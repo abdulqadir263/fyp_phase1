@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
-import '../../../../app/widgets/custom_button.dart';
-import '../../../../app/widgets/custom_text_field.dart';
+import '../../../app/widgets/custom_button.dart';
+import '../../../app/widgets/custom_text_field.dart';
 
 // Profile screen ka UI
 class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ✅ FIXED: AppBar with proper layout
       appBar: AppBar(
-        title: Text('My Profile'),
+        title: Text(
+          'My Profile',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         actions: [
           // Edit/Save button
           Obx(() => IconButton(
-            icon: Icon(controller.isEditing.value ? Icons.save : Icons.edit),
+            icon: Icon(
+              controller.isEditing.value ? Icons.save : Icons.edit,
+            ),
             onPressed: controller.isEditing.value ? controller.updateProfile : controller.toggleEditMode,
             tooltip: controller.isEditing.value ? 'Save' : 'Edit',
           )),
@@ -240,7 +249,7 @@ class ProfileView extends GetView<ProfileController> {
   Widget _buildActionButtons() {
     return Column(
       children: [
-        // ✅ NEW: Create Profile Later Button (sirf pehli bar ke liye)
+        // Create Profile Later Button (sirf pehli bar ke liye)
         if (!controller.isEditing.value && _isFirstTimeLogin()) ...[
           OutlinedButton(
             onPressed: controller.createProfileLater,
@@ -276,7 +285,7 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  // ✅ NEW: Check if it's first time login
+  // Check if it's first time login
   bool _isFirstTimeLogin() {
     // Simple check - if profile is incomplete, it's likely first time
     final user = controller.user.value;

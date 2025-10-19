@@ -35,6 +35,19 @@ class HomeController extends GetxController {
     }
   }
 
+  // ✅ NEW: Get profile image URL
+  String get profileImageUrl {
+    if (user.value == null || user.value!.profileImage == null || user.value!.profileImage!.isEmpty) {
+      return ''; // Return empty string if no profile image
+    }
+    return user.value!.profileImage!;
+  }
+
+  // ✅ NEW: Refresh user data to get updated profile image
+  Future<void> refreshUserData() async {
+    await _authProvider.refreshUserData();
+  }
+
   // Page change karne ke liye function
   void changePage(int index) {
     currentIndex.value = index;
@@ -46,11 +59,10 @@ class HomeController extends GetxController {
       title: 'Logout',
       titleStyle: const TextStyle(fontSize: 18), // This parameter is still valid
       middleText: 'Are you sure you want to logout?',
-      // textConfirm and confirmTextColor are replaced by the 'confirm' widget below
       textCancel: 'No',
       onCancel: () => Get.back(), // Dialog close karo
 
-      // ✅ FIX: Use the 'confirm' property for custom styling and actions
+      // ✅ FIXED: Use the 'confirm' property for custom styling and actions
       confirm: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: Get.theme.primaryColor, // Optional: for background
@@ -96,7 +108,7 @@ class HomeController extends GetxController {
         middleText: 'To use this feature, please create an account or log in.',
         textCancel: 'Cancel',
 
-        // ✅ FIX: Use the 'confirm' property to style the button and set its action
+        // ✅ FIXED: Use the 'confirm' property to style the button and set its action
         confirm: TextButton(
           style: TextButton.styleFrom(
             backgroundColor: Get.theme.primaryColor, // Optional: for background

@@ -5,15 +5,14 @@ import 'dart:io';
 import '../../../../app/data/models/user_model.dart';
 import '../../../../app/data/providers/auth_provider.dart';
 import '../../../../app/data/services/firebase_service.dart';
-import '../../../../app/data/services/cloudinary_service.dart'; // ✅ Add this import
+import '../../../../app/data/services/cloudinary_service.dart';
 import '../../../../app/routes/app_routes.dart';
-import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 
 // Profile screen ka logic
 class ProfileController extends GetxController {
   final AuthProvider _authProvider = Get.find<AuthProvider>();
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
-  final CloudinaryService _cloudinaryService = Get.find<CloudinaryService>(); // ✅ Add this
+  final CloudinaryService _cloudinaryService = Get.find<CloudinaryService>();
   final ImagePicker _picker = ImagePicker();
 
   // Text Editing Controllers
@@ -30,7 +29,7 @@ class ProfileController extends GetxController {
   final RxBool isEditing = false.obs;
   final RxString selectedUserType = 'farmer'.obs;
   final RxString profileImagePath = ''.obs;
-  final RxBool isUploadingImage = false.obs; // ✅ NEW: Image upload status
+  final RxBool isUploadingImage = false.obs;
 
   // Current user ka data
   Rx<UserModel?> get user => _authProvider.currentUser;
@@ -65,7 +64,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // ✅ UPDATED: Profile image pick karna with Cloudinary upload
+  // Profile image pick karna with Cloudinary upload
   Future<void> pickProfileImage() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -107,7 +106,7 @@ class ProfileController extends GetxController {
     return true;
   }
 
-  // ✅ UPDATED: Profile update karna with Cloudinary image URL
+  // Profile update karna with Cloudinary image URL
   Future<void> updateProfile() async {
     if (!validateForm()) return;
 
@@ -124,7 +123,7 @@ class ProfileController extends GetxController {
         farmSize: farmSizeController.text.trim().isEmpty ? null : farmSizeController.text.trim(),
         specialization: specializationController.text.trim().isEmpty ? null : specializationController.text.trim(),
         companyName: companyNameController.text.trim().isEmpty ? null : companyNameController.text.trim(),
-        profileImage: profileImagePath.value.isEmpty ? null : profileImagePath.value, // ✅ Using Cloudinary URL
+        profileImage: profileImagePath.value.isEmpty ? null : profileImagePath.value,
         createdAt: user.value!.createdAt,
         updatedAt: DateTime.now(),
       );
@@ -137,7 +136,7 @@ class ProfileController extends GetxController {
       isEditing.value = false;
       Get.snackbar('Success', 'Profile updated successfully!');
 
-      // ✅ UPDATED: Navigate to home after profile completion
+      // Navigate to home after profile completion
       Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
       Get.snackbar('Error', 'Failed to update profile: $e');
@@ -146,7 +145,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // ✅ NEW: Create Profile Later function
+  // Create Profile Later function
   void createProfileLater() {
     Get.defaultDialog(
       title: 'Skip Profile Creation',

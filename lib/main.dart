@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart'; // ✅ Add this import
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/themes/app_theme.dart';
 import 'app/data/services/firebase_service.dart';
+import 'app/data/services/cloudinary_service.dart';
 import 'firebase_options.dart';
 
 // Ye app ka entry point hai
@@ -12,7 +14,7 @@ void main() async {
   // Firebase ko initialize karna zaroori hai
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase ko options ke saath initialize karein
+  // Firebase ko options ke saath initialize karna
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -20,30 +22,34 @@ void main() async {
   // FirebaseService ko globally initialize karna
   Get.put(FirebaseService());
 
+  // CloudinaryService ko globally initialize karna
+  Get.put(CloudinaryService());
+
   runApp(FarmAssistApp());
 }
 
 class FarmAssistApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // GetX MaterialApp hai jo routing aur state management handle karta hai
+    // ✅ FIXED: GetX MaterialApp with Google Fonts
     return GetMaterialApp(
       title: 'FarmAssist',
-      debugShowCheckedModeBanner: false, // Debug banner remove karna
-      theme: AppTheme.lightTheme, // Light theme
-      darkTheme: AppTheme.darkTheme, // Dark theme
-      themeMode: ThemeMode.system, // System theme follow karega
+      debugShowCheckedModeBanner: false,
 
-      // Initial route jab app start hogi
+      // ✅ FIXED: Use Google Fonts
+      theme: AppTheme.lightTheme.copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+      ),
+      darkTheme: AppTheme.darkTheme.copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+      ),
+
+      // ✅ FIXED: Force light theme instead of system theme
+      themeMode: ThemeMode.light,
+
       initialRoute: AppRoutes.LOGIN,
-
-      // Sare routes jo humne define kiye hain
       getPages: AppPages.routes,
-
-      // Navigation ka style
       defaultTransition: Transition.fade,
-
-      // Translations ke liye (English/Urdu)
       locale: Locale('en', 'US'),
       fallbackLocale: Locale('en', 'US'),
     );

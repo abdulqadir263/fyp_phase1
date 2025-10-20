@@ -40,7 +40,7 @@ dependencies:
   cloud_firestore: ^6.0.3
 
   # UI & Utility
-  google_fonts: ^6.2.1
+  google_fonts: ^6.3.2
   image_picker: ^1.2.0
 
   # The following adds the Cupertino Icons font to your application.
@@ -50,6 +50,9 @@ dependencies:
   cloudinary_flutter: ^1.3.0
   cloudinary: ^1.2.0
   cloudinary_sdk: ^5.0.0
+  http: ^1.5.0
+  geolocator: ^14.0.2
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

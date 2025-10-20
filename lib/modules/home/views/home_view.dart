@@ -11,7 +11,7 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       // App Bar
       appBar: AppBar(
-        title: const Text('FarmAssist'),
+        title: const Text('Aasaan Kisaan'),
         centerTitle: true,
         actions: [
           // Language toggle button
@@ -191,211 +191,293 @@ class HomeView extends GetView<HomeController> {
 
   // Home tab content
   Widget _buildHomeContent(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Welcome Message for guest
-          Obx(() => Text(
-            controller.welcomeMessage,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          )),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeScreen = constraints.maxWidth > 600;
 
-          // Guest user banner
-          Obx(() => controller.isGuestUser
-              ? Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(vertical: 16),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade100,
-              border: Border.all(color: Colors.orange.shade300),
-              borderRadius: BorderRadius.circular(8),
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, color: Colors.orange.shade800),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'You are browsing as a guest. Some features may be limited.',
-                    style: TextStyle(color: Colors.orange.shade800),
+                // Welcome Message for guest
+                Obx(() => Text(
+                  controller.welcomeMessage,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-              ],
-            ),
-          )
-              : const SizedBox.shrink()),
+                )),
 
-          // Profile incomplete banner
-          Obx(() => controller.isProfileIncomplete && !controller.isGuestUser
-              ? Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade100,
-              border: Border.all(color: Colors.blue.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.blue.shade800),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Your profile is incomplete. Please complete your profile to access all features.',
-                    style: TextStyle(color: Colors.blue.shade800),
+                // Guest user banner
+                Obx(() => controller.isGuestUser
+                    ? Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.symmetric(vertical: isLargeScreen ? 20 : 16),
+                  padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    border: Border.all(color: Colors.orange.shade300),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                TextButton(
-                  onPressed: () => controller.goToProfile(),
-                  child: Text(
-                    'Complete Now',
-                    style: TextStyle(color: Colors.blue.shade800, fontWeight: FontWeight.bold),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.orange.shade800),
+                      SizedBox(width: isLargeScreen ? 12 : 8),
+                      Expanded(
+                        child: Text(
+                          'You are browsing as a guest. Some features may be limited.',
+                          style: TextStyle(
+                            color: Colors.orange.shade800,
+                            fontSize: isLargeScreen ? 16 : 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          )
-              : const SizedBox.shrink()),
+                )
+                    : const SizedBox.shrink()),
 
-          Text(
-            'What would you like to do today?',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
+                // Profile incomplete banner
+                Obx(() => controller.isProfileIncomplete && !controller.isGuestUser
+                    ? Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: isLargeScreen ? 20 : 16),
+                  padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    border: Border.all(color: Colors.blue.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.blue.shade800),
+                      SizedBox(width: isLargeScreen ? 12 : 8),
+                      Expanded(
+                        child: Text(
+                          'Your profile is incomplete. Please complete your profile to access all features.',
+                          style: TextStyle(
+                            color: Colors.blue.shade800,
+                            fontSize: isLargeScreen ? 16 : 14,
+                          ),
+                        ),
+                      ),
+                      if (isLargeScreen) ...[
+                        SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () => controller.goToProfile(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade800,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Complete Now'),
+                        ),
+                      ] else ...[
+                        TextButton(
+                          onPressed: () => controller.goToProfile(),
+                          child: Text(
+                            'Complete Now',
+                            style: TextStyle(
+                              color: Colors.blue.shade800,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                )
+                    : const SizedBox.shrink()),
+
+                SizedBox(height: isLargeScreen ? 8 : 4),
+
+                Text(
+                  'What would you like to do today?',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey[600],
+                    fontSize: isLargeScreen ? 18 : 16,
+                  ),
+                ),
+                SizedBox(height: isLargeScreen ? 32 : 24),
+
+                // ✅ UPDATED: Responsive Feature Cards Grid
+                _buildResponsiveFeatureGrid(context),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-
-          // ✅ UPDATED: Responsive Feature Cards Grid
-          _buildResponsiveFeatureGrid(context),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  // ✅ NEW: Responsive Grid build karna
+  // ✅ IMPROVED: Responsive Grid build karna
   Widget _buildResponsiveFeatureGrid(BuildContext context) {
-    // Screen ki width hasil karna
-    final screenWidth = MediaQuery.of(context).size.width;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
 
-    // Screen ki width ke hisab se columns set karna
-    int crossAxisCount = 2;
-    if (screenWidth > 1200) {
-      crossAxisCount = 4; // Bari screens (web)
-    } else if (screenWidth > 600) {
-      crossAxisCount = 3; // Darmiyani screens (tablet)
-    }
+        // Screen ki width ke hisab se columns set karna
+        int crossAxisCount;
+        double childAspectRatio;
+        double crossAxisSpacing;
+        double mainAxisSpacing;
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: crossAxisCount,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.1, // Card ki height/width ratio
-      children: [
-        _buildFeatureCard(
-          title: 'Book Appointment',
-          icon: Icons.calendar_today,
-          color: Colors.blue,
-          onTap: () => controller.navigateToFeature('appointments'),
-        ),
-        _buildFeatureCard(
-          title: 'Marketplace',
-          icon: Icons.shopping_cart,
-          color: Colors.green,
-          onTap: () => controller.navigateToFeature('marketplace'),
-        ),
-        _buildFeatureCard(
-          title: 'Weather Advice',
-          icon: Icons.cloud,
-          color: Colors.orange,
-          onTap: () => controller.navigateToFeature('weather'),
-        ),
-        _buildFeatureCard(
-          title: 'Crop Tracker',
-          icon: Icons.agriculture,
-          color: Colors.brown,
-          onTap: () => controller.navigateToFeature('crop_tracker'),
-        ),
-        _buildFeatureCard(
-          title: 'Community',
-          icon: Icons.people,
-          color: Colors.purple,
-          onTap: () => controller.navigateToFeature('community'),
-        ),
-        _buildFeatureCard(
-          title: 'Agri Chatbot',
-          icon: Icons.chat,
-          color: Colors.teal,
-          onTap: () => controller.navigateToFeature('chatbot'),
-        ),
-        _buildFeatureCard(
-          title: 'Disease Detection',
-          icon: Icons.bug_report,
-          color: Colors.red,
-          onTap: () => controller.navigateToFeature('disease_detection'),
-        ),
-        _buildFeatureCard(
-          title: 'Crop Recommendation',
-          icon: Icons.eco,
-          color: Colors.lightGreen,
-          onTap: () => controller.navigateToFeature('crop_recommendation'),
-        ),
-      ],
+        if (screenWidth > 1200) {
+          // Large desktop screens
+          crossAxisCount = 4;
+          childAspectRatio = 1.0;
+          crossAxisSpacing = 24;
+          mainAxisSpacing = 24;
+        } else if (screenWidth > 800) {
+          // Tablets and small desktop
+          crossAxisCount = 3;
+          childAspectRatio = 1.0;
+          crossAxisSpacing = 20;
+          mainAxisSpacing = 20;
+        } else if (screenWidth > 600) {
+          // Large mobile devices
+          crossAxisCount = 3;
+          childAspectRatio = 1.0;
+          crossAxisSpacing = 16;
+          mainAxisSpacing = 16;
+        } else if (screenWidth > 400) {
+          // Medium mobile devices
+          crossAxisCount = 2;
+          childAspectRatio = 1.1;
+          crossAxisSpacing = 12;
+          mainAxisSpacing = 12;
+        } else {
+          // Small mobile devices
+          crossAxisCount = 2;
+          childAspectRatio = 0.9;
+          crossAxisSpacing = 8;
+          mainAxisSpacing = 8;
+        }
+
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: crossAxisSpacing,
+          mainAxisSpacing: mainAxisSpacing,
+          childAspectRatio: childAspectRatio,
+          padding: EdgeInsets.zero,
+          children: [
+            _buildFeatureCard(
+              title: 'Book Appointment',
+              icon: Icons.calendar_today,
+              color: Colors.blue,
+              onTap: () => controller.navigateToFeature('appointments'),
+            ),
+            _buildFeatureCard(
+              title: 'Marketplace',
+              icon: Icons.shopping_cart,
+              color: Colors.green,
+              onTap: () => controller.navigateToFeature('marketplace'),
+            ),
+            _buildFeatureCard(
+              title: 'Weather Advice',
+              icon: Icons.cloud,
+              color: Colors.orange,
+              onTap: () => controller.navigateToFeature('weather'),
+            ),
+            _buildFeatureCard(
+              title: 'Crop Tracker',
+              icon: Icons.agriculture,
+              color: Colors.brown,
+              onTap: () => controller.navigateToFeature('crop_tracker'),
+            ),
+            _buildFeatureCard(
+              title: 'Community',
+              icon: Icons.people,
+              color: Colors.purple,
+              onTap: () => controller.navigateToFeature('community'),
+            ),
+            _buildFeatureCard(
+              title: 'Agri Chatbot',
+              icon: Icons.chat,
+              color: Colors.teal,
+              onTap: () => controller.navigateToFeature('chatbot'),
+            ),
+            _buildFeatureCard(
+              title: 'Disease Detection',
+              icon: Icons.bug_report,
+              color: Colors.red,
+              onTap: () => controller.navigateToFeature('disease_detection'),
+            ),
+            _buildFeatureCard(
+              title: 'Crop Recommendation',
+              icon: Icons.eco,
+              color: Colors.lightGreen,
+              onTap: () => controller.navigateToFeature('crop_recommendation'),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  // Feature Card widget
+  // ✅ IMPROVED: Feature Card widget with better responsiveness
   Widget _buildFeatureCard({
     required String title,
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
   }) {
-    // LayoutBuilder card ke size ke hisab se UI adjust karta hai
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Card ke size ke hisab se icon aur font size adjust karna
-        final double iconSize = constraints.maxWidth * 0.3;
-        final double fontSize = constraints.maxWidth * 0.1;
+        final double cardWidth = constraints.maxWidth;
+        final double cardHeight = constraints.maxHeight;
+
+        // Card size ke hisab se icon aur font size adjust karna
+        final double iconSize = cardWidth * 0.25;
+        final double fontSize = cardWidth * 0.09;
+
+        // Minimum and maximum sizes set karna
+        final double finalIconSize = iconSize.clamp(24.0, 40.0);
+        final double finalFontSize = fontSize.clamp(12.0, 16.0);
 
         return CustomCard(
           onTap: onTap,
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(cardWidth * 0.08),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Icon Container
               Container(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.1),
+                padding: EdgeInsets.all(cardWidth * 0.08),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
-                  size: iconSize,
+                  size: finalIconSize,
                   color: color,
                 ),
               ),
-              const Spacer(),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: fontSize > 16 ? 16 : fontSize, // Max font size 16
-                  fontWeight: FontWeight.w600,
+
+              // Spacer with dynamic height
+              SizedBox(height: cardHeight * 0.05),
+
+              // Title Text
+              Flexible(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: finalFontSize,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                // ✅ FIX: Overflow error ko theek karna
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
-              const Spacer(),
             ],
           ),
         );
@@ -403,28 +485,180 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  // Placeholder content for other tabs
+  // ✅ IMPROVED: Placeholder content for other tabs with responsive design
   Widget _buildMarketplaceContent() {
-    return const Center(
-      child: Text('Marketplace Content - Coming Soon!'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeScreen = constraints.maxWidth > 600;
+
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(isLargeScreen ? 32.0 : 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.store,
+                  size: isLargeScreen ? 80 : 60,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: isLargeScreen ? 24 : 16),
+                Text(
+                  'Marketplace',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 32 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: isLargeScreen ? 16 : 12),
+                Text(
+                  'Coming Soon!',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 18 : 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: isLargeScreen ? 24 : 16),
+                if (isLargeScreen)
+                  ElevatedButton(
+                    onPressed: () {},
+                    child: const Text('Get Notified'),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildWeatherContent() {
-    return const Center(
-      child: Text('Weather Content - Coming Soon!'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeScreen = constraints.maxWidth > 600;
+
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(isLargeScreen ? 32.0 : 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.cloud,
+                  size: isLargeScreen ? 80 : 60,
+                  color: Colors.blue,
+                ),
+                SizedBox(height: isLargeScreen ? 24 : 16),
+                Text(
+                  'Weather Forecast',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 32 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: isLargeScreen ? 16 : 12),
+                Text(
+                  'Coming Soon!',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 18 : 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildCropTrackerContent() {
-    return const Center(
-      child: Text('Crop Tracker Content - Coming Soon!'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeScreen = constraints.maxWidth > 600;
+
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(isLargeScreen ? 32.0 : 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.agriculture,
+                  size: isLargeScreen ? 80 : 60,
+                  color: Colors.green,
+                ),
+                SizedBox(height: isLargeScreen ? 24 : 16),
+                Text(
+                  'Crop Tracker',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 32 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: isLargeScreen ? 16 : 12),
+                Text(
+                  'Coming Soon!',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 18 : 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildCommunityContent() {
-    return const Center(
-      child: Text('Community Content - Coming Soon!'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeScreen = constraints.maxWidth > 600;
+
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(isLargeScreen ? 32.0 : 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.people,
+                  size: isLargeScreen ? 80 : 60,
+                  color: Colors.purple,
+                ),
+                SizedBox(height: isLargeScreen ? 24 : 16),
+                Text(
+                  'Community',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 32 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: isLargeScreen ? 16 : 12),
+                Text(
+                  'Coming Soon!',
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 18 : 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                if (isLargeScreen)
+                  SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Join Community'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

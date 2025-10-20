@@ -93,4 +93,16 @@ class FirebaseService extends GetxService {
         return 'An error occurred: ${e.message}';
     }
   }
+
+  // Add this method to the FirebaseService class
+
+// Send password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _getErrorMessage(e);
+    }
+  }
+
 }

@@ -3,9 +3,11 @@ import '../../modules/auth/views/forgot_password_view.dart';
 import '../../modules/auth/views/login_view.dart';
 import '../../modules/home/views/home_view.dart';
 import '../../modules/profile/views/profile_view.dart';
+import '../../modules/weather/views/weather_view.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/profile_binding.dart';
+import '../bindings/weather_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -33,5 +35,14 @@ class AppPages {
       page: () => ProfileView(),
       binding: ProfileBinding(),
     ),
+
+    // Add these routes to your existing AppPages.routes list
+    GetPage(
+      name: AppRoutes.WEATHER,
+      page: () => WeatherView(),
+      binding: WeatherBinding(),
+    ),
+
+
   ];
 }

@@ -230,4 +230,24 @@ class AuthProvider extends GetxService {
       Get.snackbar('Error', e.toString());
     }
   }
+
+  // Add this method to the AuthProvider class
+
+// Forgot password function
+  Future<void> forgotPassword(String email) async {
+    try {
+      print('AuthProvider: [START] forgotPassword for: $email');
+
+      await _firebaseService.sendPasswordResetEmail(email);
+
+      print('AuthProvider: Password reset email sent successfully');
+
+    } catch (e, stackTrace) {
+      print('AuthProvider: [ERROR] in forgotPassword: $e');
+      print('AuthProvider: [STACK TRACE] $stackTrace');
+      throw e; // Re-throw to handle in controller
+    }
+  }
+
+
 }

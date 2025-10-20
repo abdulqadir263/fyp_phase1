@@ -12,11 +12,13 @@ class AuthController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   // Reactive Variables
   final RxBool isLogin = true.obs;
   final RxBool isLoading = false.obs;
   final RxBool isPasswordVisible = false.obs;
+  final RxBool isConfirmPasswordVisible = false.obs;
   final RxString selectedUserType = 'farmer'.obs;
 
   @override
@@ -30,6 +32,7 @@ class AuthController extends GetxController {
     if (!isLogin.value) {
       nameController.clear();
       phoneController.clear();
+      confirmPasswordController.clear();
     }
     print('AuthController: Toggled auth mode. IsLogin: ${isLogin.value}');
   }
@@ -38,12 +41,27 @@ class AuthController extends GetxController {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
+  }
+
   bool validateForm() {
     print('AuthController: Validating form...');
 
     if (!isLogin.value) {
       if (nameController.text.isEmpty || nameController.text.length < 3) {
         Get.snackbar('Error', 'Please enter a valid name (at least 3 characters)');
+        return false;
+      }
+
+      if (phoneController.text.isEmpty || phoneController.text.length < 11) {
+        Get.snackbar('Error', 'Please enter a valid phone number (at least 11 digits)');
+        return false;
+      }
+
+      // Confirm password validation
+      if (passwordController.text != confirmPasswordController.text) {
+        Get.snackbar('Error', 'Passwords do not match');
         return false;
       }
     }
@@ -55,11 +73,6 @@ class AuthController extends GetxController {
 
     if (passwordController.text.isEmpty || passwordController.text.length < 6) {
       Get.snackbar('Error', 'Password must be at least 6 characters');
-      return false;
-    }
-
-    if (!isLogin.value && (phoneController.text.isEmpty || phoneController.text.length < 11)) {
-      Get.snackbar('Error', 'Please enter a valid phone number (at least 11 digits)');
       return false;
     }
 
@@ -93,7 +106,35 @@ class AuthController extends GetxController {
     }
   }
 
-  void forgotPassword() {
+  // ✅ NEW: Forgot Password Functionality
+  Future<void> forgotPassword(String email) async {
+    try {
+      isLoading.value = true;
+
+      if (email.isEmpty || !GetUtils.isEmail(email)) {
+        Get.snackbar('Error', 'Please enter a valid email address');
+        return;
+      }
+
+      // Firebase password reset
+      await _authProvider.forgotPassword(email);
+
+      Get.snackbar(
+        'Success',
+        'Password reset link sent to $email',
+        duration: Duration(seconds: 5),
+      );
+
+      Get.back(); // Go back to login screen
+
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to send reset email: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void navigateToForgotPassword() {
     if (emailController.text.isEmpty || !GetUtils.isEmail(emailController.text)) {
       Get.snackbar('Error', 'Please enter a valid email address first');
       return;
@@ -122,6 +163,7 @@ class AuthController extends GetxController {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.onClose();
   }
 }

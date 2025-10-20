@@ -9,10 +9,13 @@ class AppRoutes {
   static const HOME = '/home';
   static const PROFILE = '/profile';
 
+  // Add these routes to your existing AppRoutes class
+  static const WEATHER = '/weather';
+  static const WEATHER_DETAIL = '/weather-detail';
+
   // Feature Routes
   static const APPOINTMENTS = '/appointments';
   static const MARKETPLACE = '/marketplace';
-  static const WEATHER = '/weather';
   static const CROP_TRACKER = '/crop-tracker';
   static const COMMUNITY = '/community';
   static const CHATBOT = '/chatbot';

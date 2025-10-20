@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // App ki sare constants yahan par rakhenge
 class AppConstants {
   // App Info
-  static const String APP_NAME = 'FarmAssist';
+  static const String APP_NAME = 'Aasaan Kisaan';
   static const String APP_VERSION = '1.0.0';
 
   // API Keys (Yahan apni actual keys lagayein)

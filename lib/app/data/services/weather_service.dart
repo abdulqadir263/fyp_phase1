@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:get/get_state_manager/src/rx_flutter/rx_disposable.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -64,6 +63,14 @@ class WeatherService extends GetxService {
           weatherCode: weatherCode,
         );
 
+        // Generate agriculture recommendations
+        final agricultureRecommendations = await _generateAgricultureRecommendations(
+          temperature: temperature,
+          humidity: humidity,
+          windSpeed: windSpeed,
+          weatherCode: weatherCode,
+        );
+
         return WeatherModel(
           id: DateTime.now().toString(),
           location: locationName,
@@ -74,6 +81,7 @@ class WeatherService extends GetxService {
           icon: _getWeatherIcon(weatherCode),
           dateTime: DateTime.now(),
           recommendations: recommendations,
+          agricultureRecommendations: agricultureRecommendations,
         );
       } else {
         print('Weather API Error: ${response.statusCode} - ${response.body}');
@@ -126,6 +134,13 @@ class WeatherService extends GetxService {
             weatherCode: weatherCode,
           );
 
+          final agricultureRecommendations = await _generateAgricultureRecommendations(
+            temperature: avgTemp,
+            humidity: 60.0,
+            windSpeed: windSpeed,
+            weatherCode: weatherCode,
+          );
+
           forecast.add(WeatherModel(
             id: 'forecast_$i',
             location: 'Forecast',
@@ -136,6 +151,7 @@ class WeatherService extends GetxService {
             icon: _getWeatherIcon(weatherCode),
             dateTime: DateTime.parse(daily['time'][i]),
             recommendations: recommendations,
+            agricultureRecommendations: agricultureRecommendations,
           ));
         }
 
@@ -147,6 +163,275 @@ class WeatherService extends GetxService {
     } catch (e) {
       print('Error fetching forecast: $e');
       return _getMockForecastData();
+    }
+  }
+
+  // Generate Agriculture Recommendations based on weather conditions
+  Future<List<AgricultureRecommendation>> _generateAgricultureRecommendations({
+    required double temperature,
+    required double humidity,
+    required double windSpeed,
+    required int weatherCode,
+  }) async {
+    final List<AgricultureRecommendation> recommendations = [];
+
+    // Rule 1: Harvesting Conditions
+    if (_isGoodForHarvesting(temperature, humidity, windSpeed, weatherCode)) {
+      recommendations.add(AgricultureRecommendation(
+        category: 'harvesting',
+        title: 'Ideal Harvesting Conditions',
+        description: 'Perfect weather for crop harvesting operations',
+        isRecommended: true,
+        priority: 'high',
+        actions: [
+          'Proceed with wheat/rice harvesting',
+          'Spread grains for sun drying',
+          'Good for hay making and fodder preparation',
+          'Check moisture content before storage'
+        ],
+        riskLevel: 'low',
+      ));
+    } else {
+      recommendations.add(AgricultureRecommendation(
+        category: 'harvesting',
+        title: 'Poor Harvesting Conditions',
+        description: 'Weather not suitable for harvesting',
+        isRecommended: false,
+        priority: 'medium',
+        actions: [
+          'Delay harvesting operations',
+          'Monitor weather for improvement',
+          'Prepare harvesting equipment'
+        ],
+        riskLevel: 'medium',
+      ));
+    }
+
+    // Rule 2: Spraying Conditions
+    if (_isGoodForSpraying(temperature, humidity, windSpeed, weatherCode)) {
+      recommendations.add(AgricultureRecommendation(
+        category: 'spraying',
+        title: 'Optimal Spraying Conditions',
+        description: 'Safe for pesticide and herbicide application',
+        isRecommended: true,
+        priority: 'high',
+        actions: [
+          'Safe for pesticide application',
+          'Low drift risk - efficient spraying',
+          'Good absorption conditions',
+          'Ideal for fungicide application if needed'
+        ],
+        riskLevel: 'low',
+      ));
+    } else {
+      recommendations.add(AgricultureRecommendation(
+        category: 'spraying',
+        title: 'Avoid Spraying',
+        description: 'Weather conditions not suitable for spraying',
+        isRecommended: false,
+        priority: 'medium',
+        actions: [
+          'Delay chemical applications',
+          'High drift risk detected',
+          'Wait for calmer weather conditions'
+        ],
+        riskLevel: 'high',
+      ));
+    }
+
+    // Rule 3: Irrigation Advice
+    recommendations.add(_getIrrigationRecommendation(temperature, humidity));
+
+    // Rule 4: Disease Risk Assessment
+    recommendations.add(_getDiseaseRiskRecommendation(temperature, humidity));
+
+    // Rule 5: General Farming Operations
+    recommendations.add(_getGeneralFarmingRecommendation(temperature, weatherCode));
+
+    // Rule 6: Livestock Management
+    recommendations.add(_getLivestockRecommendation(temperature));
+
+    return recommendations;
+  }
+
+  bool _isGoodForHarvesting(double temperature, double humidity, double windSpeed, int weatherCode) {
+    final isRaining = weatherCode >= 51 && weatherCode <= 82;
+    return temperature > 20 &&
+        temperature < 35 &&
+        windSpeed < 15 &&
+        !isRaining &&
+        humidity < 70;
+  }
+
+  bool _isGoodForSpraying(double temperature, double humidity, double windSpeed, int weatherCode) {
+    final isRaining = weatherCode >= 51 && weatherCode <= 82;
+    return windSpeed < 10 &&
+        temperature > 15 &&
+        temperature < 30 &&
+        !isRaining &&
+        humidity > 40 &&
+        humidity < 80;
+  }
+
+  AgricultureRecommendation _getIrrigationRecommendation(double temperature, double humidity) {
+    if (temperature > 30 && humidity < 50) {
+      return AgricultureRecommendation(
+        category: 'irrigation',
+        title: 'Increased Irrigation Needed',
+        description: 'High temperature and low humidity increase water demand',
+        isRecommended: true,
+        priority: 'high',
+        actions: [
+          'Increase irrigation frequency',
+          'Water in early morning or late evening',
+          'Monitor soil moisture daily',
+          'Check for signs of water stress in crops'
+        ],
+        riskLevel: 'medium',
+      );
+    } else if (humidity > 80) {
+      return AgricultureRecommendation(
+        category: 'irrigation',
+        title: 'Reduce Irrigation',
+        description: 'High humidity reduces water requirement',
+        isRecommended: false,
+        priority: 'medium',
+        actions: [
+          'Reduce irrigation frequency',
+          'Avoid overwatering',
+          'Monitor for fungal diseases',
+          'Improve field drainage if needed'
+        ],
+        riskLevel: 'low',
+      );
+    } else {
+      return AgricultureRecommendation(
+        category: 'irrigation',
+        title: 'Normal Irrigation Schedule',
+        description: 'Maintain regular irrigation routine',
+        isRecommended: true,
+        priority: 'low',
+        actions: [
+          'Continue with standard irrigation',
+          'Monitor soil moisture levels',
+          'Adjust based on crop growth stage'
+        ],
+        riskLevel: 'low',
+      );
+    }
+  }
+
+  AgricultureRecommendation _getDiseaseRiskRecommendation(double temperature, double humidity) {
+    if (humidity > 85 && temperature > 20) {
+      return AgricultureRecommendation(
+        category: 'disease',
+        title: 'High Disease Risk Alert',
+        description: 'Conditions favorable for fungal diseases',
+        isRecommended: false,
+        priority: 'high',
+        actions: [
+          'Monitor for powdery mildew and rust',
+          'Consider preventive fungicide',
+          'Improve air circulation in fields',
+          'Avoid overhead irrigation'
+        ],
+        riskLevel: 'high',
+      );
+    } else if (humidity < 50) {
+      return AgricultureRecommendation(
+        category: 'disease',
+        title: 'Low Disease Risk',
+        description: 'Unfavorable conditions for disease development',
+        isRecommended: true,
+        priority: 'low',
+        actions: [
+          'Low fungal disease pressure',
+          'Reduce fungicide applications',
+          'Focus on other farm operations'
+        ],
+        riskLevel: 'low',
+      );
+    } else {
+      return AgricultureRecommendation(
+        category: 'disease',
+        title: 'Moderate Disease Risk',
+        description: 'Monitor crops for disease symptoms',
+        isRecommended: true,
+        priority: 'medium',
+        actions: [
+          'Regular field scouting',
+          'Watch for early disease signs',
+          'Prepare fungicides if needed'
+        ],
+        riskLevel: 'medium',
+      );
+    }
+  }
+
+  AgricultureRecommendation _getGeneralFarmingRecommendation(double temperature, int weatherCode) {
+    final isClearSky = weatherCode == 0;
+    if (isClearSky && temperature > 25) {
+      return AgricultureRecommendation(
+        category: 'general',
+        title: 'Excellent Field Conditions',
+        description: 'Ideal weather for most farming operations',
+        isRecommended: true,
+        priority: 'high',
+        actions: [
+          'Good for land preparation',
+          'Ideal for planting operations',
+          'Excellent for fieldwork',
+          'Good drying conditions for crops'
+        ],
+        riskLevel: 'low',
+      );
+    } else {
+      return AgricultureRecommendation(
+        category: 'general',
+        title: 'Moderate Field Conditions',
+        description: 'Suitable for most farming activities with precautions',
+        isRecommended: true,
+        priority: 'medium',
+        actions: [
+          'Plan outdoor work accordingly',
+          'Monitor weather changes',
+          'Take appropriate precautions'
+        ],
+        riskLevel: 'medium',
+      );
+    }
+  }
+
+  AgricultureRecommendation _getLivestockRecommendation(double temperature) {
+    if (temperature > 30) {
+      return AgricultureRecommendation(
+        category: 'livestock',
+        title: 'Livestock Heat Stress Alert',
+        description: 'High temperatures may stress animals',
+        isRecommended: false,
+        priority: 'high',
+        actions: [
+          'Provide ample shade and water',
+          'Avoid handling animals during peak heat',
+          'Monitor for signs of heat stress',
+          'Adjust feeding schedules to cooler hours'
+        ],
+        riskLevel: 'high',
+      );
+    } else {
+      return AgricultureRecommendation(
+        category: 'livestock',
+        title: 'Good Livestock Conditions',
+        description: 'Comfortable weather for animals',
+        isRecommended: true,
+        priority: 'low',
+        actions: [
+          'Maintain regular care routine',
+          'Ensure clean water supply',
+          'Good conditions for outdoor grazing'
+        ],
+        riskLevel: 'low',
+      );
     }
   }
 
@@ -221,7 +506,7 @@ class WeatherService extends GetxService {
     }
   }
 
-// Convert weather code to icon - Use emojis instead of URLs
+  // Convert weather code to icon - Use emojis instead of URLs
   String _getWeatherIcon(int weatherCode) {
     switch (weatherCode) {
       case 0: return '☀️'; // Clear sky
@@ -284,6 +569,8 @@ class WeatherService extends GetxService {
 
   // Mock data for fallback
   WeatherModel _getMockWeatherData() {
+    final mockAgricultureRecs = AgricultureRecommendation.createDemoRecommendations();
+
     return WeatherModel(
       id: 'mock_${DateTime.now().toString()}',
       location: 'Lahore, Pakistan',
@@ -301,20 +588,37 @@ class WeatherService extends GetxService {
           isRecommended: true,
         ),
       ],
+      agricultureRecommendations: mockAgricultureRecs,
     );
   }
 
   List<WeatherModel> _getMockForecastData() {
+    final mockAgricultureRecs = AgricultureRecommendation.createDemoRecommendations();
+
     return [
       WeatherModel(
-        id: 'mock_1', location: 'Lahore', temperature: 29.0, humidity: 60.0,
-        windSpeed: 7.0, description: 'Sunny', icon: '☀️',
-        dateTime: DateTime.now().add(const Duration(days: 1)), recommendations: [],
+        id: 'mock_1',
+        location: 'Lahore',
+        temperature: 29.0,
+        humidity: 60.0,
+        windSpeed: 7.0,
+        description: 'Sunny',
+        icon: '☀️',
+        dateTime: DateTime.now().add(const Duration(days: 1)),
+        recommendations: [],
+        agricultureRecommendations: mockAgricultureRecs,
       ),
       WeatherModel(
-        id: 'mock_2', location: 'Lahore', temperature: 27.5, humidity: 65.0,
-        windSpeed: 6.0, description: 'Partly cloudy', icon: '⛅',
-        dateTime: DateTime.now().add(const Duration(days: 2)), recommendations: [],
+        id: 'mock_2',
+        location: 'Lahore',
+        temperature: 27.5,
+        humidity: 65.0,
+        windSpeed: 6.0,
+        description: 'Partly cloudy',
+        icon: '⛅',
+        dateTime: DateTime.now().add(const Duration(days: 2)),
+        recommendations: [],
+        agricultureRecommendations: mockAgricultureRecs,
       ),
     ];
   }

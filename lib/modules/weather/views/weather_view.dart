@@ -65,6 +65,12 @@ class WeatherView extends GetView<WeatherController> {
               'Failed to load weather data',
               style: Get.textTheme.titleMedium,
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Please check your internet connection and try again',
+              textAlign: TextAlign.center,
+              style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               width: 120,
@@ -80,17 +86,22 @@ class WeatherView extends GetView<WeatherController> {
   }
 
   Widget _buildWeatherContent(WeatherModel weather) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildCurrentWeatherCard(weather),
-          const SizedBox(height: 24),
-          _buildRecommendationsCard(weather),
-          const SizedBox(height: 24),
-          _buildForecastCard(),
-        ],
+    return RefreshIndicator(
+      onRefresh: () => controller.refreshWeather(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCurrentWeatherCard(weather),
+            const SizedBox(height: 24),
+            _buildAgricultureAdvisoryCard(weather),
+            const SizedBox(height: 24),
+            _buildForecastCard(),
+            const SizedBox(height: 16),
+            _buildLastUpdatedInfo(),
+          ],
+        ),
       ),
     );
   }
@@ -143,9 +154,20 @@ class WeatherView extends GetView<WeatherController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            weather.location,
-            style: Get.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  weather.location,
+                  style: Get.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Row(
@@ -164,7 +186,10 @@ class WeatherView extends GetView<WeatherController> {
                     const SizedBox(height: 8),
                     Text(
                       toTitleCase(weather.description),
-                      style: Get.textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
+                      style: Get.textTheme.titleMedium?.copyWith(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _buildWeatherDetails(weather),
@@ -172,14 +197,17 @@ class WeatherView extends GetView<WeatherController> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Use emoji icons instead of network images
               Container(
                 width: 80,
                 height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(40),
+                ),
                 alignment: Alignment.center,
                 child: Text(
                   weather.icon,
-                  style: const TextStyle(fontSize: 48),
+                  style: const TextStyle(fontSize: 40),
                 ),
               ),
             ],
@@ -200,8 +228,8 @@ class WeatherView extends GetView<WeatherController> {
         ),
         _buildWeatherDetail(
           icon: Icons.air,
-          label: 'Wind',
-          value: '${weather.windSpeed.toStringAsFixed(1)} m/s',
+          label: 'Wind Speed',
+          value: controller.getWindSpeedDisplay(weather.windSpeed),
         ),
       ],
     );
@@ -210,19 +238,35 @@ class WeatherView extends GetView<WeatherController> {
   Widget _buildWeatherDetail({required IconData icon, required String label, required String value}) {
     return Column(
       children: [
-        Icon(icon, size: 24, color: Get.theme.primaryColor),
-        const SizedBox(height: 4),
-        Text(value, style: Get.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Get.theme.primaryColor.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 20, color: Get.theme.primaryColor),
+        ),
+        const SizedBox(height: 8),
+        Text(value, style: Get.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        )),
         const SizedBox(height: 2),
-        Text(label, style: Get.textTheme.bodySmall),
+        Text(
+          label,
+          style: Get.textTheme.bodySmall?.copyWith(
+            color: Colors.grey.shade600,
+            fontSize: 12,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildRecommendationsCard(WeatherModel weather) {
-    final recommendations = weather.recommendations;
-    if (recommendations.isEmpty) {
-      return const SizedBox.shrink();
+  Widget _buildAgricultureAdvisoryCard(WeatherModel weather) {
+    final agricultureRecs = weather.agricultureRecommendations;
+    if (agricultureRecs.isEmpty) {
+      return _buildDefaultRecommendationsCard(weather);
     }
 
     return CustomCard(
@@ -230,13 +274,271 @@ class WeatherView extends GetView<WeatherController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Icon(Icons.agriculture, color: Get.theme.primaryColor),
+              const SizedBox(width: 8),
+              Text(
+                'Smart Farming Advisory',
+                style: Get.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Text(
-            'Farming Recommendations',
-            style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            'AI-powered recommendations based on current weather',
+            style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 16),
+
+          // Agriculture Risk Overview
+          _buildRiskOverview(agricultureRecs),
+          const SizedBox(height: 16),
+
+          // Detailed Recommendations
+          Column(
+            children: agricultureRecs.map((rec) => _buildAgricultureRecommendationItem(rec)).toList(),
+          ),
+
+          const SizedBox(height: 12),
+          _buildAgricultureFooter(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultRecommendationsCard(WeatherModel weather) {
+    return CustomCard(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.agriculture, color: Get.theme.primaryColor),
+              const SizedBox(width: 8),
+              Text(
+                'Farming Recommendations',
+                style: Get.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Based on current weather conditions',
+            style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
           Column(
-            children: recommendations.map((rec) => _buildRecommendationItem(rec)).toList(),
+            children: weather.recommendations.map((rec) => _buildRecommendationItem(rec)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRiskOverview(List<AgricultureRecommendation> recommendations) {
+    final highRiskCount = recommendations.where((rec) => rec.riskLevel == 'high').length;
+    final mediumRiskCount = recommendations.where((rec) => rec.riskLevel == 'medium').length;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: highRiskCount > 0 ? Colors.orange.shade50 : Colors.green.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: highRiskCount > 0 ? Colors.orange.shade200 : Colors.green.shade200,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            highRiskCount > 0 ? Icons.warning : Icons.check_circle,
+            color: highRiskCount > 0 ? Colors.orange : Colors.green,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  highRiskCount > 0 ? 'Attention Required' : 'Favorable Conditions',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: highRiskCount > 0 ? Colors.orange.shade800 : Colors.green.shade800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  highRiskCount > 0
+                      ? '$highRiskCount high-risk condition${highRiskCount > 1 ? 's' : ''} detected'
+                      : 'Good conditions for farming activities',
+                  style: Get.textTheme.bodySmall?.copyWith(
+                    color: highRiskCount > 0 ? Colors.orange.shade700 : Colors.green.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgricultureRecommendationItem(AgricultureRecommendation rec) {
+    final color = rec.isRecommended ? Colors.green.shade800 : Colors.orange.shade800;
+    final bgColor = rec.isRecommended ? Colors.green.shade50 : Colors.orange.shade50;
+    final borderColor = rec.isRecommended ? Colors.green.shade200 : Colors.orange.shade200;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with priority and risk
+          Row(
+            children: [
+              Text(
+                controller.getAgricultureCategoryIcon(rec.category),
+                style: const TextStyle(fontSize: 20),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  rec.title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      controller.getAgriculturePriorityIcon(rec.priority),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      rec.priority.toUpperCase(),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Description
+          Text(
+            rec.description,
+            style: Get.textTheme.bodyMedium?.copyWith(
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Risk Level
+          Row(
+            children: [
+              Text(
+                'Risk Level: ',
+                style: Get.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                rec.riskLevel.toUpperCase(),
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(controller.getRiskLevelColor(rec.riskLevel)),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Actions list
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: rec.actions.map((action) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      rec.isRecommended ? Icons.check_circle : Icons.info,
+                      size: 16,
+                      color: color,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        action,
+                        style: Get.textTheme.bodyMedium?.copyWith(
+                          fontSize: 14,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgricultureFooter() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.lightbulb_outline, size: 16, color: Colors.blue.shade700),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Recommendations update automatically with weather changes',
+              style: Get.textTheme.bodySmall?.copyWith(
+                color: Colors.blue.shade700,
+              ),
+            ),
           ),
         ],
       ),
@@ -245,24 +547,74 @@ class WeatherView extends GetView<WeatherController> {
 
   Widget _buildRecommendationItem(WeatherRecommendation recommendation) {
     final isRecommended = recommendation.isRecommended;
-    final color = isRecommended ? Colors.green.shade800 : Colors.red.shade800;
+    final color = isRecommended ? Colors.green.shade800 : Colors.orange.shade800;
+    final bgColor = isRecommended ? Colors.green.shade50 : Colors.orange.shade50;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(_getCategoryIcon(recommendation.category), color: color, size: 20),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _getCategoryIcon(recommendation.category),
+              color: Colors.white,
+              size: 16,
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              controller.getRecommendationText(recommendation),
-              style: Get.textTheme.bodyMedium,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getCategoryTitle(recommendation.category),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  controller.getRecommendationText(recommendation),
+                  style: Get.textTheme.bodyMedium?.copyWith(
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _getCategoryTitle(String category) {
+    switch (category) {
+      case 'watering':
+        return 'Watering Advice';
+      case 'spraying':
+        return 'Spraying Recommendation';
+      case 'harvesting':
+        return 'Harvesting Guidance';
+      case 'general':
+        return 'General Farming Tip';
+      default:
+        return 'Farming Advice';
+    }
   }
 
   IconData _getCategoryIcon(String category) {
@@ -274,7 +626,7 @@ class WeatherView extends GetView<WeatherController> {
       case 'harvesting':
         return Icons.agriculture;
       default:
-        return Icons.info_outline;
+        return Icons.lightbulb_outline;
     }
   }
 
@@ -290,9 +642,23 @@ class WeatherView extends GetView<WeatherController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Icon(Icons.calendar_today, color: Get.theme.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  '5-Day Forecast',
+                  style: Get.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Text(
-              '5-Day Forecast',
-              style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              'Weather outlook for the coming days',
+              style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
             ),
             const SizedBox(height: 16),
             ListView.builder(
@@ -301,7 +667,7 @@ class WeatherView extends GetView<WeatherController> {
               itemCount: forecast.length,
               itemBuilder: (context, index) {
                 final day = forecast[index];
-                return _buildForecastItem(day);
+                return _buildForecastItem(day, index);
               },
             ),
           ],
@@ -310,16 +676,40 @@ class WeatherView extends GetView<WeatherController> {
     });
   }
 
-  Widget _buildForecastItem(WeatherModel weather) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+  Widget _buildForecastItem(WeatherModel weather, int index) {
+    final isToday = index == 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isToday ? Get.theme.primaryColor.withOpacity(0.05) : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        border: isToday ? Border.all(color: Get.theme.primaryColor.withOpacity(0.2)) : null,
+      ),
       child: Row(
         children: [
           Expanded(
             flex: 2,
-            child: Text(
-              DateFormat('EEE').format(weather.dateTime),
-              style: Get.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isToday ? 'Today' : DateFormat('EEE').format(weather.dateTime),
+                  style: Get.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (isToday) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormat('MMM d').format(weather.dateTime),
+                    style: Get.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
@@ -334,10 +724,48 @@ class WeatherView extends GetView<WeatherController> {
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              controller.getTemperatureDisplay(weather.temperature),
-              textAlign: TextAlign.right,
-              style: Get.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  controller.getTemperatureDisplay(weather.temperature),
+                  style: Get.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  toTitleCase(weather.description),
+                  textAlign: TextAlign.right,
+                  style: Get.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLastUpdatedInfo() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+          const SizedBox(width: 6),
+          Text(
+            'Last updated: ${DateFormat('hh:mm a').format(DateTime.now())}',
+            style: Get.textTheme.bodySmall?.copyWith(
+              color: Colors.grey.shade600,
             ),
           ),
         ],

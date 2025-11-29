@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/constants/app_constants.dart';
 
 // Reusable text field widget with modern design
 class CustomTextField extends StatelessWidget {
@@ -20,7 +21,7 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.labelText,
     this.hintText,
@@ -37,7 +38,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.readOnly = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +86,10 @@ class CustomTextField extends StatelessWidget {
               ),
               prefixIcon: prefixIcon != null
                   ? Icon(
-                prefixIcon,
-                size: 20,
-                color: enabled ? Colors.grey[600] : Colors.grey[400],
-              )
+                      prefixIcon,
+                      size: 20,
+                      color: enabled ? Colors.grey[600] : Colors.grey[400],
+                    )
                   : null,
               suffixIcon: suffixIcon,
               filled: true,
@@ -106,8 +107,8 @@ class CustomTextField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(
-                  color: Theme.of(context).primaryColor,
+                borderSide: const BorderSide(
+                  color: AppConstants.primaryGreen,
                   width: 2,
                 ),
               ),
@@ -117,11 +118,11 @@ class CustomTextField extends StatelessWidget {
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: Colors.red, width: 1),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(color: Colors.red, width: 2),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
             ),
           ),

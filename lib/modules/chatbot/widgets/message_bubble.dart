@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/message_model.dart';
 
@@ -22,13 +23,18 @@ class MessageBubble extends StatelessWidget {
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: GestureDetector(
         onLongPress: () {
+          // Haptic feedback
+          HapticFeedback.mediumImpact();
           // Copy text to clipboard
           Clipboard.setData(ClipboardData(text: message.text));
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Message copied to clipboard'),
-              duration: Duration(seconds: 1),
-            ),
+          // Show toast notification
+          Fluttertoast.showToast(
+            msg: "Copied!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            backgroundColor: Colors.black87,
+            textColor: Colors.white,
+            fontSize: 14.0,
           );
           onLongPress?.call();
         },

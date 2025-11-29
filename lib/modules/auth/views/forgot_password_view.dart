@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 import '../../../app/widgets/custom_button.dart';
@@ -51,9 +50,7 @@ class ForgotPasswordView extends GetView<AuthController> {
       case 0:
         return _buildEmailStep();
       case 1:
-        return _buildOtpStep();
-      case 2:
-        return _buildNewPasswordStep();
+        return _buildSuccessStep();
       default:
         return _buildEmailStep();
     }
@@ -78,7 +75,7 @@ class ForgotPasswordView extends GetView<AuthController> {
           Obx(() => CustomButton(
                 text: 'Send Reset Link',
                 onPressed: () =>
-                    controller.sendPasswordResetOTP(emailController.text.trim()),
+                    controller.sendPasswordResetEmail(emailController.text.trim()),
                 isLoading: controller.isLoading.value,
               )),
         ],
@@ -86,18 +83,18 @@ class ForgotPasswordView extends GetView<AuthController> {
     );
   }
 
-  Widget _buildOtpStep() {
+  Widget _buildSuccessStep() {
     return SingleChildScrollView(
-      key: const ValueKey('otp_step'),
+      key: const ValueKey('success_step'),
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeaderSection(
-            icon: Icons.sms_outlined,
+            icon: Icons.mark_email_read_outlined,
             title: 'Check Your Email',
             subtitle:
-                'We have sent a password reset link to ${controller.resetEmail.value}. Please check your email.',
+                'We have sent a password reset link to ${controller.resetEmail.value}. Please check your email inbox and spam folder.',
           ),
           const SizedBox(height: 40),
           _buildEmailInfoCard(),
@@ -108,32 +105,6 @@ class ForgotPasswordView extends GetView<AuthController> {
             text: 'Back to Login',
             onPressed: () => Get.back(),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNewPasswordStep() {
-    return SingleChildScrollView(
-      key: const ValueKey('password_step'),
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeaderSection(
-            icon: Icons.lock_outline,
-            title: 'Create New Password',
-            subtitle: 'Enter your new password below.',
-          ),
-          const SizedBox(height: 40),
-          _buildNewPasswordFormSection(),
-          const SizedBox(height: 40),
-          Obx(() => CustomButton(
-                text: 'Reset Password',
-                onPressed: () => controller
-                    .resetPassword(controller.newPasswordController.text),
-                isLoading: controller.isLoading.value,
-              )),
         ],
       ),
     );
@@ -258,7 +229,7 @@ class ForgotPasswordView extends GetView<AuthController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Please check your inbox and spam folder for the password reset link.',
+            'Please check your inbox and spam folder for the password reset link. Click the link in the email to reset your password.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.green[700],
@@ -273,7 +244,7 @@ class ForgotPasswordView extends GetView<AuthController> {
 
   Widget _buildResendSection() {
     return Obx(() {
-      final timer = controller.otpResendTimer.value;
+      final timer = controller.resendTimer.value;
       return Center(
         child: Column(
           children: [
@@ -292,7 +263,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                   )
                 : TextButton(
                     onPressed: () => controller
-                        .sendPasswordResetOTP(controller.resetEmail.value),
+                        .sendPasswordResetEmail(controller.resetEmail.value),
                     child: Text(
                       'Resend Email',
                       style: TextStyle(
@@ -305,58 +276,5 @@ class ForgotPasswordView extends GetView<AuthController> {
         ),
       );
     });
-  }
-
-  Widget _buildNewPasswordFormSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          CustomTextField(
-            controller: controller.newPasswordController,
-            labelText: 'New Password',
-            hintText: 'Enter your new password',
-            prefixIcon: Icons.lock_outline,
-            obscureText: true,
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange[50],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.warning_amber_outlined,
-                    color: Colors.orange[600], size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Password must be at least 6 characters long.',
-                    style: TextStyle(
-                      color: Colors.orange[800],
-                      fontSize: 12,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

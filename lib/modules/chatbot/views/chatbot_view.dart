@@ -25,7 +25,7 @@ class ChatbotView extends GetView<ChatbotController> {
     );
   }
 
-  /// Build app bar
+  /// Build app bar with overflow fix
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       backgroundColor: AppConstants.primaryGreen,
@@ -46,32 +46,35 @@ class ChatbotView extends GetView<ChatbotController> {
             child: const Icon(Icons.eco, size: 20),
           ),
           const SizedBox(width: 10),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'AgriBot Assistant',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text(
+                  'AgriBot',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                'Online',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
+                Text(
+                  'Online',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
       actions: [
-        // Language toggle
+        // Compact language toggle
         Obx(() => Container(
-              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(16),
@@ -79,29 +82,25 @@ class ChatbotView extends GetView<ChatbotController> {
               child: InkWell(
                 onTap: controller.toggleLanguage,
                 borderRadius: BorderRadius.circular(16),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.selectedLanguage.value == 'en' ? 'EN' : 'UR',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Text(
+                    controller.selectedLanguage.value == 'en' ? 'EN' : 'UR',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.language, size: 16),
-                  ],
+                  ),
                 ),
               ),
             )),
         // Clear chat
         IconButton(
-          icon: const Icon(Icons.delete_outline),
+          icon: const Icon(Icons.delete_outline, size: 22),
           onPressed: controller.clearChat,
           tooltip: 'Clear chat',
+          padding: const EdgeInsets.all(8),
         ),
-        const SizedBox(width: 4),
       ],
     );
   }
@@ -137,35 +136,80 @@ class ChatbotView extends GetView<ChatbotController> {
     });
   }
 
-  /// Build empty state
+  /// Build empty state with quick action suggestions
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.agriculture,
-            size: 80,
-            color: AppConstants.primaryGreen.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "👋 Hello! I'm your farming assistant.",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.agriculture,
+              size: 80,
+              color: AppConstants.primaryGreen.withOpacity(0.5),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Ask me anything about agriculture!",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
+            const SizedBox(height: 16),
+            Text(
+              "👋 Hello! I'm your farming assistant.",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[700],
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              "Ask me anything about agriculture!",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Try asking:",
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildQuickActionChip("🌾 Wheat farming tips"),
+                _buildQuickActionChip("🐛 Pest control"),
+                _buildQuickActionChip("💧 Irrigation advice"),
+                _buildQuickActionChip("🌱 Best crops for season"),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  /// Build quick action chip for suggestions
+  Widget _buildQuickActionChip(String label) {
+    return ActionChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: AppConstants.primaryGreen,
+        ),
+      ),
+      backgroundColor: AppConstants.primaryGreen.withOpacity(0.1),
+      side: BorderSide(color: AppConstants.primaryGreen.withOpacity(0.3)),
+      onPressed: () {
+        controller.textController.text = label.replaceAll(RegExp(r'[\u{1F300}-\u{1FAD6}]', unicode: true), '').trim();
+      },
     );
   }
 
@@ -371,11 +415,16 @@ class ChatbotView extends GetView<ChatbotController> {
     });
   }
 
-  /// Handle send action
+  /// Handle send action - supports text only, image only, or both
   void _handleSend() {
-    if (controller.selectedImage.value != null) {
+    final hasImage = controller.selectedImage.value != null;
+    final hasText = controller.textController.text.trim().isNotEmpty;
+    
+    if (hasImage) {
+      // Image is selected - send with image (text is optional)
       controller.sendImageMessage();
-    } else {
+    } else if (hasText) {
+      // Text only
       controller.sendTextMessage();
     }
   }

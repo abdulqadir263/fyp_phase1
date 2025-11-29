@@ -1,7 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
@@ -9,7 +8,6 @@ import '../../../core/constants/app_constants.dart';
 // Auth screen ka logic (UI ke saath direct interaction)
 class AuthController extends GetxController {
   final AuthProvider _authProvider = Get.find<AuthProvider>();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Text Editing Controllers
   final TextEditingController nameController = TextEditingController();
@@ -17,8 +15,6 @@ class AuthController extends GetxController {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
-  final TextEditingController newPasswordController = TextEditingController();
 
   // Reactive Variables
   final RxBool isLogin = true.obs;
@@ -27,11 +23,11 @@ class AuthController extends GetxController {
   final RxBool isConfirmPasswordVisible = false.obs;
   final RxString selectedUserType = 'farmer'.obs;
   
-  // OTP related variables
-  final RxInt forgotPasswordStep = 0.obs; // 0: email, 1: OTP, 2: new password
+  // Password reset related variables
+  final RxInt forgotPasswordStep = 0.obs; // 0: email, 1: success message
   final RxString resetEmail = ''.obs;
-  final RxBool isOtpSent = false.obs;
-  final RxInt otpResendTimer = 0.obs;
+  final RxBool isEmailSent = false.obs;
+  final RxInt resendTimer = 0.obs;
 
   @override
   void onInit() {
@@ -118,43 +114,28 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Generate 6-digit OTP using cryptographically secure random
-  String _generateOTP() {
-    final random = Random.secure();
-    return List.generate(6, (_) => random.nextInt(10)).join();
-  }
-
-  /// Send password reset OTP
-  Future<void> sendPasswordResetOTP(String email) async {
+  /// Send password reset email using Firebase Auth built-in method
+  /// This avoids Firestore permission issues by using Firebase Auth directly
+  Future<void> sendPasswordResetEmail(String email) async {
     try {
       isLoading.value = true;
 
       if (email.isEmpty || !GetUtils.isEmail(email)) {
-        Get.snackbar('Error', 'Please enter a valid email address');
+        Get.snackbar(
+          'Error', 
+          'Please enter a valid email address',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[900],
+        );
         return;
       }
 
-      // Generate OTP
-      final otp = _generateOTP();
-      final expiryTime = DateTime.now().add(
-        Duration(minutes: AppConstants.otpExpiryMinutes),
-      );
-
-      // Store OTP in Firestore
-      await _firestore.collection(AppConstants.otpCollection).doc(email).set({
-        'otp': otp,
-        'email': email,
-        'expiryTime': Timestamp.fromDate(expiryTime),
-        'createdAt': Timestamp.now(),
-        'verified': false,
-      });
-
-      // For now, use Firebase's built-in password reset email
-      // In production, you would send OTP via email service
-      await _authProvider.forgotPassword(email);
+      // Use Firebase Auth's built-in password reset - no Firestore write needed
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       resetEmail.value = email;
-      isOtpSent.value = true;
+      isEmailSent.value = true;
       forgotPasswordStep.value = 1;
       
       // Start resend timer
@@ -163,145 +144,68 @@ class AuthController extends GetxController {
       Get.snackbar(
         'Success',
         'Password reset link sent to $email',
+        snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 5),
         backgroundColor: Colors.green[100],
+        colorText: Colors.green[900],
       );
 
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Failed to send reset email';
+      
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No user found with this email address';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Invalid email address format';
+      } else if (e.code == 'too-many-requests') {
+        errorMessage = 'Too many requests. Please try again later';
+      }
+      
+      Get.snackbar(
+        'Error', 
+        errorMessage,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[900],
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Failed to send reset email: $e');
+      Get.snackbar(
+        'Error', 
+        'An unexpected error occurred. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[900],
+      );
+      debugPrint('Password reset error: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Start OTP resend timer
+  /// Start resend timer for password reset email
   void _startResendTimer() {
-    otpResendTimer.value = 60;
+    resendTimer.value = 60;
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 1));
-      if (otpResendTimer.value > 0) {
-        otpResendTimer.value--;
+      if (resendTimer.value > 0) {
+        resendTimer.value--;
         return true;
       }
       return false;
     });
   }
 
-  /// Verify OTP
-  Future<bool> verifyOTP(String enteredOTP) async {
-    try {
-      isLoading.value = true;
-
-      if (enteredOTP.length != 6) {
-        Get.snackbar('Error', 'Please enter a valid 6-digit OTP');
-        return false;
-      }
-
-      // Get stored OTP from Firestore
-      final doc = await _firestore
-          .collection(AppConstants.otpCollection)
-          .doc(resetEmail.value)
-          .get();
-
-      if (!doc.exists) {
-        Get.snackbar('Error', 'OTP expired or not found. Please request a new one.');
-        return false;
-      }
-
-      final data = doc.data()!;
-      final storedOTP = data['otp'] as String;
-      final expiryTime = (data['expiryTime'] as Timestamp).toDate();
-
-      // Check if OTP is expired
-      if (DateTime.now().isAfter(expiryTime)) {
-        Get.snackbar('Error', 'OTP has expired. Please request a new one.');
-        await _firestore.collection(AppConstants.otpCollection).doc(resetEmail.value).delete();
-        return false;
-      }
-
-      // Verify OTP
-      if (storedOTP != enteredOTP) {
-        Get.snackbar('Error', 'Invalid OTP. Please try again.');
-        return false;
-      }
-
-      // Mark as verified
-      await _firestore.collection(AppConstants.otpCollection).doc(resetEmail.value).update({
-        'verified': true,
-      });
-
-      forgotPasswordStep.value = 2;
-      Get.snackbar(
-        'Success',
-        'OTP verified successfully!',
-        backgroundColor: Colors.green[100],
-      );
-      return true;
-
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to verify OTP: $e');
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Reset password after OTP verification
-  Future<void> resetPassword(String newPassword) async {
-    try {
-      isLoading.value = true;
-
-      if (newPassword.length < 6) {
-        Get.snackbar('Error', 'Password must be at least 6 characters');
-        return;
-      }
-
-      // Verify that OTP was verified
-      final doc = await _firestore
-          .collection(AppConstants.otpCollection)
-          .doc(resetEmail.value)
-          .get();
-
-      if (!doc.exists || doc.data()?['verified'] != true) {
-        Get.snackbar('Error', 'Please verify OTP first');
-        return;
-      }
-
-      // Delete OTP document
-      await _firestore.collection(AppConstants.otpCollection).doc(resetEmail.value).delete();
-
-      // Reset state
-      _resetForgotPasswordState();
-
-      Get.snackbar(
-        'Success',
-        'Password reset successful! Please login with your new password.',
-        duration: const Duration(seconds: 5),
-        backgroundColor: Colors.green[100],
-      );
-
-      Get.offAllNamed(AppRoutes.LOGIN);
-
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to reset password: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Legacy forgot password (using Firebase email link)
+  /// Legacy forgot password method - redirects to new implementation
   Future<void> forgotPassword(String email) async {
-    await sendPasswordResetOTP(email);
+    await sendPasswordResetEmail(email);
   }
 
   /// Reset forgot password state
   void _resetForgotPasswordState() {
     forgotPasswordStep.value = 0;
     resetEmail.value = '';
-    isOtpSent.value = false;
-    otpResendTimer.value = 0;
-    otpController.clear();
-    newPasswordController.clear();
+    isEmailSent.value = false;
+    resendTimer.value = 0;
   }
 
   void navigateToForgotPassword() {
@@ -329,8 +233,6 @@ class AuthController extends GetxController {
     phoneController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    otpController.dispose();
-    newPasswordController.dispose();
     super.onClose();
   }
 }

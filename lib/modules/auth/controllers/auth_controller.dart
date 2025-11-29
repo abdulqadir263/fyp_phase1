@@ -118,9 +118,9 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Generate 6-digit OTP
+  /// Generate 6-digit OTP using cryptographically secure random
   String _generateOTP() {
-    final random = Random();
+    final random = Random.secure();
     return List.generate(6, (_) => random.nextInt(10)).join();
   }
 

@@ -82,6 +82,15 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  // Profile placeholder widget
+  Widget _buildProfilePlaceholder(bool isGuest) {
+    return Icon(
+      isGuest ? Icons.person_outline : Icons.person,
+      size: 40,
+      color: Colors.grey[600],
+    );
+  }
+
   // Drawer build karna
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
@@ -114,25 +123,13 @@ class HomeView extends GetView<HomeController> {
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.grey[600],
-                          ),
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.grey[600],
-                          ),
+                          placeholder: (context, url) => _buildProfilePlaceholder(isGuest),
+                          errorWidget: (context, url, error) => _buildProfilePlaceholder(isGuest),
                         ),
                       )
-                    : Icon(
-                        isGuest ? Icons.person_outline : Icons.person,
-                        size: 40,
-                        color: Colors.grey[600],
-                      ),
+                    : _buildProfilePlaceholder(isGuest),
               ),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,

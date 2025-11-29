@@ -155,6 +155,16 @@ class ChatbotController extends GetxController {
 
     final text = textController.text.trim();
     
+    // Validate message length for image messages too
+    if (text.length > AppConstants.maxMessageLength) {
+      Get.snackbar(
+        'Error',
+        'Message cannot exceed ${AppConstants.maxMessageLength} characters',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    
     // Haptic feedback
     HapticFeedback.lightImpact();
 
@@ -366,8 +376,17 @@ class ChatbotController extends GetxController {
     );
   }
 
+  /// Validate message length
+  bool _isMessageValid(String text) {
+    return text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
+  }
+
   /// Check if send button should be enabled
-  bool get canSend =>
-      (textController.text.trim().isNotEmpty || selectedImage.value != null) &&
-      !isLoading.value;
+  bool get canSend {
+    final text = textController.text.trim();
+    final hasValidText = text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
+    final hasImage = selectedImage.value != null;
+    
+    return (hasValidText || hasImage) && !isLoading.value;
+  }
 }

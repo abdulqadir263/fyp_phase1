@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/routes/app_routes.dart';
 import '../controllers/home_controller.dart';
 import '../../../app/widgets/custom_card.dart';
+import '../../../core/constants/app_constants.dart';
 
 // Home screen ka UI
 class HomeView extends GetView<HomeController> {
+  const HomeView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,6 +18,28 @@ class HomeView extends GetView<HomeController> {
         title: const Text('Aasaan Kisaan'),
         centerTitle: true,
         actions: [
+          // Notification bell icon with badge
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () => Get.snackbar('Info', 'Notifications coming soon!'),
+                tooltip: 'Notifications',
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
+                ),
+              ),
+            ],
+          ),
           // Language toggle button
           IconButton(
             icon: const Icon(Icons.language),
@@ -26,7 +52,7 @@ class HomeView extends GetView<HomeController> {
       // Side Drawer
       drawer: _buildDrawer(context),
 
-      // Body
+      // Body with pull-to-refresh
       body: Obx(() => IndexedStack(
         index: controller.currentIndex.value,
         children: [
@@ -38,8 +64,30 @@ class HomeView extends GetView<HomeController> {
         ],
       )),
 
+      // Floating Action Button for quick access
+      floatingActionButton: _buildFloatingActionButton(),
+
       // Bottom Navigation Bar
       bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  // Floating Action Button for quick access
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton(
+      onPressed: () => controller.navigateToFeature('chatbot'),
+      backgroundColor: AppConstants.primaryGreen,
+      child: const Icon(Icons.chat, color: Colors.white),
+      tooltip: 'AgriBot Assistant',
+    );
+  }
+
+  // Profile placeholder widget
+  Widget _buildProfilePlaceholder(bool isGuest) {
+    return Icon(
+      isGuest ? Icons.person_outline : Icons.person,
+      size: 40,
+      color: Colors.grey[600],
     );
   }
 
@@ -68,20 +116,28 @@ class HomeView extends GetView<HomeController> {
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
-                // ✅ FIX: Profile image ko behtar tareeqe se handle karna
-                backgroundImage: profileImageUrl.isNotEmpty
-                    ? NetworkImage(profileImageUrl)
-                    : null,
-                child: profileImageUrl.isEmpty
-                    ? Icon(
-                  isGuest ? Icons.person_outline : Icons.person,
-                  size: 40,
-                  color: Colors.grey[600],
-                )
-                    : null,
+                child: profileImageUrl.isNotEmpty
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: profileImageUrl,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => _buildProfilePlaceholder(isGuest),
+                          errorWidget: (context, url, error) => _buildProfilePlaceholder(isGuest),
+                        ),
+                      )
+                    : _buildProfilePlaceholder(isGuest),
               ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppConstants.primaryGreen,
+                    AppConstants.darkGreen,
+                  ],
+                ),
               ),
             );
           }),
@@ -195,90 +251,101 @@ class HomeView extends GetView<HomeController> {
       builder: (context, constraints) {
         final bool isLargeScreen = constraints.maxWidth > 600;
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome Message for guest
-                Obx(() => Text(
-                  controller.welcomeMessage,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                )),
+        return RefreshIndicator(
+          onRefresh: () async {
+            await controller.refreshUserData();
+          },
+          color: AppConstants.primaryGreen,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome Message
+                  Obx(() => Text(
+                    controller.welcomeMessage,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )),
 
-                // Guest user banner
-                Obx(() => controller.isGuestUser
-                    ? Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.symmetric(vertical: isLargeScreen ? 20 : 16),
-                  padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    border: Border.all(color: Colors.orange.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange.shade800),
-                      SizedBox(width: isLargeScreen ? 12 : 8),
-                      Expanded(
-                        child: Text(
-                          'You are browsing as a guest. Some features may be limited.',
-                          style: TextStyle(
-                            color: Colors.orange.shade800,
-                            fontSize: isLargeScreen ? 16 : 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                    : const SizedBox.shrink()),
+                  const SizedBox(height: 16),
 
-                // Profile incomplete banner
-                Obx(() => controller.isProfileIncomplete && !controller.isGuestUser
-                    ? Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.only(bottom: isLargeScreen ? 20 : 16),
-                  padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
-                    border: Border.all(color: Colors.blue.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blue.shade800),
-                      SizedBox(width: isLargeScreen ? 12 : 8),
-                      Expanded(
-                        child: Text(
-                          'Your profile is incomplete. Please complete your profile to access all features.',
-                          style: TextStyle(
-                            color: Colors.blue.shade800,
-                            fontSize: isLargeScreen ? 16 : 14,
+                  // Weather Widget Card
+                  _buildWeatherWidget(isLargeScreen),
+
+                  // Guest user banner
+                  Obx(() => controller.isGuestUser
+                      ? Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.symmetric(vertical: isLargeScreen ? 20 : 16),
+                          padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            border: Border.all(color: Colors.orange.shade300),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                      ),
-                      if (isLargeScreen) ...[
-                        SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () => controller.goToProfile(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade800,
-                            foregroundColor: Colors.white,
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.orange.shade800),
+                              SizedBox(width: isLargeScreen ? 12 : 8),
+                              Expanded(
+                                child: Text(
+                                  'You are browsing as a guest. Some features may be limited.',
+                                  style: TextStyle(
+                                    color: Colors.orange.shade800,
+                                    fontSize: isLargeScreen ? 16 : 14,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: const Text('Complete Now'),
-                        ),
-                      ] else ...[
-                        TextButton(
-                          onPressed: () => controller.goToProfile(),
-                          child: Text(
+                        )
+                      : const SizedBox.shrink()),
+
+                  // Profile incomplete banner
+                  Obx(() => controller.isProfileIncomplete && !controller.isGuestUser
+                      ? Container(
+                          width: double.infinity,
+                          margin: EdgeInsets.only(bottom: isLargeScreen ? 20 : 16),
+                          padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            border: Border.all(color: Colors.blue.shade300),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.blue.shade800),
+                              SizedBox(width: isLargeScreen ? 12 : 8),
+                              Expanded(
+                                child: Text(
+                                  'Your profile is incomplete. Please complete your profile to access all features.',
+                                  style: TextStyle(
+                                    color: Colors.blue.shade800,
+                                    fontSize: isLargeScreen ? 16 : 14,
+                                  ),
+                                ),
+                              ),
+                              if (isLargeScreen) ...[
+                                const SizedBox(width: 12),
+                                ElevatedButton(
+                                  onPressed: () => controller.goToProfile(),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue.shade800,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Complete Now'),
+                                ),
+                              ] else ...[
+                                TextButton(
+                                  onPressed: () => controller.goToProfile(),
+                                  child: Text(
                             'Complete Now',
                             style: TextStyle(
                               color: Colors.blue.shade800,
@@ -295,6 +362,10 @@ class HomeView extends GetView<HomeController> {
 
                 SizedBox(height: isLargeScreen ? 8 : 4),
 
+                // Quick Actions Section
+                _buildSectionTitle('Quick Actions', context),
+                const SizedBox(height: 12),
+
                 Text(
                   'What would you like to do today?',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -304,17 +375,171 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 32 : 24),
 
-                // ✅ UPDATED: Responsive Feature Cards Grid
+                // Feature Cards Grid
                 _buildResponsiveFeatureGrid(context),
+
+                const SizedBox(height: 24),
+
+                // Farmer Tips Carousel
+                _buildFarmerTipsCarousel(isLargeScreen),
               ],
             ),
           ),
+        ),
         );
       },
     );
   }
 
-  // ✅ IMPROVED: Responsive Grid build karna
+  // Weather Widget Card
+  Widget _buildWeatherWidget(bool isLargeScreen) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: isLargeScreen ? 20 : 16),
+      padding: EdgeInsets.all(isLargeScreen ? 20 : 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.shade400,
+            Colors.blue.shade600,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => controller.navigateToFeature('weather'),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.wb_sunny,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Today\'s Weather',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap to view detailed forecast',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Section Title
+  Widget _buildSectionTitle(String title, BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[800],
+      ),
+    );
+  }
+
+  // Farmer Tips Carousel
+  Widget _buildFarmerTipsCarousel(bool isLargeScreen) {
+    final tips = [
+      {'icon': Icons.water_drop, 'tip': 'Water your crops early morning for best results', 'color': Colors.blue},
+      {'icon': Icons.bug_report, 'tip': 'Check for pests regularly to prevent crop damage', 'color': Colors.red},
+      {'icon': Icons.eco, 'tip': 'Use organic fertilizers for healthier soil', 'color': Colors.green},
+      {'icon': Icons.cloud, 'tip': 'Monitor weather forecasts for farming decisions', 'color': Colors.orange},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Farming Tips', Get.context!),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: isLargeScreen ? 120 : 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: tips.length,
+            itemBuilder: (context, index) {
+              final tip = tips[index];
+              return Container(
+                width: isLargeScreen ? 280 : 220,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: (tip['color'] as Color).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: (tip['color'] as Color).withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      tip['icon'] as IconData,
+                      color: tip['color'] as Color,
+                      size: isLargeScreen ? 32 : 28,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        tip['tip'] as String,
+                        style: TextStyle(
+                          fontSize: isLargeScreen ? 14 : 12,
+                          color: Colors.grey[800],
+                          height: 1.3,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Responsive Grid build karna
   Widget _buildResponsiveFeatureGrid(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {

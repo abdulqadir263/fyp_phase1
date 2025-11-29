@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
 import '../controllers/community_controller.dart';
+import '../models/post_model.dart';
 import 'widgets/comment_item.dart';
 import 'widgets/image_grid.dart';
 
@@ -196,7 +197,7 @@ class PostDetailView extends GetView<CommunityController> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              post.category.toString().toUpperCase(),
+              PostModel.getCategoryDisplayName(post.category.toString()),
               style: TextStyle(
                 color: AppConstants.primaryGreen,
                 fontSize: 11,

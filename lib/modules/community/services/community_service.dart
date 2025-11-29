@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/post_model.dart';
@@ -42,7 +43,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
     } catch (e) {
-      print('Error fetching posts: $e');
+      debugPrint('Error fetching posts: $e');
       return [];
     }
   }
@@ -59,7 +60,7 @@ class CommunityService extends GetxService {
       }
       return null;
     } catch (e) {
-      print('Error getting post: $e');
+      debugPrint('Error getting post: $e');
       return null;
     }
   }
@@ -70,7 +71,7 @@ class CommunityService extends GetxService {
       final docRef = await _postsCollection.add(post.toJson());
       return docRef.id;
     } catch (e) {
-      print('Error creating post: $e');
+      debugPrint('Error creating post: $e');
       return null;
     }
   }
@@ -81,7 +82,7 @@ class CommunityService extends GetxService {
       await _postsCollection.doc(post.id).update(post.toJson());
       return true;
     } catch (e) {
-      print('Error updating post: $e');
+      debugPrint('Error updating post: $e');
       return false;
     }
   }
@@ -105,7 +106,7 @@ class CommunityService extends GetxService {
       
       return true;
     } catch (e) {
-      print('Error deleting post: $e');
+      debugPrint('Error deleting post: $e');
       return false;
     }
   }
@@ -143,7 +144,7 @@ class CommunityService extends GetxService {
         return true;
       });
     } catch (e) {
-      print('Error toggling bookmark: $e');
+      debugPrint('Error toggling bookmark: $e');
       return false;
     }
   }
@@ -163,7 +164,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
     } catch (e) {
-      print('Error getting bookmarked posts: $e');
+      debugPrint('Error getting bookmarked posts: $e');
       return [];
     }
   }
@@ -183,7 +184,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
     } catch (e) {
-      print('Error getting user posts: $e');
+      debugPrint('Error getting user posts: $e');
       return [];
     }
   }
@@ -204,7 +205,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
     } catch (e) {
-      print('Error fetching comments: $e');
+      debugPrint('Error fetching comments: $e');
       return [];
     }
   }
@@ -224,7 +225,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
     } catch (e) {
-      print('Error fetching replies: $e');
+      debugPrint('Error fetching replies: $e');
       return [];
     }
   }
@@ -241,7 +242,7 @@ class CommunityService extends GetxService {
       
       return docRef.id;
     } catch (e) {
-      print('Error adding comment: $e');
+      debugPrint('Error adding comment: $e');
       return null;
     }
   }
@@ -258,7 +259,7 @@ class CommunityService extends GetxService {
       
       return true;
     } catch (e) {
-      print('Error deleting comment: $e');
+      debugPrint('Error deleting comment: $e');
       return false;
     }
   }
@@ -281,7 +282,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
     } catch (e) {
-      print('Error searching posts: $e');
+      debugPrint('Error searching posts: $e');
       return [];
     }
   }

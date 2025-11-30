@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
 import '../controllers/community_controller.dart';
 import 'widgets/post_card.dart';
 import 'widgets/category_filter_bar.dart';
 
-/// Community view showing list of posts
+/// This view displays the community posts feed
+/// Features:
+/// - Pull-to-refresh to reload posts
+/// - Category filter bar to filter by post category
+/// - Infinite scroll pagination
+/// - FAB to create new posts
+/// - Tap post to view details
+/// - Bookmark and delete functionality
 class CommunityView extends GetView<CommunityController> {
   const CommunityView({super.key});
 
@@ -20,13 +26,14 @@ class CommunityView extends GetView<CommunityController> {
         color: AppConstants.primaryGreen,
         child: Column(
           children: [
-            // Category filter bar
+            // Category filter bar at top
             const CategoryFilterBar(),
-            // Posts list
+            // Scrollable posts list
             Expanded(child: _buildPostsList()),
           ],
         ),
       ),
+      // Floating button to create new post
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.toNamed('/community/create'),
         backgroundColor: AppConstants.primaryGreen,
@@ -36,6 +43,7 @@ class CommunityView extends GetView<CommunityController> {
     );
   }
 
+  /// Build the app bar with bookmark action
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: const Text('Community'),
@@ -44,14 +52,7 @@ class CommunityView extends GetView<CommunityController> {
       foregroundColor: Colors.white,
       elevation: 2,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {
-            // TODO: Implement search
-            Get.snackbar('Info', 'Search coming soon');
-          },
-          tooltip: 'Search',
-        ),
+        // Bookmark icon to view saved posts
         IconButton(
           icon: const Icon(Icons.bookmark_outline),
           onPressed: () {
@@ -64,8 +65,10 @@ class CommunityView extends GetView<CommunityController> {
     );
   }
 
+  /// Build the posts list with loading states and infinite scroll
   Widget _buildPostsList() {
     return Obx(() {
+      // Show loading spinner on initial load
       if (controller.isLoading.value && controller.posts.isEmpty) {
         return const Center(
           child: CircularProgressIndicator(
@@ -74,16 +77,18 @@ class CommunityView extends GetView<CommunityController> {
         );
       }
 
+      // Show empty state if no posts
       if (controller.posts.isEmpty) {
         return _buildEmptyState();
       }
 
+      // Build list with infinite scroll
       return ListView.builder(
         padding: const EdgeInsets.only(bottom: 80),
         itemCount: controller.posts.length + (controller.hasMore ? 1 : 0),
         itemBuilder: (context, index) {
+          // Load more indicator at the end
           if (index == controller.posts.length) {
-            // Load more indicator
             controller.loadMore();
             return Padding(
               padding: const EdgeInsets.all(16),
@@ -97,12 +102,14 @@ class CommunityView extends GetView<CommunityController> {
             );
           }
 
+          // Build individual post card
           final post = controller.posts[index];
           return PostCard(
             post: post,
             onTap: () => Get.toNamed('/community/post/${post.id}'),
             onBookmark: () => controller.toggleBookmark(post.id),
             isBookmarked: controller.isBookmarked(post.id),
+            // Only show delete option for post author
             onDelete: controller.isPostAuthor(post.userId)
                 ? () => controller.deletePost(post.id)
                 : null,
@@ -112,6 +119,7 @@ class CommunityView extends GetView<CommunityController> {
     });
   }
 
+  /// Build empty state when no posts exist
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

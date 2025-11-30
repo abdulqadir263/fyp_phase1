@@ -10,41 +10,82 @@ import '../models/post_model.dart';
 import '../models/comment_model.dart';
 import '../services/community_service.dart';
 
-/// Controller for community module functionality
+/// This controller manages the community posts feed
+/// It handles:
+/// - Fetching posts from Firestore with pagination
+/// - Creating new posts with images
+/// - Deleting posts (only if you're the author)
+/// - Bookmarking posts
+/// - Loading and adding comments
 class CommunityController extends GetxController {
+  /// Auth provider to access current user data
   final AuthProvider _authProvider = Get.find<AuthProvider>();
+  
+  /// Community service for Firebase operations
   final CommunityService _communityService = Get.find<CommunityService>();
+  
+  /// Image picker for selecting post images
   final ImagePicker _imagePicker = ImagePicker();
 
-  // Reactive variables for posts list
+  /// This list holds all the posts we fetch from Firebase
+  /// The 'Rx' makes it reactive - the UI updates automatically when this changes
   final RxList<PostModel> posts = <PostModel>[].obs;
+  
+  /// Shows loading spinner when true
   final RxBool isLoading = false.obs;
+  
+  /// Shows loading indicator for infinite scroll
   final RxBool isLoadingMore = false.obs;
+  
+  /// Currently selected category filter
   final RxString selectedCategory = 'all'.obs;
+  
+  /// List of post IDs that user has bookmarked
   final RxList<String> bookmarkedPosts = <String>[].obs;
+  
+  /// Search query for filtering posts (not yet implemented)
   final RxString searchQuery = ''.obs;
 
-  // Pagination
+  // ==================== Pagination ====================
+  /// Last document for Firestore pagination cursor
   DocumentSnapshot? lastDocument;
+  
+  /// Whether there are more posts to load
   bool hasMore = true;
+  
+  /// Number of posts to fetch per page
   static const int pageSize = 20;
 
-  // Create post variables
+  // ==================== Create Post Variables ====================
+  /// Controller for post title input
   final TextEditingController titleController = TextEditingController();
+  
+  /// Controller for post description input
   final TextEditingController descriptionController = TextEditingController();
+  
+  /// List of images selected for new post
   final RxList<File> selectedImages = <File>[].obs;
+  
+  /// Category selected for new post
   final RxString postCategory = 'crops'.obs;
+  
+  /// Shows loading indicator while creating post
   final RxBool isCreatingPost = false.obs;
 
-  // Comments
+  // ==================== Comments ====================
+  /// List of comments for current post
   final RxList<CommentModel> comments = <CommentModel>[].obs;
+  
+  /// Controller for comment input
   final TextEditingController commentController = TextEditingController();
+  
+  /// Shows loading indicator while loading comments
   final RxBool isLoadingComments = false.obs;
 
-  // Current post for detail view
+  /// Current post being viewed in detail
   final Rx<PostModel?> currentPost = Rx<PostModel?>(null);
 
-  // Available categories
+  /// Get list of available categories including 'all'
   List<String> get categories => ['all', ...PostModel.categories];
 
   @override
@@ -62,10 +103,10 @@ class CommunityController extends GetxController {
     super.onClose();
   }
 
-  /// Get current user ID
+  /// Get current user ID from auth provider
   String? get currentUserId => _authProvider.currentUser.value?.uid;
 
-  /// Get current user name
+  /// Get current user name for displaying on posts
   String get currentUserName => _authProvider.currentUser.value?.name ?? 'User';
 
   /// Get current user avatar URL

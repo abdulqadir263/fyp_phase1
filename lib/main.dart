@@ -8,7 +8,9 @@ import 'app/themes/app_theme.dart';
 import 'app/data/services/firebase_service.dart';
 import 'app/data/services/cloudinary_service.dart';
 import 'app/data/services/weather_service.dart';
+import 'app/data/providers/auth_provider.dart';
 import 'app/services/gemini_service.dart';
+import 'modules/community/services/community_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -22,11 +24,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize all services
-  Get.put(FirebaseService());
-  Get.put(CloudinaryService());
-  Get.put(WeatherService());
-  Get.put(GeminiService());
+  // Initialize all core services as permanent
+  Get.put(FirebaseService(), permanent: true);
+  Get.put(CloudinaryService(), permanent: true);
+  Get.put(WeatherService(), permanent: true);
+  Get.put(GeminiService(), permanent: true);
+  Get.put(AuthProvider(), permanent: true);
+  Get.put(CommunityService(), permanent: true);
 
   // Global error handler
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -54,6 +58,7 @@ class FarmAssistApp extends StatelessWidget {
       initialRoute: AppRoutes.LOGIN,
       getPages: AppPages.routes,
       defaultTransition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 200),
       locale: const Locale('en', 'US'),
       fallbackLocale: const Locale('en', 'US'),
     );

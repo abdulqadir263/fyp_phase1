@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
@@ -6,7 +5,7 @@ import '../controllers/chatbot_controller.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/typing_indicator.dart';
 
-/// Chatbot view with modern UI
+/// Chatbot view with modern UI - text input only
 class ChatbotView extends GetView<ChatbotController> {
   const ChatbotView({super.key});
 
@@ -18,7 +17,6 @@ class ChatbotView extends GetView<ChatbotController> {
       body: Column(
         children: [
           Expanded(child: _buildMessageList()),
-          _buildImagePreview(),
           _buildInputBar(),
         ],
       ),
@@ -213,44 +211,6 @@ class ChatbotView extends GetView<ChatbotController> {
     );
   }
 
-  /// Build image preview
-  Widget _buildImagePreview() {
-    return Obx(() {
-      if (controller.selectedImage.value == null) {
-        return const SizedBox.shrink();
-      }
-
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        color: Colors.grey[200],
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                controller.selectedImage.value!,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Image selected',
-                style: TextStyle(color: Colors.grey[700]),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.red),
-              onPressed: controller.clearSelectedImage,
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
   /// Build input bar
   Widget _buildInputBar() {
     return Container(
@@ -288,12 +248,10 @@ class ChatbotView extends GetView<ChatbotController> {
                     ),
                   )
                 : const SizedBox.shrink()),
-            // Input row
+            // Input row - text only (image input removed)
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Image picker button
-                _buildImagePickerButton(),
                 const SizedBox(width: 8),
                 // Text field
                 Expanded(child: _buildTextField()),
@@ -305,45 +263,6 @@ class ChatbotView extends GetView<ChatbotController> {
           ],
         ),
       ),
-    );
-  }
-
-  /// Build image picker button
-  Widget _buildImagePickerButton() {
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.add_photo_alternate_outlined,
-        color: AppConstants.primaryGreen,
-      ),
-      onSelected: (value) {
-        if (value == 'gallery') {
-          controller.pickImageFromGallery();
-        } else if (value == 'camera') {
-          controller.takePhoto();
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'gallery',
-          child: Row(
-            children: [
-              Icon(Icons.photo_library_outlined),
-              SizedBox(width: 12),
-              Text('Gallery'),
-            ],
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'camera',
-          child: Row(
-            children: [
-              Icon(Icons.camera_alt_outlined),
-              SizedBox(width: 12),
-              Text('Camera'),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -415,16 +334,11 @@ class ChatbotView extends GetView<ChatbotController> {
     });
   }
 
-  /// Handle send action - supports text only, image only, or both
+  /// Handle send action - text only
   void _handleSend() {
-    final hasImage = controller.selectedImage.value != null;
     final hasText = controller.textController.text.trim().isNotEmpty;
     
-    if (hasImage) {
-      // Image is selected - send with image (text is optional)
-      controller.sendImageMessage();
-    } else if (hasText) {
-      // Text only
+    if (hasText) {
       controller.sendTextMessage();
     }
   }

@@ -97,20 +97,27 @@ class AuthController extends GetxController {
     }
 
     print('AuthController: Submitting form. IsLogin: ${isLogin.value}');
+    
+    // Set loading state in controller
+    isLoading.value = true;
 
-    if (isLogin.value) {
-      await _authProvider.signIn(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-    } else {
-      await _authProvider.signUp(
-        name: nameController.text.trim(),
-        email: emailController.text.trim(),
-        phone: phoneController.text.trim(),
-        password: passwordController.text.trim(),
-        userType: selectedUserType.value,
-      );
+    try {
+      if (isLogin.value) {
+        await _authProvider.signIn(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+      } else {
+        await _authProvider.signUp(
+          name: nameController.text.trim(),
+          email: emailController.text.trim(),
+          phone: phoneController.text.trim(),
+          password: passwordController.text.trim(),
+          userType: selectedUserType.value,
+        );
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 

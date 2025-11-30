@@ -43,6 +43,12 @@ class CommunityController extends GetxController {
   /// List of post IDs that user has bookmarked
   final RxList<String> bookmarkedPosts = <String>[].obs;
   
+  /// List of actual bookmarked post objects for bookmarks view
+  final RxList<PostModel> bookmarkedPostsList = <PostModel>[].obs;
+  
+  /// Loading state for bookmarks
+  final RxBool isLoadingBookmarks = false.obs;
+  
   /// Search query for filtering posts (not yet implemented)
   final RxString searchQuery = ''.obs;
 
@@ -112,15 +118,33 @@ class CommunityController extends GetxController {
   /// Get current user avatar URL
   String get currentUserAvatar => _authProvider.currentUser.value?.profileImage ?? '';
 
-  /// Load user's bookmarked posts
+  /// Load user's bookmarked posts (only IDs for quick checking)
   Future<void> _loadBookmarks() async {
     if (currentUserId == null || currentUserId == 'guest_user') return;
     
     try {
       final bookmarked = await _communityService.getBookmarkedPosts(currentUserId!);
       bookmarkedPosts.value = bookmarked.map((p) => p.id).toList();
+      bookmarkedPostsList.value = bookmarked;
     } catch (e) {
       debugPrint('Error loading bookmarks: $e');
+    }
+  }
+
+  /// Fetch bookmarked posts with full details for bookmarks view
+  Future<void> fetchBookmarkedPosts() async {
+    if (currentUserId == null || currentUserId == 'guest_user') return;
+    if (isLoadingBookmarks.value) return;
+    
+    try {
+      isLoadingBookmarks.value = true;
+      final bookmarked = await _communityService.getBookmarkedPosts(currentUserId!);
+      bookmarkedPostsList.value = bookmarked;
+      bookmarkedPosts.value = bookmarked.map((p) => p.id).toList();
+    } catch (e) {
+      debugPrint('Error fetching bookmarked posts: $e');
+    } finally {
+      isLoadingBookmarks.value = false;
     }
   }
 
@@ -212,6 +236,18 @@ class CommunityController extends GetxController {
             bookmarkedBy: newBookmarkedBy,
             bookmarksCount: newBookmarkedBy.length,
           );
+        }
+        
+        // Update bookmarkedPostsList - remove or add post
+        if (bookmarkedPosts.contains(postId)) {
+          // Was added to bookmarks, so add to the list
+          final postToAdd = posts.firstWhereOrNull((p) => p.id == postId);
+          if (postToAdd != null && !bookmarkedPostsList.any((p) => p.id == postId)) {
+            bookmarkedPostsList.add(postToAdd);
+          }
+        } else {
+          // Was removed from bookmarks, so remove from the list
+          bookmarkedPostsList.removeWhere((p) => p.id == postId);
         }
       }
     } catch (e) {

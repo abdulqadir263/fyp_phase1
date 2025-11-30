@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/data/services/cloudinary_service.dart';
 import '../../../app/utils/app_snackbar.dart';
-import '../../../core/constants/app_constants.dart';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
 import '../services/community_service.dart';
@@ -55,13 +55,23 @@ class CommunityController extends GetxController {
 
   // ==================== Pagination ====================
   /// Last document for Firestore pagination cursor
-  DocumentSnapshot? lastDocument;
+  DocumentSnapshot? _lastDocument;
   
   /// Whether there are more posts to load
-  bool hasMore = true;
+  bool _hasMore = true;
   
   /// Number of posts to fetch per page
-  static const int pageSize = 20;
+  static const int _pageSize = 20;
+  
+  // ==================== State Management ====================
+  /// Flag to track if controller is still active (for safe async operations)
+  bool _isDisposed = false;
+  
+  /// Track if a bookmark operation is in progress for a specific post
+  final Set<String> _bookmarkInProgress = {};
+  
+  /// Track if delete operation is in progress for a specific post
+  final Set<String> _deleteInProgress = {};
 
   // ==================== Create Post Variables ====================
   /// Controller for post title input
@@ -104,6 +114,7 @@ class CommunityController extends GetxController {
 
   @override
   void onClose() {
+    _isDisposed = true;
     titleController.dispose();
     descriptionController.dispose();
     commentController.dispose();
@@ -125,6 +136,7 @@ class CommunityController extends GetxController {
     
     try {
       final bookmarked = await _communityService.getBookmarkedPosts(currentUserId!);
+      if (_isDisposed) return;
       bookmarkedPosts.value = bookmarked.map((p) => p.id).toList();
       bookmarkedPostsList.value = bookmarked;
     } catch (e) {
@@ -140,57 +152,86 @@ class CommunityController extends GetxController {
     try {
       isLoadingBookmarks.value = true;
       final bookmarked = await _communityService.getBookmarkedPosts(currentUserId!);
+      if (_isDisposed) return;
       bookmarkedPostsList.value = bookmarked;
       bookmarkedPosts.value = bookmarked.map((p) => p.id).toList();
     } catch (e) {
       debugPrint('Error fetching bookmarked posts: $e');
     } finally {
-      isLoadingBookmarks.value = false;
+      if (!_isDisposed) {
+        isLoadingBookmarks.value = false;
+      }
     }
   }
 
   /// Fetch posts with optional refresh
   Future<void> fetchPosts({bool refresh = false}) async {
-    if (isLoading.value) return;
+    if (isLoading.value && !refresh) return;
 
     try {
       if (refresh) {
-        lastDocument = null;
-        hasMore = true;
+        _lastDocument = null;
+        _hasMore = true;
         posts.clear();
       }
 
       isLoading.value = true;
 
-      final newPosts = await _communityService.fetchPosts(
-        lastDocument: lastDocument,
-        limit: pageSize,
+      final result = await _communityService.fetchPosts(
+        lastDocument: _lastDocument,
+        limit: _pageSize,
         category: selectedCategory.value == 'all' ? null : selectedCategory.value,
       );
+      
+      if (_isDisposed) return;
 
-      if (newPosts.isNotEmpty) {
-        posts.addAll(newPosts);
-        hasMore = newPosts.length >= pageSize;
+      if (result.posts.isNotEmpty) {
+        posts.addAll(result.posts);
+        _lastDocument = result.lastDocument;
+        _hasMore = result.posts.length >= _pageSize;
       } else {
-        hasMore = false;
+        _hasMore = false;
       }
     } catch (e) {
-      AppSnackbar.error('Failed to load posts');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to load posts');
+      }
       debugPrint('Error fetching posts: $e');
     } finally {
-      isLoading.value = false;
+      if (!_isDisposed) {
+        isLoading.value = false;
+      }
     }
   }
 
   /// Load more posts for infinite scroll
   Future<void> loadMore() async {
-    if (!hasMore || isLoadingMore.value) return;
+    if (!_hasMore || isLoadingMore.value || isLoading.value) return;
 
     try {
       isLoadingMore.value = true;
-      await fetchPosts();
+      
+      final result = await _communityService.fetchPosts(
+        lastDocument: _lastDocument,
+        limit: _pageSize,
+        category: selectedCategory.value == 'all' ? null : selectedCategory.value,
+      );
+      
+      if (_isDisposed) return;
+
+      if (result.posts.isNotEmpty) {
+        posts.addAll(result.posts);
+        _lastDocument = result.lastDocument;
+        _hasMore = result.posts.length >= _pageSize;
+      } else {
+        _hasMore = false;
+      }
+    } catch (e) {
+      debugPrint('Error loading more posts: $e');
     } finally {
-      isLoadingMore.value = false;
+      if (!_isDisposed) {
+        isLoadingMore.value = false;
+      }
     }
   }
 
@@ -208,14 +249,21 @@ class CommunityController extends GetxController {
   }
 
   /// Toggle bookmark for a post
+  /// Uses debouncing to prevent rapid toggle issues
   Future<void> toggleBookmark(String postId) async {
     if (currentUserId == null || currentUserId == 'guest_user') {
       AppSnackbar.info('Please login to bookmark posts');
       return;
     }
+    
+    // Prevent multiple simultaneous bookmark operations on the same post
+    if (_bookmarkInProgress.contains(postId)) return;
+    _bookmarkInProgress.add(postId);
 
     try {
       final success = await _communityService.toggleBookmark(postId, currentUserId!);
+      if (_isDisposed) return;
+      
       if (success) {
         if (bookmarkedPosts.contains(postId)) {
           bookmarkedPosts.remove(postId);
@@ -252,8 +300,12 @@ class CommunityController extends GetxController {
         }
       }
     } catch (e) {
-      AppSnackbar.error('Failed to update bookmark');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to update bookmark');
+      }
       debugPrint('Error toggling bookmark: $e');
+    } finally {
+      _bookmarkInProgress.remove(postId);
     }
   }
 
@@ -263,7 +315,11 @@ class CommunityController extends GetxController {
   }
 
   /// Delete a post
+  /// Uses debouncing to prevent double-tap issues
   Future<void> deletePost(String postId) async {
+    // Prevent multiple simultaneous delete operations on the same post
+    if (_deleteInProgress.contains(postId)) return;
+    
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Delete Post'),
@@ -283,12 +339,18 @@ class CommunityController extends GetxController {
     );
 
     if (confirmed != true) return;
+    
+    _deleteInProgress.add(postId);
 
     try {
       isLoading.value = true;
       final success = await _communityService.deletePost(postId);
+      if (_isDisposed) return;
+      
       if (success) {
         posts.removeWhere((p) => p.id == postId);
+        bookmarkedPostsList.removeWhere((p) => p.id == postId);
+        bookmarkedPosts.remove(postId);
         AppSnackbar.success('Post deleted successfully');
         
         if (currentPost.value?.id == postId) {
@@ -298,10 +360,15 @@ class CommunityController extends GetxController {
         AppSnackbar.error('Failed to delete post');
       }
     } catch (e) {
-      AppSnackbar.error('Failed to delete post');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to delete post');
+      }
       debugPrint('Error deleting post: $e');
     } finally {
-      isLoading.value = false;
+      _deleteInProgress.remove(postId);
+      if (!_isDisposed) {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -400,7 +467,11 @@ class CommunityController extends GetxController {
   }
 
   /// Create new post
+  /// Uses parallel image uploads for better performance
   Future<void> createPost() async {
+    // Prevent double submission
+    if (isCreatingPost.value) return;
+    
     if (!validateCreatePostForm()) return;
     if (currentUserId == null || currentUserId == 'guest_user') {
       AppSnackbar.info('Please login to create posts');
@@ -410,17 +481,18 @@ class CommunityController extends GetxController {
     try {
       isCreatingPost.value = true;
 
-      // Upload images to Cloudinary
+      // Upload images to Cloudinary in parallel for better performance
       List<String> imageUrls = [];
       if (selectedImages.isNotEmpty) {
         final cloudinaryService = Get.find<CloudinaryService>();
-        for (var image in selectedImages) {
-          final url = await cloudinaryService.uploadImage(image, 'post_images');
-          if (url != null) {
-            imageUrls.add(url);
-          }
-        }
+        final uploadFutures = selectedImages.map(
+          (image) => cloudinaryService.uploadImage(image, 'post_images'),
+        );
+        final results = await Future.wait(uploadFutures);
+        imageUrls = results.whereType<String>().toList();
       }
+      
+      if (_isDisposed) return;
 
       // Create post model
       final post = PostModel(
@@ -437,6 +509,8 @@ class CommunityController extends GetxController {
 
       // Save to Firestore
       final postId = await _communityService.createPost(post);
+      
+      if (_isDisposed) return;
 
       if (postId != null) {
         AppSnackbar.success('Post created successfully');
@@ -447,10 +521,14 @@ class CommunityController extends GetxController {
         AppSnackbar.error('Failed to create post');
       }
     } catch (e) {
-      AppSnackbar.error('Failed to create post');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to create post');
+      }
       debugPrint('Error creating post: $e');
     } finally {
-      isCreatingPost.value = false;
+      if (!_isDisposed) {
+        isCreatingPost.value = false;
+      }
     }
   }
 
@@ -461,40 +539,59 @@ class CommunityController extends GetxController {
     currentPost.value = post;
     // Clear existing comments and load new ones for this post
     comments.clear();
-    // Load comments only if not already loading
+    // Load comments asynchronously - don't block navigation
+    _loadCommentsAsync(post.id);
+  }
+  
+  /// Load comments asynchronously without blocking
+  void _loadCommentsAsync(String postId) {
     if (!isLoadingComments.value) {
-      loadComments(post.id);
+      loadComments(postId);
     }
   }
 
   /// Load post details
   Future<void> loadPostDetails(String postId) async {
+    if (isLoading.value) return;
+    
     try {
       isLoading.value = true;
       final post = await _communityService.getPost(postId);
+      if (_isDisposed) return;
+      
       currentPost.value = post;
       
       if (post != null) {
         await loadComments(postId);
       }
     } catch (e) {
-      AppSnackbar.error('Failed to load post');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to load post');
+      }
       debugPrint('Error loading post: $e');
     } finally {
-      isLoading.value = false;
+      if (!_isDisposed) {
+        isLoading.value = false;
+      }
     }
   }
 
   /// Load comments for current post
   Future<void> loadComments(String postId) async {
+    if (isLoadingComments.value) return;
+    
     try {
       isLoadingComments.value = true;
       final loadedComments = await _communityService.fetchComments(postId);
+      if (_isDisposed) return;
+      
       comments.value = loadedComments;
     } catch (e) {
       debugPrint('Error loading comments: $e');
     } finally {
-      isLoadingComments.value = false;
+      if (!_isDisposed) {
+        isLoadingComments.value = false;
+      }
     }
   }
 
@@ -523,18 +620,23 @@ class CommunityController extends GetxController {
       );
 
       final commentId = await _communityService.addComment(comment);
+      if (_isDisposed) return;
       
       if (commentId != null) {
         commentController.clear();
         await loadComments(currentPost.value!.id);
         
         // Update comments count in current post
-        currentPost.value = currentPost.value!.copyWith(
-          commentsCount: currentPost.value!.commentsCount + 1,
-        );
+        if (currentPost.value != null) {
+          currentPost.value = currentPost.value!.copyWith(
+            commentsCount: currentPost.value!.commentsCount + 1,
+          );
+        }
       }
     } catch (e) {
-      AppSnackbar.error('Failed to add comment');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to add comment');
+      }
       debugPrint('Error adding comment: $e');
     }
   }
@@ -548,17 +650,22 @@ class CommunityController extends GetxController {
         commentId,
         currentPost.value!.id,
       );
+      if (_isDisposed) return;
       
       if (success) {
         await loadComments(currentPost.value!.id);
         
         // Update comments count in current post
-        currentPost.value = currentPost.value!.copyWith(
-          commentsCount: currentPost.value!.commentsCount - 1,
-        );
+        if (currentPost.value != null) {
+          currentPost.value = currentPost.value!.copyWith(
+            commentsCount: (currentPost.value!.commentsCount - 1).clamp(0, double.maxFinite.toInt()),
+          );
+        }
       }
     } catch (e) {
-      AppSnackbar.error('Failed to delete comment');
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to delete comment');
+      }
       debugPrint('Error deleting comment: $e');
     }
   }

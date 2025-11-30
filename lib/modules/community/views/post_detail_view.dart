@@ -16,8 +16,14 @@ class PostDetailView extends GetView<CommunityController> {
   Widget build(BuildContext context) {
     // Get post ID from route parameters
     final postId = Get.parameters['id'];
-    if (postId != null && controller.currentPost.value?.id != postId) {
-      controller.loadPostDetails(postId);
+    
+    // Load post on first build using addPostFrameCallback to avoid build-time errors
+    if (postId != null && postId.isNotEmpty) {
+      if (controller.currentPost.value?.id != postId) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.loadPostDetails(postId);
+        });
+      }
     }
 
     return Scaffold(

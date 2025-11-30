@@ -241,9 +241,9 @@ class CommunityController extends GetxController {
         // Update bookmarkedPostsList - remove or add post
         if (bookmarkedPosts.contains(postId)) {
           // Was added to bookmarks, so add to the list
-          final postToAdd = posts.firstWhereOrNull((p) => p.id == postId);
-          if (postToAdd != null && !bookmarkedPostsList.any((p) => p.id == postId)) {
-            bookmarkedPostsList.add(postToAdd);
+          final postIndex = posts.indexWhere((p) => p.id == postId);
+          if (postIndex != -1 && !bookmarkedPostsList.any((p) => p.id == postId)) {
+            bookmarkedPostsList.add(posts[postIndex]);
           }
         } else {
           // Was removed from bookmarks, so remove from the list

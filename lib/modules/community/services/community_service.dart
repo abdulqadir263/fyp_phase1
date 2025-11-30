@@ -192,17 +192,19 @@ class CommunityService extends GetxService {
   /// Fetch comments for a post
   Future<List<CommentModel>> fetchComments(String postId) async {
     try {
+      // First, get all comments for this post
       final snapshot = await _commentsCollection
           .where('postId', isEqualTo: postId)
-          .where('parentCommentId', isNull: true)
           .orderBy('createdAt', descending: false)
           .get();
 
+      // Filter to only top-level comments (no parentCommentId)
       return snapshot.docs
           .map((doc) => CommentModel.fromJson(
                 doc.data() as Map<String, dynamic>,
                 docId: doc.id,
               ))
+          .where((comment) => comment.parentCommentId == null || comment.parentCommentId!.isEmpty)
           .toList();
     } catch (e) {
       debugPrint('Error fetching comments: $e');

@@ -2,9 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
 
-// App ka light aur dark theme
+// App ka light aur dark theme - optimized for performance
 class AppTheme {
-  // ✅ FIXED: Light Theme with fixed colors
+  // Shared AppBar title style
+  static const TextStyle _appBarTitleStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  );
+
+  // Shared page transitions for smoother navigation
+  static const PageTransitionsTheme _pageTransitions = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    },
+  );
+
+  // ✅ OPTIMIZED: Light Theme with performance improvements
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -14,20 +29,19 @@ class AppTheme {
         brightness: Brightness.light,
       ),
 
-      // ✅ FIXED: AppBar Theme
+      // Optimized page transitions
+      pageTransitionsTheme: _pageTransitions,
+
+      // AppBar Theme
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 2,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        titleTextStyle: _appBarTitleStyle,
       ),
 
-      // ✅ FIXED: Elevated Button Theme
+      // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
@@ -39,7 +53,7 @@ class AppTheme {
         ),
       ),
 
-      // ✅ FIXED: Card Theme
+      // Card Theme
       cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -48,7 +62,7 @@ class AppTheme {
         color: Colors.white,
       ),
 
-      // ✅ FIXED: Input Field Theme
+      // Input Field Theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -61,8 +75,8 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
 
-      // ✅ FIXED: Text Theme
-      textTheme: TextTheme(
+      // Text Theme
+      textTheme: const TextTheme(
         displayLarge: TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.bold,
@@ -78,10 +92,18 @@ class AppTheme {
           color: Colors.black54,
         ),
       ),
+      
+      // Snackbar theme for faster display
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
     );
   }
 
-  // ✅ FIXED: Dark Theme
+  // ✅ OPTIMIZED: Dark Theme
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -91,16 +113,15 @@ class AppTheme {
         brightness: Brightness.dark,
       ),
 
+      // Optimized page transitions
+      pageTransitionsTheme: _pageTransitions,
+
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 2,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        titleTextStyle: _appBarTitleStyle,
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -119,7 +140,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        color: Color(0xFF1E1E1E),
+        color: const Color(0xFF1E1E1E),
       ),
 
       inputDecorationTheme: InputDecorationTheme(
@@ -134,7 +155,7 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
 
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         displayLarge: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -148,6 +169,14 @@ class AppTheme {
         ),
         bodyMedium: TextStyle(
           color: Colors.white70,
+        ),
+      ),
+      
+      // Snackbar theme for faster display
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
     );

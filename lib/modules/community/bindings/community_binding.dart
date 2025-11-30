@@ -1,17 +1,14 @@
 import 'package:get/get.dart';
 import '../controllers/community_controller.dart';
-import '../services/community_service.dart';
 
 /// Binding for community module
 class CommunityBinding extends Bindings {
   @override
   void dependencies() {
-    // Register CommunityService if not already registered
-    if (!Get.isRegistered<CommunityService>()) {
-      Get.lazyPut<CommunityService>(() => CommunityService());
+    // CommunityService is initialized in main.dart as permanent
+    // Register CommunityController - use put to ensure it's always available
+    if (!Get.isRegistered<CommunityController>()) {
+      Get.put<CommunityController>(CommunityController());
     }
-    
-    // Register CommunityController
-    Get.lazyPut<CommunityController>(() => CommunityController());
   }
 }

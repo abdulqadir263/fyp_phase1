@@ -61,6 +61,11 @@ class HomeController extends GetxController {
   /// - Weather (2): Navigates to full Weather screen
   /// - Crop Tracker (3): Shows coming soon placeholder
   /// - Community (4): Navigates to full Community screen
+  /// 
+  /// Note: For Weather and Community, we navigate to full screens rather than
+  /// showing content within IndexedStack. We don't update currentIndex for these
+  /// because when user returns via back navigation, they should see the tab
+  /// they were previously viewing, not the Weather/Community tab.
   void changePage(int index) {
     switch (index) {
       case 0:
@@ -72,7 +77,8 @@ class HomeController extends GetxController {
         currentIndex.value = index;
         break;
       case 2:
-        // Weather - navigate to Weather screen
+        // Weather - navigate to full Weather screen
+        // Don't update currentIndex so user returns to previous tab
         Get.toNamed(AppRoutes.WEATHER);
         break;
       case 3:
@@ -80,7 +86,8 @@ class HomeController extends GetxController {
         currentIndex.value = index;
         break;
       case 4:
-        // Community - navigate to Community screen
+        // Community - navigate to full Community screen
+        // Don't update currentIndex so user returns to previous tab
         Get.toNamed(AppRoutes.COMMUNITY);
         break;
       default:

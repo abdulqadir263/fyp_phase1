@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../models/post_model.dart';
 
 /// Widget for displaying a post card in the list
+/// Optimized for performance with memory cache settings
 class PostCard extends StatelessWidget {
   final PostModel post;
   final VoidCallback? onTap;
@@ -51,7 +52,7 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
       child: Row(
         children: [
-          // User avatar
+          // User avatar - optimized with cache settings
           CircleAvatar(
             radius: 20,
             backgroundColor: Colors.grey[200],
@@ -62,6 +63,10 @@ class PostCard extends StatelessWidget {
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
+                      memCacheHeight: 80,
+                      memCacheWidth: 80,
+                      fadeInDuration: const Duration(milliseconds: 150),
+                      fadeOutDuration: const Duration(milliseconds: 150),
                       errorWidget: (_, __, ___) => Icon(Icons.person, color: Colors.grey[500]),
                     ),
                   )
@@ -145,7 +150,7 @@ class PostCard extends StatelessWidget {
             ),
             child: Text(
               PostModel.getCategoryDisplayName(post.category),
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppConstants.primaryGreen,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
@@ -200,10 +205,14 @@ class PostCard extends StatelessWidget {
       height: 180,
       width: double.infinity,
       fit: BoxFit.cover,
+      memCacheHeight: 360,
+      memCacheWidth: 600,
+      fadeInDuration: const Duration(milliseconds: 200),
+      fadeOutDuration: const Duration(milliseconds: 200),
       placeholder: (_, __) => Container(
         height: 180,
         color: Colors.grey[200],
-        child: const Center(child: CircularProgressIndicator()),
+        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
       ),
       errorWidget: (_, __, ___) => Container(
         height: 180,
@@ -221,6 +230,10 @@ class PostCard extends StatelessWidget {
             imageUrl: post.imageUrls[0],
             height: 140,
             fit: BoxFit.cover,
+            memCacheHeight: 280,
+            memCacheWidth: 280,
+            fadeInDuration: const Duration(milliseconds: 200),
+            fadeOutDuration: const Duration(milliseconds: 200),
             placeholder: (_, __) => Container(
               height: 140,
               color: Colors.grey[200],
@@ -238,6 +251,10 @@ class PostCard extends StatelessWidget {
             imageUrl: post.imageUrls[1],
             height: 140,
             fit: BoxFit.cover,
+            memCacheHeight: 280,
+            memCacheWidth: 280,
+            fadeInDuration: const Duration(milliseconds: 200),
+            fadeOutDuration: const Duration(milliseconds: 200),
             placeholder: (_, __) => Container(
               height: 140,
               color: Colors.grey[200],

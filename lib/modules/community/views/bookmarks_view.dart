@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
-import '../controllers/community_controller.dart';
+import '../controllers/post_controller.dart';
 import 'widgets/post_card.dart';
 
 /// View for displaying bookmarked posts
@@ -13,12 +13,12 @@ class BookmarksView extends StatefulWidget {
 }
 
 class _BookmarksViewState extends State<BookmarksView> {
-  late final CommunityController controller;
+  late final PostController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.find<CommunityController>();
+    controller = Get.find<PostController>();
     // Fetch bookmarked posts when view is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchBookmarkedPosts();
@@ -59,18 +59,18 @@ class _BookmarksViewState extends State<BookmarksView> {
             itemCount: bookmarkedPosts.length,
             itemBuilder: (context, index) {
               final post = bookmarkedPosts[index];
-              return PostCard(
+              return Obx(() => PostCard(
                 post: post,
                 onTap: () {
                   controller.setCurrentPost(post);
                   Get.toNamed('/community/post/${post.id}');
                 },
                 onBookmark: () => controller.toggleBookmark(post.id),
-                isBookmarked: true,
+                isBookmarked: controller.isBookmarked(post.id),
                 onDelete: controller.isPostAuthor(post.userId)
                     ? () => controller.deletePost(post.id)
                     : null,
-              );
+              ));
             },
           ),
         );

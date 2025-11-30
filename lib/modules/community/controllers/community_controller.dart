@@ -422,8 +422,12 @@ class CommunityController extends GetxController {
   /// Set current post for detail view (used before navigation)
   void setCurrentPost(PostModel post) {
     currentPost.value = post;
-    // Load comments for this post in the background
-    loadComments(post.id);
+    // Clear existing comments and load new ones for this post
+    comments.clear();
+    // Load comments only if not already loading
+    if (!isLoadingComments.value) {
+      loadComments(post.id);
+    }
   }
 
   /// Load post details

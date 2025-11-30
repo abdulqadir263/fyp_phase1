@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../controllers/community_controller.dart';
+import '../../controllers/post_controller.dart';
 import '../../models/post_model.dart';
 
 /// Horizontal scrollable category filter bar
-class CategoryFilterBar extends GetView<CommunityController> {
+class CategoryFilterBar extends GetView<PostController> {
   const CategoryFilterBar({super.key});
 
   @override

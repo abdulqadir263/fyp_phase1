@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
-import '../controllers/community_controller.dart';
+import '../controllers/create_post_controller.dart';
 import '../models/post_model.dart';
 
 /// View for creating new posts
-class CreatePostView extends GetView<CommunityController> {
+class CreatePostView extends GetView<CreatePostController> {
   const CreatePostView({super.key});
 
   @override
@@ -44,7 +44,7 @@ class CreatePostView extends GetView<CommunityController> {
       leading: IconButton(
         icon: const Icon(Icons.close),
         onPressed: () {
-          controller.clearCreatePostForm();
+          controller.clearForm();
           Get.back();
         },
       ),

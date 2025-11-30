@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
-import '../controllers/community_controller.dart';
+import '../controllers/post_controller.dart';
 import 'widgets/post_card.dart';
 import 'widgets/category_filter_bar.dart';
 
@@ -13,7 +13,7 @@ import 'widgets/category_filter_bar.dart';
 /// - FAB to create new posts
 /// - Tap post to view details
 /// - Bookmark and delete functionality
-class CommunityView extends GetView<CommunityController> {
+class CommunityView extends GetView<PostController> {
   const CommunityView({super.key});
 
   @override
@@ -101,7 +101,7 @@ class CommunityView extends GetView<CommunityController> {
 
           // Build individual post card
           final post = controller.posts[index];
-          return PostCard(
+          return Obx(() => PostCard(
             post: post,
             onTap: () {
               // Set current post before navigation for better UX
@@ -114,7 +114,7 @@ class CommunityView extends GetView<CommunityController> {
             onDelete: controller.isPostAuthor(post.userId)
                 ? () => controller.deletePost(post.id)
                 : null,
-          );
+          ));
         },
       );
     });

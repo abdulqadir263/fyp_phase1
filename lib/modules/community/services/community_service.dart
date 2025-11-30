@@ -5,6 +5,17 @@ import '../../../core/constants/app_constants.dart';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
 
+/// Result class for paginated post fetching
+class FetchPostsResult {
+  final List<PostModel> posts;
+  final DocumentSnapshot? lastDocument;
+
+  FetchPostsResult({
+    required this.posts,
+    this.lastDocument,
+  });
+}
+
 /// Service class for community Firebase operations
 class CommunityService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -17,7 +28,8 @@ class CommunityService extends GetxService {
       _firestore.collection(AppConstants.commentsCollection);
 
   /// Fetch posts with pagination
-  Future<List<PostModel>> fetchPosts({
+  /// Returns a [FetchPostsResult] containing posts and the last document for pagination
+  Future<FetchPostsResult> fetchPosts({
     DocumentSnapshot? lastDocument,
     int limit = 20,
     String? category,
@@ -36,15 +48,20 @@ class CommunityService extends GetxService {
       }
 
       final snapshot = await query.get();
-      return snapshot.docs
+      final posts = snapshot.docs
           .map((doc) => PostModel.fromJson(
                 doc.data() as Map<String, dynamic>,
                 docId: doc.id,
               ))
           .toList();
+      
+      return FetchPostsResult(
+        posts: posts,
+        lastDocument: snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+      );
     } catch (e) {
       debugPrint('Error fetching posts: $e');
-      return [];
+      return FetchPostsResult(posts: []);
     }
   }
 

@@ -167,19 +167,27 @@ class CommunityService extends GetxService {
   }
 
   /// Get user's bookmarked posts
+  /// Note: Using client-side sorting to avoid composite index requirement
+  /// with array_contains + orderBy
   Future<List<PostModel>> getBookmarkedPosts(String userId) async {
     try {
+      // Query without orderBy to avoid composite index requirement
+      // array_contains + orderBy requires a composite index
       final snapshot = await _postsCollection
           .where('bookmarkedBy', arrayContains: userId)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs
+      final posts = snapshot.docs
           .map((doc) => PostModel.fromJson(
                 doc.data() as Map<String, dynamic>,
                 docId: doc.id,
               ))
           .toList();
+      
+      // Sort in memory by createdAt descending
+      posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      
+      return posts;
     } catch (e) {
       debugPrint('Error getting bookmarked posts: $e');
       return [];
@@ -207,22 +215,27 @@ class CommunityService extends GetxService {
   }
 
   /// Fetch comments for a post
+  /// Note: Using client-side sorting to avoid composite index requirement
   Future<List<CommentModel>> fetchComments(String postId) async {
     try {
-      // First, get all comments for this post
+      // Query without orderBy to avoid composite index requirement
       final snapshot = await _commentsCollection
           .where('postId', isEqualTo: postId)
-          .orderBy('createdAt', descending: false)
           .get();
 
-      // Filter to only top-level comments (no parentCommentId)
-      return snapshot.docs
+      // Map and filter to only top-level comments (no parentCommentId)
+      final comments = snapshot.docs
           .map((doc) => CommentModel.fromJson(
                 doc.data() as Map<String, dynamic>,
                 docId: doc.id,
               ))
           .where((comment) => comment.parentCommentId == null || comment.parentCommentId!.isEmpty)
           .toList();
+      
+      // Sort in memory by createdAt ascending (oldest first)
+      comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      
+      return comments;
     } catch (e) {
       debugPrint('Error fetching comments: $e');
       return [];
@@ -230,19 +243,25 @@ class CommunityService extends GetxService {
   }
 
   /// Fetch replies for a comment
+  /// Note: Using client-side sorting to avoid composite index requirement
   Future<List<CommentModel>> fetchReplies(String parentCommentId) async {
     try {
+      // Query without orderBy to avoid composite index requirement
       final snapshot = await _commentsCollection
           .where('parentCommentId', isEqualTo: parentCommentId)
-          .orderBy('createdAt', descending: false)
           .get();
 
-      return snapshot.docs
+      final replies = snapshot.docs
           .map((doc) => CommentModel.fromJson(
                 doc.data() as Map<String, dynamic>,
                 docId: doc.id,
               ))
           .toList();
+      
+      // Sort in memory by createdAt ascending (oldest first)
+      replies.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      
+      return replies;
     } catch (e) {
       debugPrint('Error fetching replies: $e');
       return [];

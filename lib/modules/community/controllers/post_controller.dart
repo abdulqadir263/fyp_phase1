@@ -63,6 +63,9 @@ class PostController extends GetxController {
   
   /// Track if delete operation is in progress for a specific post
   final Set<String> _deleteInProgress = {};
+  
+  /// Track if navigation is in progress to prevent double navigation
+  bool _isNavigating = false;
 
   /// Current post being viewed in detail
   final Rx<PostModel?> currentPost = Rx<PostModel?>(null);
@@ -329,6 +332,23 @@ class PostController extends GetxController {
   /// Set current post for detail view (used before navigation)
   void setCurrentPost(PostModel post) {
     currentPost.value = post;
+  }
+  
+  /// Navigate to post detail with debounce to prevent double navigation
+  Future<void> navigateToPostDetail(PostModel post) async {
+    // Prevent double navigation
+    if (_isNavigating) return;
+    _isNavigating = true;
+    
+    try {
+      currentPost.value = post;
+      await Get.toNamed('/community/post/${post.id}');
+    } finally {
+      // Reset after a short delay to allow navigation to complete
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _isNavigating = false;
+      });
+    }
   }
 
   /// Load post details

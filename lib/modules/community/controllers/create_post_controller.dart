@@ -215,13 +215,16 @@ class CreatePostController extends GetxController {
         AppSnackbar.success('Post created successfully');
         clearForm();
         
-        // Navigate back to community screen
+        // Navigate back to community screen first
         Get.back();
         
-        // Refresh posts list
-        if (Get.isRegistered<PostController>()) {
-          Get.find<PostController>().fetchPosts(refresh: true);
-        }
+        // Refresh posts list after navigation completes
+        // Using Future.microtask to ensure navigation finishes first
+        Future.microtask(() {
+          if (Get.isRegistered<PostController>()) {
+            Get.find<PostController>().fetchPosts(refresh: true);
+          }
+        });
       } else {
         AppSnackbar.error('Failed to create post');
       }

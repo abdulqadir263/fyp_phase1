@@ -486,10 +486,22 @@ class CommunityController extends GetxController {
       if (selectedImages.isNotEmpty) {
         final cloudinaryService = Get.find<CloudinaryService>();
         final uploadFutures = selectedImages.map(
-          (image) => cloudinaryService.uploadImage(image, 'post_images'),
+          (image) => cloudinaryService.uploadImage(image, 'post_images').catchError((e) {
+            debugPrint('Error uploading image: $e');
+            return null;
+          }),
         );
         final results = await Future.wait(uploadFutures);
         imageUrls = results.whereType<String>().toList();
+        
+        // Warn user if some images failed to upload
+        final failedCount = selectedImages.length - imageUrls.length;
+        if (failedCount > 0 && imageUrls.isNotEmpty) {
+          AppSnackbar.info('$failedCount image(s) failed to upload');
+        } else if (failedCount > 0 && imageUrls.isEmpty) {
+          // All images failed, but continue with post creation without images
+          debugPrint('All image uploads failed, continuing with text-only post');
+        }
       }
       
       if (_isDisposed) return;
@@ -658,7 +670,7 @@ class CommunityController extends GetxController {
         // Update comments count in current post
         if (currentPost.value != null) {
           currentPost.value = currentPost.value!.copyWith(
-            commentsCount: (currentPost.value!.commentsCount - 1).clamp(0, double.maxFinite.toInt()),
+            commentsCount: (currentPost.value!.commentsCount - 1).clamp(0, 999999),
           );
         }
       }

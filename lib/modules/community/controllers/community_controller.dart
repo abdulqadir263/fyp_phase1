@@ -419,6 +419,17 @@ class CommunityController extends GetxController {
 
   // ==================== POST DETAIL & COMMENTS ====================
 
+  /// Set current post for detail view (used before navigation)
+  void setCurrentPost(PostModel post) {
+    currentPost.value = post;
+    // Clear existing comments and load new ones for this post
+    comments.clear();
+    // Load comments only if not already loading
+    if (!isLoadingComments.value) {
+      loadComments(post.id);
+    }
+  }
+
   /// Load post details
   Future<void> loadPostDetails(String postId) async {
     try {

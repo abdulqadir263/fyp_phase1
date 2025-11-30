@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/data/services/cloudinary_service.dart';
+import '../../../app/utils/app_snackbar.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/post_model.dart';
 import '../models/comment_model.dart';
@@ -42,6 +43,12 @@ class CommunityController extends GetxController {
   
   /// List of post IDs that user has bookmarked
   final RxList<String> bookmarkedPosts = <String>[].obs;
+  
+  /// List of actual bookmarked post objects for bookmarks view
+  final RxList<PostModel> bookmarkedPostsList = <PostModel>[].obs;
+  
+  /// Loading state for bookmarks
+  final RxBool isLoadingBookmarks = false.obs;
   
   /// Search query for filtering posts (not yet implemented)
   final RxString searchQuery = ''.obs;
@@ -112,15 +119,33 @@ class CommunityController extends GetxController {
   /// Get current user avatar URL
   String get currentUserAvatar => _authProvider.currentUser.value?.profileImage ?? '';
 
-  /// Load user's bookmarked posts
+  /// Load user's bookmarked posts (only IDs for quick checking)
   Future<void> _loadBookmarks() async {
     if (currentUserId == null || currentUserId == 'guest_user') return;
     
     try {
       final bookmarked = await _communityService.getBookmarkedPosts(currentUserId!);
       bookmarkedPosts.value = bookmarked.map((p) => p.id).toList();
+      bookmarkedPostsList.value = bookmarked;
     } catch (e) {
       debugPrint('Error loading bookmarks: $e');
+    }
+  }
+
+  /// Fetch bookmarked posts with full details for bookmarks view
+  Future<void> fetchBookmarkedPosts() async {
+    if (currentUserId == null || currentUserId == 'guest_user') return;
+    if (isLoadingBookmarks.value) return;
+    
+    try {
+      isLoadingBookmarks.value = true;
+      final bookmarked = await _communityService.getBookmarkedPosts(currentUserId!);
+      bookmarkedPostsList.value = bookmarked;
+      bookmarkedPosts.value = bookmarked.map((p) => p.id).toList();
+    } catch (e) {
+      debugPrint('Error fetching bookmarked posts: $e');
+    } finally {
+      isLoadingBookmarks.value = false;
     }
   }
 
@@ -150,7 +175,7 @@ class CommunityController extends GetxController {
         hasMore = false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load posts');
+      AppSnackbar.error('Failed to load posts');
       debugPrint('Error fetching posts: $e');
     } finally {
       isLoading.value = false;
@@ -185,7 +210,7 @@ class CommunityController extends GetxController {
   /// Toggle bookmark for a post
   Future<void> toggleBookmark(String postId) async {
     if (currentUserId == null || currentUserId == 'guest_user') {
-      Get.snackbar('Info', 'Please login to bookmark posts');
+      AppSnackbar.info('Please login to bookmark posts');
       return;
     }
 
@@ -213,9 +238,21 @@ class CommunityController extends GetxController {
             bookmarksCount: newBookmarkedBy.length,
           );
         }
+        
+        // Update bookmarkedPostsList - remove or add post
+        if (bookmarkedPosts.contains(postId)) {
+          // Was added to bookmarks, so add to the list
+          final postIndex = posts.indexWhere((p) => p.id == postId);
+          if (postIndex != -1 && !bookmarkedPostsList.any((p) => p.id == postId)) {
+            bookmarkedPostsList.add(posts[postIndex]);
+          }
+        } else {
+          // Was removed from bookmarks, so remove from the list
+          bookmarkedPostsList.removeWhere((p) => p.id == postId);
+        }
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update bookmark');
+      AppSnackbar.error('Failed to update bookmark');
       debugPrint('Error toggling bookmark: $e');
     }
   }
@@ -252,16 +289,16 @@ class CommunityController extends GetxController {
       final success = await _communityService.deletePost(postId);
       if (success) {
         posts.removeWhere((p) => p.id == postId);
-        Get.snackbar('Success', 'Post deleted successfully');
+        AppSnackbar.success('Post deleted successfully');
         
         if (currentPost.value?.id == postId) {
           Get.back();
         }
       } else {
-        Get.snackbar('Error', 'Failed to delete post');
+        AppSnackbar.error('Failed to delete post');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete post');
+      AppSnackbar.error('Failed to delete post');
       debugPrint('Error deleting post: $e');
     } finally {
       isLoading.value = false;
@@ -273,7 +310,7 @@ class CommunityController extends GetxController {
   /// Pick images from gallery
   Future<void> pickImages() async {
     if (selectedImages.length >= 2) {
-      Get.snackbar('Info', 'Maximum 2 images allowed');
+      AppSnackbar.info('Maximum 2 images allowed');
       return;
     }
 
@@ -290,7 +327,7 @@ class CommunityController extends GetxController {
         selectedImages.addAll(filesToAdd.map((xf) => File(xf.path)));
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to pick images');
+      AppSnackbar.error('Failed to pick images');
       debugPrint('Error picking images: $e');
     }
   }
@@ -298,7 +335,7 @@ class CommunityController extends GetxController {
   /// Take photo with camera
   Future<void> takePhoto() async {
     if (selectedImages.length >= 2) {
-      Get.snackbar('Info', 'Maximum 2 images allowed');
+      AppSnackbar.info('Maximum 2 images allowed');
       return;
     }
 
@@ -314,7 +351,7 @@ class CommunityController extends GetxController {
         selectedImages.add(File(pickedFile.path));
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to take photo');
+      AppSnackbar.error('Failed to take photo');
       debugPrint('Error taking photo: $e');
     }
   }
@@ -340,22 +377,22 @@ class CommunityController extends GetxController {
     final description = descriptionController.text.trim();
 
     if (title.isEmpty || title.length < 5) {
-      Get.snackbar('Error', 'Title must be at least 5 characters');
+      AppSnackbar.error('Title must be at least 5 characters');
       return false;
     }
 
     if (title.length > 100) {
-      Get.snackbar('Error', 'Title cannot exceed 100 characters');
+      AppSnackbar.error('Title cannot exceed 100 characters');
       return false;
     }
 
     if (description.isEmpty || description.length < 20) {
-      Get.snackbar('Error', 'Description must be at least 20 characters');
+      AppSnackbar.error('Description must be at least 20 characters');
       return false;
     }
 
     if (description.length > 1000) {
-      Get.snackbar('Error', 'Description cannot exceed 1000 characters');
+      AppSnackbar.error('Description cannot exceed 1000 characters');
       return false;
     }
 
@@ -366,7 +403,7 @@ class CommunityController extends GetxController {
   Future<void> createPost() async {
     if (!validateCreatePostForm()) return;
     if (currentUserId == null || currentUserId == 'guest_user') {
-      Get.snackbar('Info', 'Please login to create posts');
+      AppSnackbar.info('Please login to create posts');
       return;
     }
 
@@ -402,15 +439,15 @@ class CommunityController extends GetxController {
       final postId = await _communityService.createPost(post);
 
       if (postId != null) {
-        Get.snackbar('Success', 'Post created successfully');
+        AppSnackbar.success('Post created successfully');
         clearCreatePostForm();
         Get.back();
         fetchPosts(refresh: true);
       } else {
-        Get.snackbar('Error', 'Failed to create post');
+        AppSnackbar.error('Failed to create post');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to create post');
+      AppSnackbar.error('Failed to create post');
       debugPrint('Error creating post: $e');
     } finally {
       isCreatingPost.value = false;
@@ -441,7 +478,7 @@ class CommunityController extends GetxController {
         await loadComments(postId);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load post');
+      AppSnackbar.error('Failed to load post');
       debugPrint('Error loading post: $e');
     } finally {
       isLoading.value = false;
@@ -467,7 +504,7 @@ class CommunityController extends GetxController {
     if (text.isEmpty) return;
 
     if (currentUserId == null || currentUserId == 'guest_user') {
-      Get.snackbar('Info', 'Please login to comment');
+      AppSnackbar.info('Please login to comment');
       return;
     }
 
@@ -497,7 +534,7 @@ class CommunityController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to add comment');
+      AppSnackbar.error('Failed to add comment');
       debugPrint('Error adding comment: $e');
     }
   }
@@ -521,7 +558,7 @@ class CommunityController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete comment');
+      AppSnackbar.error('Failed to delete comment');
       debugPrint('Error deleting comment: $e');
     }
   }

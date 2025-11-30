@@ -381,12 +381,11 @@ class ChatbotController extends GetxController {
     return text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
   }
 
-  /// Check if send button should be enabled
+  /// Check if send button should be enabled (text only)
   bool get canSend {
     final text = textController.text.trim();
     final hasValidText = text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
-    final hasImage = selectedImage.value != null;
     
-    return (hasValidText || hasImage) && !isLoading.value;
+    return hasValidText && !isLoading.value;
   }
 }

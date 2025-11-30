@@ -8,6 +8,7 @@ import '../../modules/chatbot/views/chatbot_view.dart';
 import '../../modules/community/views/community_view.dart';
 import '../../modules/community/views/create_post_view.dart';
 import '../../modules/community/views/post_detail_view.dart';
+import '../../modules/community/views/bookmarks_view.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/profile_binding.dart';
@@ -70,6 +71,11 @@ class AppPages {
     GetPage(
       name: '/community/post/:id',
       page: () => const PostDetailView(),
+      binding: CommunityBinding(),
+    ),
+    GetPage(
+      name: '/community/bookmarks',
+      page: () => const BookmarksView(),
       binding: CommunityBinding(),
     ),
   ];

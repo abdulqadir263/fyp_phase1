@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import '../models/user_model.dart';
 import '../services/firebase_service.dart';
+import '../../utils/app_snackbar.dart';
 
 // Auth ka business logic, controller aur service ke beech ka bridge
 class AuthProvider extends GetxService {
@@ -64,7 +65,7 @@ class AuthProvider extends GetxService {
     } catch (e, stackTrace) {
       print('AuthProvider: [ERROR] in _fetchUserData: $e');
       print('AuthProvider: [STACK TRACE] $stackTrace');
-      Get.snackbar('Error', 'Failed to fetch user data: $e');
+      AppSnackbar.error('Failed to fetch user data');
     } finally {
       isLoading.value = false;
       print('AuthProvider: [END] _fetchUserData');
@@ -150,7 +151,7 @@ class AuthProvider extends GetxService {
       await _firebaseService.saveUserData(newUser);
       print('AuthProvider: User data saved to Firestore');
 
-      Get.snackbar('Success', 'Account created successfully! Please login to continue.');
+      AppSnackbar.success('Account created successfully! Please login to continue.');
 
       // Login screen par redirect karna
       print('AuthProvider: [NAVIGATING] to LOGIN after successful signup.');
@@ -159,7 +160,7 @@ class AuthProvider extends GetxService {
     } catch (e, stackTrace) {
       print('AuthProvider: [ERROR] in signUp: $e');
       print('AuthProvider: [STACK TRACE] $stackTrace');
-      Get.snackbar('Error', e.toString());
+      AppSnackbar.error(e.toString());
     } finally {
       isLoading.value = false;
       print('AuthProvider: [END] signUp');
@@ -181,12 +182,12 @@ class AuthProvider extends GetxService {
       );
 
       print('AuthProvider: signInWithEmail successful. Waiting for auth state change listener...');
-      Get.snackbar('Success', 'Login successful!');
+      AppSnackbar.success('Login successful!');
 
     } catch (e, stackTrace) {
       print('AuthProvider: [ERROR] in signIn: $e');
       print('AuthProvider: [STACK TRACE] $stackTrace');
-      Get.snackbar('Error', e.toString());
+      AppSnackbar.error(e.toString());
     } finally {
       isLoading.value = false;
       print('AuthProvider: [END] signIn');
@@ -202,10 +203,10 @@ class AuthProvider extends GetxService {
       isAuthenticated.value = false;
 
       Get.offAllNamed(AppRoutes.LOGIN);
-      Get.snackbar('Success', 'Logged out successfully!');
+      AppSnackbar.success('Logged out successfully!');
     } catch (e) {
       print('AuthProvider: [ERROR] in signOut: $e');
-      Get.snackbar('Error', e.toString());
+      AppSnackbar.error(e.toString());
     }
   }
 
@@ -224,10 +225,10 @@ class AuthProvider extends GetxService {
       isAuthenticated.value = true;
 
       Get.offAllNamed(AppRoutes.HOME);
-      Get.snackbar('Success', 'Logged in as Guest!');
+      AppSnackbar.success('Logged in as Guest!');
     } catch (e) {
       print('AuthProvider: [ERROR] in signInAsGuest: $e');
-      Get.snackbar('Error', e.toString());
+      AppSnackbar.error(e.toString());
     }
   }
 

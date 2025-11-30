@@ -55,10 +55,7 @@ class CommunityView extends GetView<CommunityController> {
         // Bookmark icon to view saved posts
         IconButton(
           icon: const Icon(Icons.bookmark_outline),
-          onPressed: () {
-            // TODO: Navigate to bookmarked posts
-            Get.snackbar('Info', 'Bookmarks coming soon');
-          },
+          onPressed: () => Get.toNamed('/community/bookmarks'),
           tooltip: 'Bookmarks',
         ),
       ],

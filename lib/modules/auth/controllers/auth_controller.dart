@@ -1,11 +1,13 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/routes/app_routes.dart';
-import '../../../core/constants/app_constants.dart';
 
-// Auth screen ka logic (UI ke saath direct interaction)
+/// Controller for handling authentication UI logic
+/// Manages login, signup, and password reset flows
 class AuthController extends GetxController {
   final AuthProvider _authProvider = Get.find<AuthProvider>();
 
@@ -28,11 +30,17 @@ class AuthController extends GetxController {
   final RxString resetEmail = ''.obs;
   final RxBool isEmailSent = false.obs;
   final RxInt resendTimer = 0.obs;
+  
+  // Timer for resend countdown - stored to allow cancellation
+  Timer? _resendTimerInstance;
+  
+  // Flag to track if controller is still active
+  bool _isDisposed = false;
 
   @override
   void onInit() {
     super.onInit();
-    print('AuthController: Initialized');
+    debugPrint('AuthController: Initialized');
   }
 
   void toggleAuthMode() {
@@ -42,7 +50,7 @@ class AuthController extends GetxController {
       phoneController.clear();
       confirmPasswordController.clear();
     }
-    print('AuthController: Toggled auth mode. IsLogin: ${isLogin.value}');
+    debugPrint('AuthController: Toggled auth mode. IsLogin: ${isLogin.value}');
   }
 
   void togglePasswordVisibility() {
@@ -54,7 +62,7 @@ class AuthController extends GetxController {
   }
 
   bool validateForm() {
-    print('AuthController: Validating form...');
+    debugPrint('AuthController: Validating form...');
 
     if (!isLogin.value) {
       if (nameController.text.isEmpty || nameController.text.length < 3) {
@@ -84,11 +92,14 @@ class AuthController extends GetxController {
       return false;
     }
 
-    print('AuthController: Form validation passed.');
+    debugPrint('AuthController: Form validation passed.');
     return true;
   }
 
   Future<void> submit() async {
+    // Prevent double submission
+    if (isLoading.value) return;
+    
     if (!validateForm()) return;
 
     // Safely unfocus keyboard
@@ -96,7 +107,7 @@ class AuthController extends GetxController {
       FocusScope.of(Get.context!).unfocus();
     }
 
-    print('AuthController: Submitting form. IsLogin: ${isLogin.value}');
+    debugPrint('AuthController: Submitting form. IsLogin: ${isLogin.value}');
     
     // Set loading state in controller
     isLoading.value = true;
@@ -117,13 +128,18 @@ class AuthController extends GetxController {
         );
       }
     } finally {
-      isLoading.value = false;
+      if (!_isDisposed) {
+        isLoading.value = false;
+      }
     }
   }
 
   /// Send password reset email using Firebase Auth built-in method
   /// This avoids Firestore permission issues by using Firebase Auth directly
   Future<void> sendPasswordResetEmail(String email) async {
+    // Prevent multiple submissions
+    if (isLoading.value) return;
+    
     try {
       isLoading.value = true;
 
@@ -185,20 +201,25 @@ class AuthController extends GetxController {
       );
       debugPrint('Password reset error: $e');
     } finally {
-      isLoading.value = false;
+      if (!_isDisposed) {
+        isLoading.value = false;
+      }
     }
   }
 
   /// Start resend timer for password reset email
   void _startResendTimer() {
+    // Cancel any existing timer to prevent memory leaks
+    _resendTimerInstance?.cancel();
+    
     resendTimer.value = 60;
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (resendTimer.value > 0) {
-        resendTimer.value--;
-        return true;
+    _resendTimerInstance = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isDisposed || resendTimer.value <= 0) {
+        timer.cancel();
+        _resendTimerInstance = null;
+        return;
       }
-      return false;
+      resendTimer.value--;
     });
   }
 
@@ -221,20 +242,26 @@ class AuthController extends GetxController {
   }
 
   void signInAsGuest() {
-    print('AuthController: Signing in as guest');
+    debugPrint('AuthController: Signing in as guest');
     _authProvider.signInAsGuest();
   }
 
   void onUserTypeChanged(String? value) {
     if (value != null) {
       selectedUserType.value = value;
-      print('AuthController: User type changed to: $value');
+      debugPrint('AuthController: User type changed to: $value');
     }
   }
 
   @override
   void onClose() {
-    print('AuthController: Disposing controllers');
+    _isDisposed = true;
+    
+    // Cancel the resend timer to prevent memory leaks
+    _resendTimerInstance?.cancel();
+    _resendTimerInstance = null;
+    
+    debugPrint('AuthController: Disposing controllers');
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();

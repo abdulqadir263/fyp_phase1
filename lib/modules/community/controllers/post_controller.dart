@@ -64,6 +64,9 @@ class PostController extends GetxController {
   /// Track if delete operation is in progress for a specific post
   final Set<String> _deleteInProgress = {};
   
+  /// Navigation debounce duration in milliseconds
+  static const int _navigationDebounceMs = 300;
+  
   /// Track if navigation is in progress to prevent double navigation
   bool _isNavigating = false;
 
@@ -344,8 +347,8 @@ class PostController extends GetxController {
       currentPost.value = post;
       await Get.toNamed('/community/post/${post.id}');
     } finally {
-      // Reset after a short delay to allow navigation to complete
-      Future.delayed(const Duration(milliseconds: 300), () {
+      // Reset after debounce duration to allow navigation to complete
+      Future.delayed(const Duration(milliseconds: _navigationDebounceMs), () {
         _isNavigating = false;
       });
     }

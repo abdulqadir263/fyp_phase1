@@ -168,7 +168,8 @@ class CommunityService extends GetxService {
 
   /// Get user's bookmarked posts
   /// Note: Using client-side sorting to avoid composite index requirement
-  /// with array_contains + orderBy
+  /// with array_contains + orderBy. For large datasets, consider adding
+  /// a composite index in Firestore console (bookmarkedBy + createdAt).
   Future<List<PostModel>> getBookmarkedPosts(String userId) async {
     try {
       // Query without orderBy to avoid composite index requirement
@@ -184,7 +185,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
       
-      // Sort in memory by createdAt descending
+      // Sort in memory by createdAt descending (acceptable for typical bookmark counts)
       posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       
       return posts;
@@ -215,7 +216,9 @@ class CommunityService extends GetxService {
   }
 
   /// Fetch comments for a post
-  /// Note: Using client-side sorting to avoid composite index requirement
+  /// Note: Using client-side sorting to avoid composite index requirement.
+  /// For posts with many comments, consider adding a composite index
+  /// in Firestore console (postId + createdAt).
   Future<List<CommentModel>> fetchComments(String postId) async {
     try {
       // Query without orderBy to avoid composite index requirement
@@ -232,7 +235,7 @@ class CommunityService extends GetxService {
           .where((comment) => comment.parentCommentId == null || comment.parentCommentId!.isEmpty)
           .toList();
       
-      // Sort in memory by createdAt ascending (oldest first)
+      // Sort in memory by createdAt ascending (oldest first, acceptable for typical comment counts)
       comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
       
       return comments;
@@ -243,7 +246,9 @@ class CommunityService extends GetxService {
   }
 
   /// Fetch replies for a comment
-  /// Note: Using client-side sorting to avoid composite index requirement
+  /// Note: Using client-side sorting to avoid composite index requirement.
+  /// For comments with many replies, consider adding a composite index
+  /// in Firestore console (parentCommentId + createdAt).
   Future<List<CommentModel>> fetchReplies(String parentCommentId) async {
     try {
       // Query without orderBy to avoid composite index requirement
@@ -258,7 +263,7 @@ class CommunityService extends GetxService {
               ))
           .toList();
       
-      // Sort in memory by createdAt ascending (oldest first)
+      // Sort in memory by createdAt ascending (oldest first, acceptable for typical reply counts)
       replies.sort((a, b) => a.createdAt.compareTo(b.createdAt));
       
       return replies;

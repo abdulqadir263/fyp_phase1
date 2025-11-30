@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 
 /// Widget for displaying image grid (1 or 2 images)
+/// Optimized with memory cache settings for better performance
 class ImageGrid extends StatelessWidget {
   final List<String> imageUrls;
   final double height;
@@ -34,11 +35,15 @@ class ImageGrid extends StatelessWidget {
           height: height,
           width: double.infinity,
           fit: BoxFit.cover,
+          memCacheHeight: 400,
+          memCacheWidth: 600,
+          fadeInDuration: const Duration(milliseconds: 200),
+          fadeOutDuration: const Duration(milliseconds: 200),
           placeholder: (_, __) => Container(
             height: height,
             color: Colors.grey[200],
             child: const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
           errorWidget: (_, __, ___) => Container(
@@ -65,6 +70,10 @@ class ImageGrid extends StatelessWidget {
                 imageUrl: imageUrls[0],
                 height: height,
                 fit: BoxFit.cover,
+                memCacheHeight: 300,
+                memCacheWidth: 300,
+                fadeInDuration: const Duration(milliseconds: 200),
+                fadeOutDuration: const Duration(milliseconds: 200),
                 placeholder: (_, __) => Container(
                   height: height,
                   color: Colors.grey[200],
@@ -85,6 +94,10 @@ class ImageGrid extends StatelessWidget {
                 imageUrl: imageUrls[1],
                 height: height,
                 fit: BoxFit.cover,
+                memCacheHeight: 300,
+                memCacheWidth: 300,
+                fadeInDuration: const Duration(milliseconds: 200),
+                fadeOutDuration: const Duration(milliseconds: 200),
                 placeholder: (_, __) => Container(
                   height: height,
                   color: Colors.grey[200],

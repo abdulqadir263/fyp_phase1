@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
-import '../controllers/community_controller.dart';
+import '../controllers/post_controller.dart';
+import '../controllers/comment_controller.dart';
 import '../models/post_model.dart';
 import 'widgets/comment_item.dart';
 import 'widgets/image_grid.dart';
@@ -17,18 +18,27 @@ class PostDetailView extends StatefulWidget {
 }
 
 class _PostDetailViewState extends State<PostDetailView> {
-  late final CommunityController controller;
+  late final PostController postController;
+  late final CommentController commentController;
   bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.find<CommunityController>();
+    postController = Get.find<PostController>();
+    commentController = Get.find<CommentController>();
     
     // Load post details after the first frame to avoid GetX Obx errors
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadPostIfNeeded();
     });
+  }
+
+  @override
+  void dispose() {
+    // Clear comments when leaving the view
+    commentController.clearComments();
+    super.dispose();
   }
 
   void _loadPostIfNeeded() {
@@ -38,9 +48,11 @@ class _PostDetailViewState extends State<PostDetailView> {
     final postId = Get.parameters['id'];
     if (postId != null && postId.isNotEmpty) {
       // Only load if not already loaded or if different post
-      if (controller.currentPost.value?.id != postId) {
-        controller.loadPostDetails(postId);
+      if (postController.currentPost.value?.id != postId) {
+        postController.loadPostDetails(postId);
       }
+      // Load comments for this post
+      commentController.loadComments(postId);
     }
   }
 
@@ -50,13 +62,13 @@ class _PostDetailViewState extends State<PostDetailView> {
       backgroundColor: Colors.grey[100],
       appBar: _buildAppBar(),
       body: Obx(() {
-        if (controller.isLoading.value && controller.currentPost.value == null) {
+        if (postController.isLoading.value && postController.currentPost.value == null) {
           return const Center(
             child: CircularProgressIndicator(color: AppConstants.primaryGreen),
           );
         }
 
-        final post = controller.currentPost.value;
+        final post = postController.currentPost.value;
         if (post == null) {
           return Center(
             child: Column(
@@ -103,14 +115,14 @@ class _PostDetailViewState extends State<PostDetailView> {
       elevation: 2,
       actions: [
         Obx(() {
-          final post = controller.currentPost.value;
+          final post = postController.currentPost.value;
           if (post == null) return const SizedBox.shrink();
           
           return PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
               if (value == 'delete') {
-                controller.deletePost(post.id);
+                postController.deletePost(post.id);
               } else if (value == 'share') {
                 Get.snackbar('Info', 'Share coming soon');
               }
@@ -126,7 +138,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                   ],
                 ),
               ),
-              if (controller.isPostAuthor(post.userId))
+              if (postController.isPostAuthor(post.userId))
                 const PopupMenuItem(
                   value: 'delete',
                   child: Row(
@@ -144,7 +156,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     );
   }
 
-  Widget _buildPostContent(dynamic post) {
+  Widget _buildPostContent(PostModel post) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.all(16),
@@ -192,17 +204,17 @@ class _PostDetailViewState extends State<PostDetailView> {
                 ),
               ),
               // Bookmark button
-              IconButton(
-                icon: Obx(() => Icon(
-                  controller.isBookmarked(post.id)
+              Obx(() => IconButton(
+                icon: Icon(
+                  postController.isBookmarked(post.id)
                       ? Icons.bookmark
                       : Icons.bookmark_border,
-                  color: controller.isBookmarked(post.id)
+                  color: postController.isBookmarked(post.id)
                       ? AppConstants.primaryGreen
                       : Colors.grey,
-                )),
-                onPressed: () => controller.toggleBookmark(post.id),
-              ),
+                ),
+                onPressed: () => postController.toggleBookmark(post.id),
+              )),
             ],
           ),
           const SizedBox(height: 16),
@@ -223,8 +235,8 @@ class _PostDetailViewState extends State<PostDetailView> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              PostModel.getCategoryDisplayName(post.category.toString()),
-              style: TextStyle(
+              PostModel.getCategoryDisplayName(post.category),
+              style: const TextStyle(
                 color: AppConstants.primaryGreen,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -248,12 +260,12 @@ class _PostDetailViewState extends State<PostDetailView> {
           ),
           const SizedBox(height: 16),
           // Stats row
-          Row(
+          Obx(() => Row(
             children: [
               Icon(Icons.comment_outlined, size: 18, color: Colors.grey[500]),
               const SizedBox(width: 4),
               Text(
-                '${post.commentsCount} comments',
+                '${postController.currentPost.value?.commentsCount ?? 0} comments',
                 style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
               const SizedBox(width: 16),
@@ -264,7 +276,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                 style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
             ],
-          ),
+          )),
         ],
       ),
     );
@@ -288,7 +300,7 @@ class _PostDetailViewState extends State<PostDetailView> {
           ),
           const SizedBox(height: 16),
           Obx(() {
-            if (controller.isLoadingComments.value) {
+            if (commentController.isLoadingComments.value) {
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.all(20),
@@ -297,7 +309,7 @@ class _PostDetailViewState extends State<PostDetailView> {
               );
             }
 
-            if (controller.comments.isEmpty) {
+            if (commentController.comments.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
@@ -323,14 +335,19 @@ class _PostDetailViewState extends State<PostDetailView> {
             return ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: controller.comments.length,
+              itemCount: commentController.comments.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final comment = controller.comments[index];
+                final comment = commentController.comments[index];
                 return CommentItem(
                   comment: comment,
-                  onDelete: controller.isCommentAuthor(comment.userId)
-                      ? () => controller.deleteComment(comment.id)
+                  onDelete: commentController.isCommentAuthor(comment.userId)
+                      ? () {
+                          final postId = postController.currentPost.value?.id;
+                          if (postId != null) {
+                            commentController.deleteComment(comment.id, postId);
+                          }
+                        }
                       : null,
                 );
               },
@@ -359,7 +376,7 @@ class _PostDetailViewState extends State<PostDetailView> {
           children: [
             Expanded(
               child: TextField(
-                controller: controller.commentController,
+                controller: commentController.commentController,
                 decoration: InputDecoration(
                   hintText: 'Write a comment...',
                   hintStyle: TextStyle(color: Colors.grey[400]),
@@ -379,24 +396,42 @@ class _PostDetailViewState extends State<PostDetailView> {
               ),
             ),
             const SizedBox(width: 8),
-            Material(
-              color: AppConstants.primaryGreen,
+            Obx(() => Material(
+              color: commentController.isAddingComment.value 
+                  ? Colors.grey 
+                  : AppConstants.primaryGreen,
               borderRadius: BorderRadius.circular(24),
               child: InkWell(
-                onTap: () => controller.addComment(),
+                onTap: commentController.isAddingComment.value
+                    ? null
+                    : () {
+                        final postId = postController.currentPost.value?.id;
+                        if (postId != null) {
+                          commentController.addComment(postId);
+                        }
+                      },
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
                   width: 44,
                   height: 44,
                   alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.send_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: commentController.isAddingComment.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                 ),
               ),
-            ),
+            )),
           ],
         ),
       ),

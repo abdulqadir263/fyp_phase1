@@ -4,19 +4,27 @@ import '../../../app/data/models/user_model.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/routes/app_routes.dart';
 
+/// This controller manages the home screen functionality
+/// It handles:
+/// - Bottom navigation bar state and navigation
+/// - User data and authentication status
+/// - Navigation to various app features
+/// - Guest user restrictions
 class HomeController extends GetxController {
+  /// Auth provider to access current user data and authentication methods
   final AuthProvider _authProvider = Get.find<AuthProvider>();
 
-  // Bottom navigation ke liye current index
+  /// Current index for bottom navigation bar
+  /// The 'Rx' makes it reactive - the UI updates automatically when this changes
   final RxInt currentIndex = 0.obs;
 
-  // Current user ka data
+  /// Get current user data from auth provider
   Rx<UserModel?> get user => _authProvider.currentUser;
 
-  // Check if current user is guest
+  /// Check if current user is browsing as guest
   bool get isGuestUser => user.value?.userType == 'guest';
 
-  // Check if profile is incomplete
+  /// Check if user profile is incomplete based on user type
   bool get isProfileIncomplete {
     final userData = user.value;
     if (userData == null || userData.userType == 'guest') return false;
@@ -33,25 +41,54 @@ class HomeController extends GetxController {
     }
   }
 
-  // Get profile image URL
+  /// Get user's profile image URL
+  /// Returns empty string if no profile image is set
   String get profileImageUrl {
     if (user.value == null || user.value!.profileImage == null || user.value!.profileImage!.isEmpty) {
-      return ''; // Return empty string if no profile image
+      return '';
     }
     return user.value!.profileImage!;
   }
 
-  // Refresh user data to get updated profile image
+  /// Refresh user data from Firebase to get updated profile information
   Future<void> refreshUserData() async {
     await _authProvider.refreshUserData();
   }
 
-  // Page change karne ke liye function
+  /// Handle bottom navigation bar page changes
+  /// - Home (0): Shows home content within the home screen
+  /// - Marketplace (1): Shows coming soon placeholder
+  /// - Weather (2): Navigates to full Weather screen
+  /// - Crop Tracker (3): Shows coming soon placeholder
+  /// - Community (4): Navigates to full Community screen
   void changePage(int index) {
-    currentIndex.value = index;
+    switch (index) {
+      case 0:
+        // Home tab - show home content
+        currentIndex.value = index;
+        break;
+      case 1:
+        // Marketplace - not yet implemented, show placeholder
+        currentIndex.value = index;
+        break;
+      case 2:
+        // Weather - navigate to Weather screen
+        Get.toNamed(AppRoutes.WEATHER);
+        break;
+      case 3:
+        // Crop Tracker - not yet implemented, show placeholder
+        currentIndex.value = index;
+        break;
+      case 4:
+        // Community - navigate to Community screen
+        Get.toNamed(AppRoutes.COMMUNITY);
+        break;
+      default:
+        currentIndex.value = 0;
+    }
   }
 
-  // Logout function
+  /// Show logout confirmation dialog and sign out if confirmed
   void logout() {
     Get.defaultDialog(
       title: 'Logout',
@@ -59,8 +96,6 @@ class HomeController extends GetxController {
       middleText: 'Are you sure you want to logout?',
       textCancel: 'No',
       onCancel: () => Get.back(),
-
-      // ✅ FIXED: Use the 'confirm' property
       confirm: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: Get.theme.primaryColor,
@@ -71,43 +106,39 @@ class HomeController extends GetxController {
         },
         child: Text(
           'Yes',
-          style: TextStyle(color: // ✅ FIXED: Use theme color scheme
-          Get.theme.colorScheme.onPrimary,
-          ),
+          style: TextStyle(color: Get.theme.colorScheme.onPrimary),
         ),
       ),
     );
   }
 
-  // Profile screen par jana
+  /// Navigate to profile screen
   void goToProfile() {
     Get.toNamed(AppRoutes.PROFILE);
   }
 
-  // Settings screen par jana
+  /// Navigate to settings screen (not yet implemented)
   void goToSettings() {
     Get.snackbar('Info', 'Settings coming soon!');
   }
 
-  // About screen par jana
+  /// Navigate to about screen (not yet implemented)
   void goToAbout() {
     Get.snackbar('Info', 'About coming soon!');
   }
 
-  // Language toggle function
+  /// Toggle app language (not yet implemented)
   void toggleLanguage() {
     Get.snackbar('Info', 'Language toggle coming soon!');
   }
 
-  // Handle guest user trying to access restricted features
+  /// Show dialog prompting guest users to sign up for restricted features
   void handleGuestUserAccess(String featureName) {
     if (isGuestUser) {
       Get.defaultDialog(
         title: 'Sign Up Required',
         middleText: 'To use this feature, please create an account or log in.',
         textCancel: 'Cancel',
-
-        // ✅ FIXED: Use the 'confirm' property
         confirm: TextButton(
           style: TextButton.styleFrom(
             backgroundColor: Get.theme.primaryColor,
@@ -127,7 +158,8 @@ class HomeController extends GetxController {
     }
   }
 
-  // Modified navigateToFeature to check for guest user
+  /// Navigate to a feature screen based on feature name
+  /// Some features are restricted for guest users
   void navigateToFeature(String feature) {
     // Features that require login
     final List<String> restrictedFeatures = [
@@ -137,12 +169,13 @@ class HomeController extends GetxController {
       'community',
     ];
 
+    // Check if guest user is trying to access restricted feature
     if (isGuestUser && restrictedFeatures.contains(feature)) {
       handleGuestUserAccess(feature);
       return;
     }
 
-    // Normal navigation for logged-in users or non-restricted features
+    // Navigate to the selected feature
     switch (feature) {
       case 'appointments':
         Get.toNamed(AppRoutes.APPOINTMENTS);
@@ -173,7 +206,7 @@ class HomeController extends GetxController {
     }
   }
 
-  // Welcome message generate karna
+  /// Generate personalized welcome message based on time of day
   String get welcomeMessage {
     final userName = user.value?.name ?? 'Farmer';
     final hour = DateTime.now().hour;

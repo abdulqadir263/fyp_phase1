@@ -106,7 +106,11 @@ class CommunityView extends GetView<CommunityController> {
           final post = controller.posts[index];
           return PostCard(
             post: post,
-            onTap: () => Get.toNamed('/community/post/${post.id}'),
+            onTap: () {
+              // Set current post before navigation for better UX
+              controller.setCurrentPost(post);
+              Get.toNamed('/community/post/${post.id}');
+            },
             onBookmark: () => controller.toggleBookmark(post.id),
             isBookmarked: controller.isBookmarked(post.id),
             // Only show delete option for post author

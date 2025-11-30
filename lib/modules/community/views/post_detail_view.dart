@@ -9,17 +9,43 @@ import 'widgets/comment_item.dart';
 import 'widgets/image_grid.dart';
 
 /// View for displaying post details
-class PostDetailView extends GetView<CommunityController> {
+class PostDetailView extends StatefulWidget {
   const PostDetailView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Get post ID from route parameters
-    final postId = Get.parameters['id'];
-    if (postId != null && controller.currentPost.value?.id != postId) {
-      controller.loadPostDetails(postId);
-    }
+  State<PostDetailView> createState() => _PostDetailViewState();
+}
 
+class _PostDetailViewState extends State<PostDetailView> {
+  late final CommunityController controller;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<CommunityController>();
+    
+    // Load post details after the first frame to avoid GetX Obx errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPostIfNeeded();
+    });
+  }
+
+  void _loadPostIfNeeded() {
+    if (_initialized) return;
+    _initialized = true;
+    
+    final postId = Get.parameters['id'];
+    if (postId != null && postId.isNotEmpty) {
+      // Only load if not already loaded or if different post
+      if (controller.currentPost.value?.id != postId) {
+        controller.loadPostDetails(postId);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: _buildAppBar(),

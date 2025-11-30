@@ -37,8 +37,8 @@ class CommunityView extends GetView<PostController> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.toNamed('/community/create'),
         backgroundColor: AppConstants.primaryGreen,
-        tooltip: 'Create Post',
         child: const Icon(Icons.add, color: Colors.white),
+        tooltip: 'Create Post',
       ),
     );
   }

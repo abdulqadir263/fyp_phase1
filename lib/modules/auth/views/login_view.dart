@@ -87,7 +87,9 @@ class LoginView extends GetView<AuthController> {
 
   Widget _buildFormSection() {
     return Obx(() => AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
       child: Container(
         key: ValueKey(controller.isLogin.value ? 'login' : 'signup'),
         decoration: BoxDecoration(

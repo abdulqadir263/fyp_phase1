@@ -61,10 +61,7 @@ class _BookmarksViewState extends State<BookmarksView> {
               final post = bookmarkedPosts[index];
               return Obx(() => PostCard(
                 post: post,
-                onTap: () {
-                  controller.setCurrentPost(post);
-                  Get.toNamed('/community/post/${post.id}');
-                },
+                onTap: () => controller.navigateToPostDetail(post),
                 onBookmark: () => controller.toggleBookmark(post.id),
                 isBookmarked: controller.isBookmarked(post.id),
                 onDelete: controller.isPostAuthor(post.userId)

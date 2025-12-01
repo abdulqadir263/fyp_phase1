@@ -13,22 +13,24 @@ class CategoryFilterBar extends GetView<PostController> {
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Obx(() => ListView.separated(
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: controller.categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = controller.categories[index];
-          final isSelected = controller.selectedCategory.value == category;
-          
-          return _buildCategoryChip(
-            label: _getCategoryLabel(category),
-            isSelected: isSelected,
-            onTap: () => controller.filterByCategory(category),
-          );
+          // Only wrap the reactive part (isSelected check) with Obx
+          return Obx(() {
+            final isSelected = controller.selectedCategory.value == category;
+            return _buildCategoryChip(
+              label: _getCategoryLabel(category),
+              isSelected: isSelected,
+              onTap: () => controller.filterByCategory(category),
+            );
+          });
         },
-      )),
+      ),
     );
   }
 

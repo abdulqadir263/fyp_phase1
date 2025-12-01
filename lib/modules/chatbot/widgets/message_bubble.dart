@@ -63,7 +63,12 @@ class MessageBubble extends StatelessWidget {
                           end: Alignment.bottomRight,
                           colors: [
                             AppConstants.primaryGreen,
-                            AppConstants.primaryGreen.withGreen(170),
+                            Color.fromARGB(
+                              AppConstants.primaryGreen.a.toInt(),
+                              AppConstants.primaryGreen.r.toInt(),
+                              (AppConstants.primaryGreen.g * 0.85).toInt(),
+                              AppConstants.primaryGreen.b.toInt(),
+                            ),
                           ],
                         )
                       : null,

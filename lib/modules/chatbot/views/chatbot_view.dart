@@ -142,7 +142,7 @@ class ChatbotView extends GetView<ChatbotController> {
 
       return ListView.builder(
         controller: controller.scrollController,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         physics: const BouncingScrollPhysics(),
         itemCount:
             controller.messages.length + (controller.isTyping.value ? 1 : 0),
@@ -439,7 +439,12 @@ class ChatbotView extends GetView<ChatbotController> {
                   end: Alignment.bottomRight,
                   colors: [
                     AppConstants.primaryGreen,
-                    AppConstants.primaryGreen.withGreen(180),
+                    Color.fromARGB(
+                      AppConstants.primaryGreen.a.toInt(),
+                      AppConstants.primaryGreen.r.toInt(),
+                      (AppConstants.primaryGreen.g * 0.85).toInt(),
+                      AppConstants.primaryGreen.b.toInt(),
+                    ),
                   ],
                 )
               : null,

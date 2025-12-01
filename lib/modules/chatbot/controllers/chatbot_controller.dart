@@ -256,7 +256,9 @@ class ChatbotController extends GetxController {
     );
   }
 
-  /// Check if send button should be enabled - uses reactive hasValidInput
+  /// Check if send button should be enabled
+  /// Note: This getter should be called inside an Obx() widget to properly
+  /// react to changes in hasValidInput and isLoading
   bool get canSend {
     return hasValidInput.value && !isLoading.value;
   }

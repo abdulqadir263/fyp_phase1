@@ -62,7 +62,7 @@ RESPONSE LENGTH GUIDELINES:
         systemInstruction: Content.text(_systemInstruction),
         generationConfig: GenerationConfig(
           temperature: 0.7,
-          // Optimized token limit for balanced responses (approx 300-600 words)
+          // Optimized token limit for balanced responses (approx 750-800 words max)
           maxOutputTokens: 1024,
         ),
       );

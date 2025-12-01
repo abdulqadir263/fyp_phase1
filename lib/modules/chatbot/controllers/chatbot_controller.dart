@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../app/services/gemini_service.dart';
 import '../../../app/data/providers/auth_provider.dart';
@@ -14,7 +12,6 @@ class ChatbotController extends GetxController {
   final GeminiService _geminiService = Get.find<GeminiService>();
   final AuthProvider _authProvider = Get.find<AuthProvider>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final ImagePicker _imagePicker = ImagePicker();
 
   // Text controller for input
   final TextEditingController textController = TextEditingController();
@@ -26,7 +23,8 @@ class ChatbotController extends GetxController {
   final RxBool isTyping = false.obs;
   final RxString selectedLanguage = 'en'.obs;
   final RxInt characterCount = 0.obs;
-  final Rx<File?> selectedImage = Rx<File?>(null);
+  // Reactive flag for send button state - triggers rebuild when text changes
+  final RxBool hasValidInput = false.obs;
 
   // Welcome message
   static const String welcomeMessageEn =
@@ -50,9 +48,12 @@ class ChatbotController extends GetxController {
     super.onClose();
   }
 
-  /// Listener for text changes
+  /// Listener for text changes - updates reactive state for UI rebuilds
   void _onTextChanged() {
+    final text = textController.text.trim();
     characterCount.value = textController.text.length;
+    // Update reactive flag for send button state
+    hasValidInput.value = text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
   }
 
   /// Add welcome message
@@ -128,9 +129,10 @@ class ChatbotController extends GetxController {
     // Haptic feedback
     HapticFeedback.lightImpact();
 
-    // Clear input
+    // Clear input and reset reactive state
     textController.clear();
     characterCount.value = 0;
+    hasValidInput.value = false;
 
     // Create user message
     final userMessage = MessageModel(
@@ -149,48 +151,6 @@ class ChatbotController extends GetxController {
     await _getAIResponse(text);
   }
 
-  /// Send message with image
-  Future<void> sendImageMessage() async {
-    if (selectedImage.value == null) return;
-
-    final text = textController.text.trim();
-    
-    // Validate message length for image messages too
-    if (text.length > AppConstants.maxMessageLength) {
-      Get.snackbar(
-        'Error',
-        'Message cannot exceed ${AppConstants.maxMessageLength} characters',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-    
-    // Haptic feedback
-    HapticFeedback.lightImpact();
-
-    // Clear input
-    textController.clear();
-    characterCount.value = 0;
-
-    // Create user message with image
-    final userMessage = MessageModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      text: text.isEmpty ? 'Analyzing image...' : text,
-      isUser: true,
-      timestamp: DateTime.now(),
-      language: selectedLanguage.value,
-    );
-
-    messages.add(userMessage);
-    _scrollToBottom();
-
-    // Get AI response with image
-    await _getAIResponseWithImage(text, selectedImage.value!);
-
-    // Clear selected image
-    selectedImage.value = null;
-  }
-
   /// Get AI response for text message
   Future<void> _getAIResponse(String text) async {
     try {
@@ -198,35 +158,6 @@ class ChatbotController extends GetxController {
       isTyping.value = true;
 
       final response = await _geminiService.sendMessage(text);
-
-      isTyping.value = false;
-
-      final botMessage = MessageModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        text: response,
-        isUser: false,
-        timestamp: DateTime.now(),
-        language: selectedLanguage.value,
-      );
-
-      messages.add(botMessage);
-      _scrollToBottom();
-      await _saveMessage(botMessage);
-    } catch (e) {
-      isTyping.value = false;
-      _handleError(e);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Get AI response with image
-  Future<void> _getAIResponseWithImage(String prompt, File image) async {
-    try {
-      isLoading.value = true;
-      isTyping.value = true;
-
-      final response = await _geminiService.sendMessageWithImage(prompt, image);
 
       isTyping.value = false;
 
@@ -265,57 +196,6 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
 
     debugPrint('Chatbot error: $error');
-  }
-
-  /// Pick image from gallery
-  Future<void> pickImageFromGallery() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 80,
-      );
-
-      if (pickedFile != null) {
-        selectedImage.value = File(pickedFile.path);
-      }
-    } catch (e) {
-      debugPrint('Error picking image: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to pick image',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  /// Take photo with camera
-  Future<void> takePhoto() async {
-    try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 80,
-      );
-
-      if (pickedFile != null) {
-        selectedImage.value = File(pickedFile.path);
-      }
-    } catch (e) {
-      debugPrint('Error taking photo: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to take photo',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  /// Clear selected image
-  void clearSelectedImage() {
-    selectedImage.value = null;
   }
 
   /// Toggle language
@@ -376,16 +256,10 @@ class ChatbotController extends GetxController {
     );
   }
 
-  /// Validate message length
-  bool _isMessageValid(String text) {
-    return text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
-  }
-
-  /// Check if send button should be enabled (text only)
+  /// Check if send button should be enabled
+  /// Note: This getter should be called inside an Obx() widget to properly
+  /// react to changes in hasValidInput and isLoading
   bool get canSend {
-    final text = textController.text.trim();
-    final hasValidText = text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
-    
-    return hasValidText && !isLoading.value;
+    return hasValidInput.value && !isLoading.value;
   }
 }

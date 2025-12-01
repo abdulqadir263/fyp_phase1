@@ -10,7 +10,7 @@ class GeminiService extends GetxService {
   late final GenerativeModel _model;
   late final ChatSession _chatSession;
 
-  /// System instruction for agriculture-focused responses
+  /// System instruction for agriculture-focused responses with balanced output
   static const String _systemInstruction = '''
 You are an expert agricultural advisor for farmers. Provide practical, actionable advice on crops, farming techniques, pest control, irrigation, fertilizers, and weather-related farming decisions.
 
@@ -33,6 +33,13 @@ IMPORTANT RULES:
 4. Keep responses concise, practical, and easy to understand for farmers.
 
 5. When discussing chemicals or pesticides, always include safety precautions.
+
+RESPONSE LENGTH GUIDELINES:
+- Aim for responses between 150-400 words for detailed questions.
+- For simple questions, provide concise answers of 50-150 words.
+- Use bullet points or numbered lists for step-by-step instructions.
+- Include a brief summary or key takeaway at the end when appropriate.
+- Avoid overly lengthy explanations; focus on actionable advice.
 ''';
 
   @override
@@ -55,7 +62,8 @@ IMPORTANT RULES:
         systemInstruction: Content.text(_systemInstruction),
         generationConfig: GenerationConfig(
           temperature: 0.7,
-          maxOutputTokens: 8192,
+          // Optimized token limit for balanced responses (approx 300-600 words)
+          maxOutputTokens: 1024,
         ),
       );
 

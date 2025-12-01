@@ -1,119 +1,123 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../routes/app_routes.dart';
 import '../models/user_model.dart';
 import '../services/firebase_service.dart';
 import '../../utils/app_snackbar.dart';
 
-// Auth ka business logic, controller aur service ke beech ka bridge
+/// Auth Provider - Manages authentication state and user data
+/// Bridge between controllers and Firebase service
 class AuthProvider extends GetxService {
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
 
+  // Observable state
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   final RxBool isLoading = false.obs;
   final RxBool isAuthenticated = false.obs;
 
+  // Track if sign-in is in progress to prevent duplicate navigation
+  bool _isSigningIn = false;
+
   @override
   void onInit() {
     super.onInit();
-    print('AuthProvider: Initialized successfully!');
+    debugPrint('AuthProvider: Initialized');
 
-    // Auth state changes ko listen karna
-    _firebaseService.authStateChanges.listen((User? user) {
-      print('AuthProvider: Auth state changed. User: ${user?.uid}');
-      if (user != null) {
-        print('AuthProvider: User is not null. Fetching data...');
-        _fetchUserData(user.uid);
-      } else {
-        print('AuthProvider: User is null. Clearing current user.');
-        currentUser.value = null;
-        isAuthenticated.value = false;
-      }
-    });
+    // Listen to auth state changes for auto-login on app start
+    _firebaseService.authStateChanges.listen(_handleAuthStateChange);
   }
 
-  // User ka data fetch karna (Private method)
-  Future<void> _fetchUserData(String uid) async {
+  /// Handle auth state changes from Firebase
+  void _handleAuthStateChange(User? user) {
+    debugPrint('AuthProvider: Auth state changed. User: ${user?.uid}');
+    
+    if (user == null) {
+      // User logged out - clear state
+      currentUser.value = null;
+      isAuthenticated.value = false;
+      return;
+    }
+
+    // Only auto-fetch on app start, not during active sign-in
+    // (sign-in handles its own navigation)
+    if (!_isSigningIn) {
+      _fetchAndNavigate(user.uid);
+    }
+  }
+
+  /// Fetch user data and navigate to appropriate screen
+  Future<void> _fetchAndNavigate(String uid) async {
     try {
       isLoading.value = true;
-      print('AuthProvider: [START] _fetchUserData for: $uid');
+      debugPrint('AuthProvider: Fetching user data for: $uid');
 
       final userData = await _firebaseService.getUserData(uid);
-      print('AuthProvider: getUserData returned. Data is null: ${userData == null}');
 
       if (userData != null) {
-        print('AuthProvider: User data found. Name: ${userData.name}, Type: ${userData.userType}');
+        debugPrint('AuthProvider: User found - ${userData.name}');
         currentUser.value = userData;
         isAuthenticated.value = true;
-
-        // Check if profile is complete
-        bool isProfileComplete = _isProfileComplete(userData);
-        print('AuthProvider: Profile complete check result: $isProfileComplete');
-
-        if (isProfileComplete) {
-          print('AuthProvider: [NAVIGATING] to HOME because profile is complete.');
-          Get.offAllNamed(AppRoutes.HOME);
-        } else {
-          print('AuthProvider: [NAVIGATING] to PROFILE because profile is incomplete.');
-          Get.offAllNamed(AppRoutes.PROFILE);
-        }
+        
+        // Navigate based on profile completion
+        _navigateAfterAuth(userData);
       } else {
-        print('AuthProvider: userData is null. Staying on login screen.');
+        debugPrint('AuthProvider: No user data found');
         currentUser.value = null;
         isAuthenticated.value = false;
       }
-    } catch (e, stackTrace) {
-      print('AuthProvider: [ERROR] in _fetchUserData: $e');
-      print('AuthProvider: [STACK TRACE] $stackTrace');
+    } catch (e) {
+      debugPrint('AuthProvider: Error fetching user data: $e');
       AppSnackbar.error('Failed to fetch user data');
     } finally {
       isLoading.value = false;
-      print('AuthProvider: [END] _fetchUserData');
     }
   }
 
-  // Check if profile is complete
-  bool _isProfileComplete(UserModel user) {
-    print('AuthProvider: [CHECK] _isProfileComplete for user: ${user.name}');
+  /// Navigate to appropriate screen after authentication
+  void _navigateAfterAuth(UserModel user) {
+    final isComplete = _isProfileComplete(user);
+    debugPrint('AuthProvider: Profile complete: $isComplete');
 
-    // Check if required fields are filled
+    if (isComplete) {
+      debugPrint('AuthProvider: Navigating to HOME');
+      Get.offAllNamed(AppRoutes.HOME);
+    } else {
+      debugPrint('AuthProvider: Navigating to PROFILE');
+      Get.offAllNamed(AppRoutes.PROFILE);
+    }
+  }
+
+  /// Check if user profile has required fields filled
+  bool _isProfileComplete(UserModel user) {
+    // Basic required fields
     if (user.name.isEmpty || user.email.isEmpty || user.phone.isEmpty) {
-      print('AuthProvider: [CHECK] Basic fields are empty. Returning false.');
       return false;
     }
 
-    // Check based on user type
+    // Check user-type specific fields
     switch (user.userType) {
       case 'farmer':
-        bool locationValid = user.location != null && user.location!.isNotEmpty;
-        print('AuthProvider: [CHECK] Farmer - Location valid: $locationValid');
-        return locationValid;
+        return user.location != null && user.location!.isNotEmpty;
       case 'expert':
-        bool specializationValid = user.specialization != null && user.specialization!.isNotEmpty;
-        print('AuthProvider: [CHECK] Expert - Specialization valid: $specializationValid');
-        return specializationValid;
+        return user.specialization != null && user.specialization!.isNotEmpty;
       case 'company':
-        bool companyValid = user.companyName != null && user.companyName!.isNotEmpty;
-        print('AuthProvider: [CHECK] Company - Company name valid: $companyValid');
-        return companyValid;
+        return user.companyName != null && user.companyName!.isNotEmpty;
       default:
-        print('AuthProvider: [CHECK] Unknown or empty user type: "${user.userType}". Returning false.');
         return false;
     }
   }
 
-  // Public method to refresh user data
+  /// Refresh user data (public method for profile updates)
   Future<void> refreshUserData() async {
     final user = _firebaseService.auth.currentUser;
     if (user != null) {
-      print('AuthProvider: Refreshing user data for: ${user.uid}');
-      await _fetchUserData(user.uid);
-    } else {
-      print('AuthProvider: No current user to refresh');
+      debugPrint('AuthProvider: Refreshing user data');
+      await _fetchAndNavigate(user.uid);
     }
   }
 
-  // Signup function
+  /// Sign up with email and password
   Future<void> signUp({
     required String name,
     required String email,
@@ -123,22 +127,22 @@ class AuthProvider extends GetxService {
   }) async {
     try {
       isLoading.value = true;
-      print('AuthProvider: [START] signUp for: $email');
+      debugPrint('AuthProvider: Starting signup for: $email');
 
-      // ✅ FIXED: Added validation
+      // Validate inputs
       if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty || userType.isEmpty) {
         throw Exception('All fields are required for signup.');
       }
 
-      // Firebase Auth main user banana
+      // Create user in Firebase Auth
       final userCredential = await _firebaseService.signUpWithEmail(
         email: email,
         password: password,
       );
 
-      print('AuthProvider: User created in Firebase Auth: ${userCredential.user?.uid}');
+      debugPrint('AuthProvider: User created: ${userCredential.user?.uid}');
 
-      // Firestore main user ka data save karna
+      // Save user data to Firestore
       final newUser = UserModel(
         uid: userCredential.user!.uid,
         name: name,
@@ -149,71 +153,87 @@ class AuthProvider extends GetxService {
       );
 
       await _firebaseService.saveUserData(newUser);
-      print('AuthProvider: User data saved to Firestore');
+      debugPrint('AuthProvider: User data saved to Firestore');
 
       AppSnackbar.success('Account created successfully! Please login to continue.');
-
-      // Login screen par redirect karna
-      print('AuthProvider: [NAVIGATING] to LOGIN after successful signup.');
+      
+      // Redirect to login
       Get.offAllNamed(AppRoutes.LOGIN);
-
-    } catch (e, stackTrace) {
-      print('AuthProvider: [ERROR] in signUp: $e');
-      print('AuthProvider: [STACK TRACE] $stackTrace');
+    } catch (e) {
+      debugPrint('AuthProvider: Signup error: $e');
       AppSnackbar.error(e.toString());
     } finally {
       isLoading.value = false;
-      print('AuthProvider: [END] signUp');
     }
   }
 
-  // Login function
+  /// Sign in with email and password
   Future<void> signIn({
     required String email,
     required String password,
   }) async {
     try {
       isLoading.value = true;
-      print('AuthProvider: [START] signIn for: $email');
+      _isSigningIn = true;
+      debugPrint('AuthProvider: Starting sign-in for: $email');
 
-      await _firebaseService.signInWithEmail(
+      // Authenticate with Firebase
+      final userCredential = await _firebaseService.signInWithEmail(
         email: email,
         password: password,
       );
 
-      print('AuthProvider: signInWithEmail successful. Waiting for auth state change listener...');
-      AppSnackbar.success('Login successful!');
+      debugPrint('AuthProvider: Sign-in successful, fetching user data');
+      
+      // Fetch user data from Firestore
+      final userData = await _firebaseService.getUserData(userCredential.user!.uid);
 
-    } catch (e, stackTrace) {
-      print('AuthProvider: [ERROR] in signIn: $e');
-      print('AuthProvider: [STACK TRACE] $stackTrace');
+      if (userData != null) {
+        // Update state
+        currentUser.value = userData;
+        isAuthenticated.value = true;
+        
+        AppSnackbar.success('Login successful!');
+        
+        // Navigate to appropriate screen
+        _navigateAfterAuth(userData);
+      } else {
+        // User authenticated but no Firestore data - unusual case
+        debugPrint('AuthProvider: No user data in Firestore');
+        AppSnackbar.error('User data not found. Please contact support.');
+      }
+    } catch (e) {
+      debugPrint('AuthProvider: Sign-in error: $e');
       AppSnackbar.error(e.toString());
     } finally {
       isLoading.value = false;
-      print('AuthProvider: [END] signIn');
+      _isSigningIn = false;
     }
   }
 
-  // Logout function
+  /// Sign out current user
   Future<void> signOut() async {
     try {
-      print('AuthProvider: [START] signOut');
+      debugPrint('AuthProvider: Signing out');
       await _firebaseService.signOut();
+      
+      // Clear state
       currentUser.value = null;
       isAuthenticated.value = false;
 
       Get.offAllNamed(AppRoutes.LOGIN);
       AppSnackbar.success('Logged out successfully!');
     } catch (e) {
-      print('AuthProvider: [ERROR] in signOut: $e');
+      debugPrint('AuthProvider: Sign-out error: $e');
       AppSnackbar.error(e.toString());
     }
   }
 
-  // Guest user ke liye function
+  /// Sign in as guest user
   Future<void> signInAsGuest() async {
     try {
-      print('AuthProvider: [START] signInAsGuest');
+      debugPrint('AuthProvider: Signing in as guest');
+      
       currentUser.value = UserModel(
         uid: 'guest_user',
         name: 'Guest User',
@@ -227,28 +247,20 @@ class AuthProvider extends GetxService {
       Get.offAllNamed(AppRoutes.HOME);
       AppSnackbar.success('Logged in as Guest!');
     } catch (e) {
-      print('AuthProvider: [ERROR] in signInAsGuest: $e');
+      debugPrint('AuthProvider: Guest sign-in error: $e');
       AppSnackbar.error(e.toString());
     }
   }
 
-  // Add this method to the AuthProvider class
-
-// Forgot password function
+  /// Send password reset email
   Future<void> forgotPassword(String email) async {
     try {
-      print('AuthProvider: [START] forgotPassword for: $email');
-
+      debugPrint('AuthProvider: Sending password reset email to: $email');
       await _firebaseService.sendPasswordResetEmail(email);
-
-      print('AuthProvider: Password reset email sent successfully');
-
-    } catch (e, stackTrace) {
-      print('AuthProvider: [ERROR] in forgotPassword: $e');
-      print('AuthProvider: [STACK TRACE] $stackTrace');
-      throw e; // Re-throw to handle in controller
+      debugPrint('AuthProvider: Password reset email sent');
+    } catch (e) {
+      debugPrint('AuthProvider: Password reset error: $e');
+      rethrow;
     }
   }
-
-
 }

@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/message_model.dart';
 
-/// Reusable widget for chat message bubbles
+/// Reusable widget for chat message bubbles with smooth animations
 class MessageBubble extends StatelessWidget {
   final MessageModel message;
   final VoidCallback? onLongPress;
@@ -38,13 +38,15 @@ class MessageBubble extends StatelessWidget {
           );
           onLongPress?.call();
         },
-        child: Container(
+        child: AnimatedContainer(
+          duration: AppConstants.shortAnimation,
+          curve: Curves.easeOutCubic,
           constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.75,
+            maxWidth: MediaQuery.of(context).size.width * 0.78,
           ),
           margin: EdgeInsets.only(
-            left: message.isUser ? 50 : 8,
-            right: message.isUser ? 8 : 50,
+            left: message.isUser ? 48 : 12,
+            right: message.isUser ? 12 : 48,
             top: 4,
             bottom: 4,
           ),
@@ -55,20 +57,35 @@ class MessageBubble extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: message.isUser
-                      ? AppConstants.primaryGreen
-                      : Colors.white,
+                  gradient: message.isUser
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppConstants.primaryGreen,
+                            Color.fromARGB(
+                              AppConstants.primaryGreen.a.toInt(),
+                              AppConstants.primaryGreen.r.toInt(),
+                              (AppConstants.primaryGreen.g * 0.85).toInt(),
+                              AppConstants.primaryGreen.b.toInt(),
+                            ),
+                          ],
+                        )
+                      : null,
+                  color: message.isUser ? null : Colors.white,
                   borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    topRight: const Radius.circular(16),
-                    bottomLeft: Radius.circular(message.isUser ? 16 : 4),
-                    bottomRight: Radius.circular(message.isUser ? 4 : 16),
+                    topLeft: const Radius.circular(20),
+                    topRight: const Radius.circular(20),
+                    bottomLeft: Radius.circular(message.isUser ? 20 : 6),
+                    bottomRight: Radius.circular(message.isUser ? 6 : 20),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+                      color: message.isUser
+                          ? AppConstants.primaryGreen.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
@@ -78,48 +95,71 @@ class MessageBubble extends StatelessWidget {
                     // Show image if available
                     if (message.imageUrl != null && message.imageUrl!.isNotEmpty)
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                         child: CachedNetworkImage(
                           imageUrl: message.imageUrl!,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
                             height: 150,
-                            color: Colors.grey[200],
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             child: const Center(
-                              child: CircularProgressIndicator(),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
                             height: 150,
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.error),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.error_outline_rounded),
                           ),
                         ),
                       ),
                     if (message.imageUrl != null && message.imageUrl!.isNotEmpty)
-                      const SizedBox(height: 8),
-                    // Message text
-                    Text(
+                      const SizedBox(height: 10),
+                    // Message text with improved typography
+                    SelectableText(
                       message.text,
                       style: TextStyle(
-                        color: message.isUser ? Colors.white : Colors.black87,
+                        color: message.isUser ? Colors.white : Colors.grey[850],
                         fontSize: 15,
-                        height: 1.4,
+                        height: 1.5,
+                        letterSpacing: 0.1,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Timestamp
+              // Timestamp with smooth styling
               Padding(
-                padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
-                child: Text(
-                  DateFormat('h:mm a').format(message.timestamp),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 11,
-                  ),
+                padding: const EdgeInsets.only(top: 5, left: 6, right: 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      DateFormat('h:mm a').format(message.timestamp),
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    if (message.isUser) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.done_all_rounded,
+                        size: 14,
+                        color: Colors.grey[500],
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],

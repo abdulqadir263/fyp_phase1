@@ -40,12 +40,17 @@ class AuthController extends GetxController {
     debugPrint('AuthController: Initialized');
   }
 
+  /// Check if email is valid
+  bool _isValidEmail(String email) {
+    return email.isNotEmpty && GetUtils.isEmail(email);
+  }
+
   /// Toggle between login and signup modes
   void toggleAuthMode() {
     isLogin.value = !isLogin.value;
     
-    // Clear signup-only fields when switching to login
-    if (isLogin.value) {
+    // Clear signup-only fields when switching to signup mode
+    if (!isLogin.value) {
       nameController.clear();
       phoneController.clear();
       confirmPasswordController.clear();
@@ -81,7 +86,7 @@ class AuthController extends GetxController {
     }
 
     // Common validations
-    if (emailController.text.isEmpty || !GetUtils.isEmail(emailController.text)) {
+    if (!_isValidEmail(emailController.text)) {
       _showError('Please enter a valid email address');
       return false;
     }
@@ -136,7 +141,7 @@ class AuthController extends GetxController {
   Future<void> sendPasswordResetEmail(String email) async {
     if (isLoading.value) return;
     
-    if (email.isEmpty || !GetUtils.isEmail(email)) {
+    if (!_isValidEmail(email)) {
       Get.snackbar(
         'Error', 
         'Please enter a valid email address',

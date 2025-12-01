@@ -183,15 +183,10 @@ class AuthProvider extends GetxService {
         password: password,
       );
 
-      final user = userCredential.user;
-      if (user == null) {
-        throw Exception('Sign-in failed: No user returned');
-      }
-
       debugPrint('AuthProvider: Sign-in successful, fetching user data');
       
       // Fetch user data from Firestore
-      final userData = await _firebaseService.getUserData(user.uid);
+      final userData = await _firebaseService.getUserData(userCredential.user!.uid);
 
       if (userData != null) {
         // Update state

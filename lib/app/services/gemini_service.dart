@@ -8,7 +8,7 @@ import '../../core/errors/exceptions.dart';
 /// Service for Gemini AI integration
 class GeminiService extends GetxService {
   late final GenerativeModel _model;
-  late final ChatSession _chatSession;
+  late ChatSession _chatSession;
 
   /// System instruction for agriculture-focused responses with balanced output
   static const String _systemInstruction = '''
@@ -122,6 +122,13 @@ RESPONSE QUALITY:
     }
   }
 
+  /// Context reminder to reinforce agriculture-only restriction with each message
+  static const String _contextReminder = '''
+[IMPORTANT: You are AgriBot. ONLY respond to agriculture/farming questions. 
+For ANY non-agricultural topic, politely decline and redirect to farming topics.]
+
+User query: ''';
+
   /// Send a text message and get a response
   Future<String> sendMessage(String message) async {
     try {
@@ -129,7 +136,10 @@ RESPONSE QUALITY:
         throw AIServiceException('Message cannot be empty');
       }
 
-      final response = await _chatSession.sendMessage(Content.text(message));
+      // Prepend context reminder to reinforce the agriculture-only restriction
+      final enhancedMessage = '$_contextReminder$message';
+      
+      final response = await _chatSession.sendMessage(Content.text(enhancedMessage));
       final text = response.text;
 
       if (text == null || text.isEmpty) {
@@ -160,8 +170,13 @@ RESPONSE QUALITY:
       final imageBytes = await image.readAsBytes();
       final mimeType = _getMimeType(image.path);
 
+      // Enhance prompt with agriculture context
+      final enhancedPrompt = prompt.isEmpty 
+          ? 'Analyze this image and provide agricultural advice. Focus only on farming-related aspects.'
+          : '$_contextReminder$prompt';
+
       final content = Content.multi([
-        TextPart(prompt.isEmpty ? 'Analyze this image and provide agricultural advice.' : prompt),
+        TextPart(enhancedPrompt),
         DataPart(mimeType, imageBytes),
       ]);
 

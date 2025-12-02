@@ -259,23 +259,21 @@ class AuthController extends GetxController {
     _resendTimerInstance = null;
     
     // Safely dispose TextEditingControllers
-    // Using try-catch to prevent errors if controllers are already disposed
-    try {
-      nameController.dispose();
-    } catch (_) {}
-    try {
-      emailController.dispose();
-    } catch (_) {}
-    try {
-      phoneController.dispose();
-    } catch (_) {}
-    try {
-      passwordController.dispose();
-    } catch (_) {}
-    try {
-      confirmPasswordController.dispose();
-    } catch (_) {}
+    _safeDisposeController(nameController);
+    _safeDisposeController(emailController);
+    _safeDisposeController(phoneController);
+    _safeDisposeController(passwordController);
+    _safeDisposeController(confirmPasswordController);
     
     super.onClose();
+  }
+  
+  /// Safely dispose a TextEditingController, catching any errors if already disposed
+  void _safeDisposeController(TextEditingController controller) {
+    try {
+      controller.dispose();
+    } catch (_) {
+      // Controller already disposed, ignore
+    }
   }
 }

@@ -170,10 +170,11 @@ User query: ''';
       final imageBytes = await image.readAsBytes();
       final mimeType = _getMimeType(image.path);
 
-      // Enhance prompt with agriculture context
-      final enhancedPrompt = prompt.isEmpty 
-          ? 'Analyze this image and provide agricultural advice. Focus only on farming-related aspects.'
-          : '$_contextReminder$prompt';
+      // Apply context reminder consistently for both empty and non-empty prompts
+      final basePrompt = prompt.isEmpty 
+          ? 'Analyze this image and provide agricultural advice.'
+          : prompt;
+      final enhancedPrompt = '$_contextReminder$basePrompt';
 
       final content = Content.multi([
         TextPart(enhancedPrompt),

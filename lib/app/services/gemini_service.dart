@@ -103,9 +103,9 @@ RESPONSE QUALITY:
           temperature: 0.6,
           // Increased token limit for longer, more detailed responses (approx 3000+ words max)
           maxOutputTokens: 4096,
-          // topK helps with response quality and completeness
+          // top-k helps with response quality and completeness
           topK: 40,
-          // topP for nucleus sampling - helps generate complete responses
+          // top-p for nucleus sampling - helps generate complete responses
           topP: 0.95,
         ),
       );

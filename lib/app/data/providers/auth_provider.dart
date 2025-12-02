@@ -155,10 +155,14 @@ class AuthProvider extends GetxService {
       await _firebaseService.saveUserData(newUser);
       debugPrint('AuthProvider: User data saved to Firestore');
 
-      AppSnackbar.success('Account created successfully! Please login to continue.');
+      // Update state with newly created user
+      currentUser.value = newUser;
+      isAuthenticated.value = true;
       
-      // Redirect to login
-      Get.offAllNamed(AppRoutes.LOGIN);
+      AppSnackbar.success('Account created successfully! Please complete your profile.');
+      
+      // Redirect to profile to complete additional information
+      Get.offAllNamed(AppRoutes.PROFILE);
     } catch (e) {
       debugPrint('AuthProvider: Signup error: $e');
       AppSnackbar.error(e.toString());

@@ -90,7 +90,6 @@ REMEMBER: When in doubt about whether a topic is agricultural, DECLINE the quest
       _model = GenerativeModel(
         model: AppConstants.geminiModel,
         apiKey: apiKey,
-        systemInstruction: Content.text(_systemInstruction),
         generationConfig: GenerationConfig(
           // Slightly lower temperature for more coherent, complete responses
           temperature: 0.6,

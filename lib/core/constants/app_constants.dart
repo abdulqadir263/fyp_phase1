@@ -43,7 +43,7 @@ class AppConstants {
 
   // Chatbot Settings
   static const int maxMessageLength = 500;
-  static const String geminiModel = 'gemini-2.0-flash';
+  static const String geminiModel = 'gemini-2.5-flash';
 
   // App settings
   static const bool enableLogging = true;

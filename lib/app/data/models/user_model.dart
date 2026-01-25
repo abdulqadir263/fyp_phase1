@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/values/constants.dart';
 
-// User ka data structure Firebase ke liye
 class UserModel {
   final String uid;
   final String name;
   final String email;
   final String phone;
-  final String userType; // farmer, expert, company
+  final String userType;
   final String? location;
   final String? farmSize;
   final String? specialization;
@@ -31,7 +30,8 @@ class UserModel {
     this.updatedAt,
   });
 
-  // Firebase se data ko Model mein convert karna
+
+
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return UserModel(
@@ -52,7 +52,7 @@ class UserModel {
     );
   }
 
-  // Model ko Firebase ke liye Map mein convert karna
+
   Map<String, dynamic> toDocument() {
     return {
       'name': name,

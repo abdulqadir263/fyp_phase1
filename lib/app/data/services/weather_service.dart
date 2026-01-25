@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import '../../../core/values/constants.dart';
 import '../models/weather_model.dart';
 
 class WeatherService extends GetxService {
@@ -53,7 +52,7 @@ class WeatherService extends GetxService {
             hourly['weather_code'][0] ?? 0;
 
         // Generate location name based on coordinates (simplified)
-        String locationName = await _getLocationName(lat!, lon!);
+        String locationName = await _getLocationName(lat, lon);
 
         // Generate AI recommendations
         final recommendations = await _generateRecommendations(

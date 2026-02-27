@@ -5,13 +5,25 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../models/post_model.dart';
 
-/// Widget for displaying a post card in the list
-/// Optimized for performance with memory cache settings
+/// Post card widget for the community feed.
+///
+/// Image display:
+/// - Uses 16:9 AspectRatio with rounded corners
+/// - Single image → full card-width
+/// - 2+ images   → first image large + "+N" overlay badge
+/// - Tap image   → full-screen PageView viewer
+///
+/// Text:
+/// - Title: max 2 lines
+/// - Description: max 3 lines with ellipsis
+/// - Timestamp: "Just now", "5m ago", "3h ago", "2d ago", "Feb 14"
 class PostCard extends StatelessWidget {
   final PostModel post;
   final VoidCallback? onTap;
   final VoidCallback? onBookmark;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onReport;
   final bool isBookmarked;
 
   const PostCard({
@@ -20,20 +32,22 @@ class PostCard extends StatelessWidget {
     this.onTap,
     this.onBookmark,
     this.onDelete,
+    this.onEdit,
+    this.onReport,
     this.isBookmarked = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      elevation: 1,
+      shadowColor: Colors.black26,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -47,12 +61,14 @@ class PostCard extends StatelessWidget {
     );
   }
 
+  // ──────────────────────────── HEADER ────────────────────────────
+
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 0),
       child: Row(
         children: [
-          // User avatar - optimized with cache settings
+          // User avatar
           CircleAvatar(
             radius: 20,
             backgroundColor: Colors.grey[200],
@@ -67,13 +83,14 @@ class PostCard extends StatelessWidget {
                       memCacheWidth: 80,
                       fadeInDuration: const Duration(milliseconds: 150),
                       fadeOutDuration: const Duration(milliseconds: 150),
-                      errorWidget: (_, __, ___) => Icon(Icons.person, color: Colors.grey[500]),
+                      errorWidget: (_, __, ___) =>
+                          Icon(Icons.person, color: Colors.grey[500]),
                     ),
                   )
                 : Icon(Icons.person, color: Colors.grey[500]),
           ),
           const SizedBox(width: 12),
-          // User info
+          // User name + timestamp
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,95 +98,139 @@ class PostCard extends StatelessWidget {
                 Text(
                   post.userName,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                      fontWeight: FontWeight.w600, fontSize: 14),
                 ),
-                Text(
-                  _formatTimeAgo(post.createdAt),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 12,
-                  ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Text(
+                      _formatTimeAgo(post.createdAt),
+                      style:
+                          TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
+                    if (post.updatedAt != null) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        '· Edited',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
           ),
-          // Menu button
+          // Overflow menu
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: Colors.grey[600]),
             padding: EdgeInsets.zero,
-            onSelected: (value) {
-              if (value == 'delete' && onDelete != null) {
-                onDelete!();
-              } else if (value == 'share') {
-                Get.snackbar('Info', 'Share coming soon');
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'share',
-                child: Row(
-                  children: [
-                    Icon(Icons.share_outlined, size: 20),
-                    SizedBox(width: 12),
-                    Text('Share'),
-                  ],
-                ),
-              ),
-              if (onDelete != null)
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                      SizedBox(width: 12),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-            ],
+            onSelected: _handleMenuAction,
+            itemBuilder: (_) => _buildMenuItems(),
           ),
         ],
       ),
     );
   }
 
+  void _handleMenuAction(String value) {
+    switch (value) {
+      case 'edit':
+        onEdit?.call();
+        break;
+      case 'delete':
+        onDelete?.call();
+        break;
+      case 'report':
+        onReport?.call();
+        break;
+      case 'share':
+        Get.snackbar('Info', 'Share coming soon');
+        break;
+    }
+  }
+
+  List<PopupMenuEntry<String>> _buildMenuItems() {
+    return [
+      if (onEdit != null)
+        const PopupMenuItem(
+          value: 'edit',
+          child: Row(children: [
+            Icon(Icons.edit_outlined, size: 20),
+            SizedBox(width: 12),
+            Text('Edit'),
+          ]),
+        ),
+      const PopupMenuItem(
+        value: 'share',
+        child: Row(children: [
+          Icon(Icons.share_outlined, size: 20),
+          SizedBox(width: 12),
+          Text('Share'),
+        ]),
+      ),
+      if (onReport != null)
+        const PopupMenuItem(
+          value: 'report',
+          child: Row(children: [
+            Icon(Icons.flag_outlined, color: Colors.orange, size: 20),
+            SizedBox(width: 12),
+            Text('Report Post', style: TextStyle(color: Colors.orange)),
+          ]),
+        ),
+      if (onDelete != null)
+        const PopupMenuItem(
+          value: 'delete',
+          child: Row(children: [
+            Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            SizedBox(width: 12),
+            Text('Delete', style: TextStyle(color: Colors.red)),
+          ]),
+        ),
+    ];
+  }
+
+  // ──────────────────────────── CONTENT ───────────────────────────
+
   Widget _buildContent() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Category chip
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: AppConstants.primaryGreen.withOpacity(0.1),
+              color: AppConstants.primaryGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               PostModel.getCategoryDisplayName(post.category),
               style: const TextStyle(
                 color: AppConstants.primaryGreen,
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           // Title
           Text(
             post.title,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
+              height: 1.3,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
-          // Description
+          const SizedBox(height: 6),
+          // Description — limited to 3 lines
           Text(
             post.description,
             style: TextStyle(
@@ -185,113 +246,99 @@ class PostCard extends StatelessWidget {
     );
   }
 
+  // ──────────────────────────── IMAGE ─────────────────────────────
+
   Widget _buildImageSection() {
     if (post.imageUrls.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: post.imageUrls.length == 1
-            ? _buildSingleImage(post.imageUrls[0])
-            : _buildDoubleImages(),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+      child: GestureDetector(
+        onTap: () => _openFullScreenViewer(0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Always show the first image
+                CachedNetworkImage(
+                  imageUrl: post.imageUrls[0],
+                  fit: BoxFit.cover,
+                  memCacheHeight: 400,
+                  memCacheWidth: 700,
+                  fadeInDuration: const Duration(milliseconds: 200),
+                  fadeOutDuration: const Duration(milliseconds: 200),
+                  placeholder: (_, __) => Container(
+                    color: Colors.grey[200],
+                    child: const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                  errorWidget: (_, __, ___) => Container(
+                    color: Colors.grey[200],
+                    child:
+                        const Icon(Icons.broken_image, color: Colors.grey),
+                  ),
+                ),
+                // "+N" badge if there are more images
+                if (post.imageUrls.length > 1)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        '+${post.imageUrls.length - 1}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSingleImage(String url) {
-    return CachedNetworkImage(
-      imageUrl: url,
-      height: 180,
-      width: double.infinity,
-      fit: BoxFit.cover,
-      memCacheHeight: 360,
-      memCacheWidth: 600,
-      fadeInDuration: const Duration(milliseconds: 200),
-      fadeOutDuration: const Duration(milliseconds: 200),
-      placeholder: (_, __) => Container(
-        height: 180,
-        color: Colors.grey[200],
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+  /// Opens a full-screen image viewer with PageView for swiping through images.
+  void _openFullScreenViewer(int initialIndex) {
+    Get.dialog(
+      _FullScreenImageViewer(
+        imageUrls: post.imageUrls,
+        initialIndex: initialIndex,
       ),
-      errorWidget: (_, __, ___) => Container(
-        height: 180,
-        color: Colors.grey[200],
-        child: const Icon(Icons.broken_image, color: Colors.grey),
-      ),
+      barrierColor: Colors.black87,
     );
   }
 
-  Widget _buildDoubleImages() {
-    return Row(
-      children: [
-        Expanded(
-          child: CachedNetworkImage(
-            imageUrl: post.imageUrls[0],
-            height: 140,
-            fit: BoxFit.cover,
-            memCacheHeight: 280,
-            memCacheWidth: 280,
-            fadeInDuration: const Duration(milliseconds: 200),
-            fadeOutDuration: const Duration(milliseconds: 200),
-            placeholder: (_, __) => Container(
-              height: 140,
-              color: Colors.grey[200],
-            ),
-            errorWidget: (_, __, ___) => Container(
-              height: 140,
-              color: Colors.grey[200],
-              child: const Icon(Icons.broken_image, color: Colors.grey),
-            ),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Expanded(
-          child: CachedNetworkImage(
-            imageUrl: post.imageUrls[1],
-            height: 140,
-            fit: BoxFit.cover,
-            memCacheHeight: 280,
-            memCacheWidth: 280,
-            fadeInDuration: const Duration(milliseconds: 200),
-            fadeOutDuration: const Duration(milliseconds: 200),
-            placeholder: (_, __) => Container(
-              height: 140,
-              color: Colors.grey[200],
-            ),
-            errorWidget: (_, __, ___) => Container(
-              height: 140,
-              color: Colors.grey[200],
-              child: const Icon(Icons.broken_image, color: Colors.grey),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // ──────────────────────────── FOOTER ────────────────────────────
 
   Widget _buildFooter() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Row(
         children: [
-          // Comments count
           Icon(Icons.comment_outlined, size: 18, color: Colors.grey[500]),
           const SizedBox(width: 4),
-          Text(
-            '${post.commentsCount}',
-            style: TextStyle(color: Colors.grey[500], fontSize: 13),
-          ),
+          Text('${post.commentsCount}',
+              style: TextStyle(color: Colors.grey[500], fontSize: 13)),
           const SizedBox(width: 16),
-          // Bookmarks count
           Icon(Icons.bookmark_border, size: 18, color: Colors.grey[500]),
           const SizedBox(width: 4),
-          Text(
-            '${post.bookmarksCount}',
-            style: TextStyle(color: Colors.grey[500], fontSize: 13),
-          ),
+          Text('${post.bookmarksCount}',
+              style: TextStyle(color: Colors.grey[500], fontSize: 13)),
           const Spacer(),
-          // Bookmark button
           IconButton(
             icon: Icon(
               isBookmarked ? Icons.bookmark : Icons.bookmark_border,
@@ -306,20 +353,118 @@ class PostCard extends StatelessWidget {
     );
   }
 
+  // ──────────────────────────── TIME FORMATTER ────────────────────
+
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
-    final difference = now.difference(dateTime);
+    final diff = now.difference(dateTime);
 
-    if (difference.inDays > 7) {
-      return DateFormat('MMM d').format(dateTime);
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inDays < 365) return DateFormat('MMM d').format(dateTime);
+    return DateFormat('MMM d, y').format(dateTime);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Full-screen image viewer (PageView) — opened by tapping post image
+// ════════════════════════════════════════════════════════════════════
+
+class _FullScreenImageViewer extends StatefulWidget {
+  final List<String> imageUrls;
+  final int initialIndex;
+
+  const _FullScreenImageViewer({
+    required this.imageUrls,
+    this.initialIndex = 0,
+  });
+
+  @override
+  State<_FullScreenImageViewer> createState() => _FullScreenImageViewerState();
+}
+
+class _FullScreenImageViewerState extends State<_FullScreenImageViewer> {
+  late final PageController _pageController;
+  late int _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.zero,
+      backgroundColor: Colors.black,
+      child: Stack(
+        children: [
+          // Swipeable images
+          PageView.builder(
+            controller: _pageController,
+            itemCount: widget.imageUrls.length,
+            onPageChanged: (i) => setState(() => _currentPage = i),
+            itemBuilder: (_, i) {
+              return InteractiveViewer(
+                child: Center(
+                  child: CachedNetworkImage(
+                    imageUrl: widget.imageUrls[i],
+                    fit: BoxFit.contain,
+                    placeholder: (_, __) => const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                    errorWidget: (_, __, ___) => const Icon(
+                      Icons.broken_image,
+                      color: Colors.white,
+                      size: 64,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          // Close button
+          Positioned(
+            top: 40,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Get.back(),
+            ),
+          ),
+          // Page indicator (only if >1 image)
+          if (widget.imageUrls.length > 1)
+            Positioned(
+              bottom: 24,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '${_currentPage + 1} / ${widget.imageUrls.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

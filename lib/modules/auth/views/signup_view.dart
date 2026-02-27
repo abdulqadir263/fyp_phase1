@@ -64,24 +64,7 @@ class SignupView extends GetView<AuthController> {
                       ),
                       const SizedBox(height: 16),
 
-                      // User Type Dropdown
-                      Obx(() => DropdownButtonFormField<String>(
-                        value: controller.selectedUserType.value,
-                        decoration: const InputDecoration(
-                          labelText: 'I am a...',
-                          prefixIcon: Icon(Icons.category),
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          if (value != null) controller.selectedUserType.value = value;
-                        },
-                        items: const [
-                          DropdownMenuItem(value: 'farmer', child: Text('Farmer')),
-                          DropdownMenuItem(value: 'expert', child: Text('Agricultural Expert')),
-                          DropdownMenuItem(value: 'company', child: Text('Company')),
-                        ],
-                      )),
-                      const SizedBox(height: 16),
+                      // Role selection removed - now handled on separate RoleSelectionView screen
 
                       // Password field
                       CustomTextField(

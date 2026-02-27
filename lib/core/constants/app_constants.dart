@@ -16,6 +16,7 @@ class AppConstants {
   static const String cropsCollection = 'crops';
   static const String communityPostsCollection = 'communityPosts';
   static const String commentsCollection = 'comments';
+  static const String reportedPostsCollection = 'reportedPosts';
   static const String chatMessagesCollection = 'chatMessages';
   static const String otpCollection = 'password_reset_otps';
 

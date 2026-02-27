@@ -127,7 +127,6 @@ class AuthController extends GetxController {
           email: emailController.text.trim(),
           phone: phoneController.text.trim(),
           password: passwordController.text.trim(),
-          userType: selectedUserType.value,
         );
       }
     } finally {

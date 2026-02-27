@@ -10,8 +10,9 @@ import 'post_controller.dart';
 /// Controller for managing comments on posts
 /// Handles:
 /// - Loading comments for a post
-/// - Adding new comments
+/// - Adding new comments and replies
 /// - Deleting comments
+/// - Loading / collapsing reply threads
 class CommentController extends GetxController {
   /// Auth provider to access current user data
   final AuthProvider _authProvider = Get.find<AuthProvider>();
@@ -19,7 +20,7 @@ class CommentController extends GetxController {
   /// Community service for Firebase operations
   final CommunityService _communityService = Get.find<CommunityService>();
 
-  /// List of comments for current post
+  /// List of top-level comments for current post
   final RxList<CommentModel> comments = <CommentModel>[].obs;
   
   /// Controller for comment input
@@ -33,6 +34,24 @@ class CommentController extends GetxController {
   
   /// Flag to track if controller is still active
   bool _isDisposed = false;
+
+  // ==================== Reply State ====================
+
+  /// The comment ID we are currently replying to (null = top-level comment)
+  final Rx<String?> replyingToCommentId = Rx<String?>(null);
+
+  /// Display name of the user we are replying to (for hint text)
+  final RxString replyingToUserName = ''.obs;
+
+  /// Map of parentCommentId → list of replies (loaded on demand)
+  final RxMap<String, List<CommentModel>> repliesMap =
+      <String, List<CommentModel>>{}.obs;
+
+  /// Set of comment IDs whose reply threads are currently expanded
+  final RxSet<String> expandedReplies = <String>{}.obs;
+
+  /// Set of comment IDs whose replies are currently loading
+  final RxSet<String> loadingReplies = <String>{}.obs;
 
   /// Get current user ID from auth provider
   String? get currentUserId => _authProvider.currentUser.value?.uid;
@@ -53,9 +72,12 @@ class CommentController extends GetxController {
   /// Clear comments when leaving post detail view
   void clearComments() {
     comments.clear();
+    repliesMap.clear();
+    expandedReplies.clear();
+    cancelReply();
   }
 
-  /// Load comments for a post
+  /// Load top-level comments for a post
   Future<void> loadComments(String postId) async {
     if (isLoadingComments.value || postId.isEmpty) return;
     
@@ -67,9 +89,6 @@ class CommentController extends GetxController {
       comments.assignAll(loadedComments);
     } catch (e) {
       debugPrint('Error loading comments: $e');
-      if (!_isDisposed) {
-        // Don't show error for comments - fail silently
-      }
     } finally {
       if (!_isDisposed) {
         isLoadingComments.value = false;
@@ -77,7 +96,57 @@ class CommentController extends GetxController {
     }
   }
 
-  /// Add comment to current post
+  // ==================== Reply Helpers ====================
+
+  /// Start replying to a specific comment
+  void startReply(String commentId, String userName) {
+    replyingToCommentId.value = commentId;
+    replyingToUserName.value = userName;
+    // Focus hint will show "Replying to userName..."
+  }
+
+  /// Cancel the current reply (go back to top-level commenting)
+  void cancelReply() {
+    replyingToCommentId.value = null;
+    replyingToUserName.value = '';
+  }
+
+  /// Load replies for a specific comment and expand the thread
+  Future<void> toggleRepliesVisibility(String commentId) async {
+    if (expandedReplies.contains(commentId)) {
+      // Collapse
+      expandedReplies.remove(commentId);
+      return;
+    }
+
+    // Expand — load replies if not already loaded
+    expandedReplies.add(commentId);
+
+    if (!repliesMap.containsKey(commentId)) {
+      await _loadReplies(commentId);
+    }
+  }
+
+  /// Fetch replies from Firestore for a parent comment
+  Future<void> _loadReplies(String parentCommentId) async {
+    if (loadingReplies.contains(parentCommentId)) return;
+    loadingReplies.add(parentCommentId);
+
+    try {
+      final replies = await _communityService.fetchReplies(parentCommentId);
+      if (_isDisposed) return;
+      repliesMap[parentCommentId] = replies;
+    } catch (e) {
+      debugPrint('Error loading replies: $e');
+    } finally {
+      loadingReplies.remove(parentCommentId);
+    }
+  }
+
+  // ==================== Add / Delete ====================
+
+  /// Add comment to current post.
+  /// If [replyingToCommentId] is set, the comment becomes a reply.
   Future<bool> addComment(String postId, {String? parentCommentId}) async {
     final text = commentController.text.trim();
     if (text.isEmpty) return false;
@@ -92,6 +161,9 @@ class CommentController extends GetxController {
     // Prevent double submission
     if (isAddingComment.value) return false;
 
+    // Use the controller-level reply target if caller didn't specify
+    final effectiveParent = parentCommentId ?? replyingToCommentId.value;
+
     try {
       isAddingComment.value = true;
       
@@ -103,7 +175,7 @@ class CommentController extends GetxController {
         userAvatarUrl: currentUserAvatar,
         text: text,
         createdAt: DateTime.now(),
-        parentCommentId: parentCommentId,
+        parentCommentId: effectiveParent,
       );
 
       final commentId = await _communityService.addComment(comment);
@@ -111,16 +183,27 @@ class CommentController extends GetxController {
       
       if (commentId != null) {
         commentController.clear();
-        
-        // Add the new comment to the list locally for immediate feedback
+
         final newComment = comment.copyWith(id: commentId);
-        comments.add(newComment);
-        
+
+        if (effectiveParent != null && effectiveParent.isNotEmpty) {
+          // It's a reply — add to repliesMap and auto-expand
+          final existing = repliesMap[effectiveParent] ?? [];
+          repliesMap[effectiveParent] = [...existing, newComment];
+          expandedReplies.add(effectiveParent);
+        } else {
+          // Top-level comment
+          comments.add(newComment);
+        }
+
+        // Cancel reply mode
+        cancelReply();
+
         // Update post comment count
         if (Get.isRegistered<PostController>()) {
           Get.find<PostController>().updateCommentCount(1);
         }
-        
+
         return true;
       }
       return false;
@@ -146,13 +229,21 @@ class CommentController extends GetxController {
       if (_isDisposed) return false;
       
       if (success) {
+        // Remove from top-level comments
         comments.removeWhere((c) => c.id == commentId);
-        
+
+        // Also remove from any reply list
+        for (final key in repliesMap.keys.toList()) {
+          repliesMap[key] = repliesMap[key]!
+              .where((c) => c.id != commentId)
+              .toList();
+        }
+
         // Update post comment count
         if (Get.isRegistered<PostController>()) {
           Get.find<PostController>().updateCommentCount(-1);
         }
-        
+
         return true;
       }
       return false;

@@ -5,6 +5,12 @@ class AppRoutes {
   static const SIGNUP = '/signup';
   static const FORGOT_PASSWORD = '/forgot-password';
 
+  // ========== NEW ONBOARDING ROUTES ==========
+  /// Role selection screen after signup
+  static const ROLE_SELECTION = '/role-selection';
+  /// Profile completion screen based on selected role
+  static const PROFILE_COMPLETION = '/profile-completion';
+
   // Main Routes
   static const HOME = '/home';
   static const PROFILE = '/profile';

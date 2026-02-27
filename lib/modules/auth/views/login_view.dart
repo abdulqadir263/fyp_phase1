@@ -200,87 +200,11 @@ class LoginView extends GetView<AuthController> {
                 ),
               ),
 
-            if (!controller.isLogin.value) const SizedBox(height: 16),
-
-            // User Type Dropdown (Signup Only)
-            if (!controller.isLogin.value) _buildUserTypeDropdown(),
+            // Role selection removed from signup - now handled on separate RoleSelectionView screen
           ],
         ),
       ),
     ));
-  }
-
-  Widget _buildUserTypeDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'I am a...',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Obx(() => DropdownButtonFormField<String>(
-            value: controller.selectedUserType.value,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: Get.theme.primaryColor,
-                  width: 2,
-                ),
-              ),
-            ),
-            icon: Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontSize: 16,
-            ),
-            onChanged: controller.onUserTypeChanged,
-            items: const [
-              DropdownMenuItem(
-                value: 'farmer',
-                child: Text('Farmer 👨‍🌾'),
-              ),
-              DropdownMenuItem(
-                value: 'expert',
-                child: Text('Agricultural Expert 🧑‍🔬'),
-              ),
-              DropdownMenuItem(
-                value: 'company',
-                child: Text('Company 🏢'),
-              ),
-            ],
-          )),
-        ),
-      ],
-    );
   }
 
   Widget _buildActionButtons() {

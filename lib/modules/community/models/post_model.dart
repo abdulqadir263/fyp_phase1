@@ -42,7 +42,7 @@ class PostModel {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
-      category: json['category'] ?? 'crops',
+      category: (json['category'] ?? 'crops').toString().trim(),
       createdAt: json['createdAt'] is Timestamp
           ? (json['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -65,7 +65,7 @@ class PostModel {
       'title': title,
       'description': description,
       'imageUrls': imageUrls,
-      'category': category,
+      'category': category.trim(),
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
       'commentsCount': commentsCount,

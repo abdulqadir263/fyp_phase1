@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import '../../modules/auth/views/forgot_password_view.dart';
 import '../../modules/auth/views/login_view.dart';
+import '../../modules/auth/views/role_selection_view.dart';
+import '../../modules/auth/views/profile_completion_view.dart';
 import '../../modules/home/views/home_view.dart';
 import '../../modules/profile/views/profile_view.dart';
 import '../../modules/weather/views/weather_view.dart';
@@ -10,6 +12,7 @@ import '../../modules/community/views/create_post_view.dart';
 import '../../modules/community/views/post_detail_view.dart';
 import '../../modules/community/views/bookmarks_view.dart';
 import '../bindings/auth_binding.dart';
+import '../bindings/onboarding_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/profile_binding.dart';
 import '../bindings/weather_binding.dart';
@@ -29,6 +32,18 @@ class AppPages {
       name: AppRoutes.FORGOT_PASSWORD,
       page: () => ForgotPasswordView(),
       binding: AuthBinding(),
+    ),
+
+    // ========== NEW ONBOARDING PAGES ==========
+    GetPage(
+      name: AppRoutes.ROLE_SELECTION,
+      page: () => const RoleSelectionView(),
+      binding: OnboardingBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PROFILE_COMPLETION,
+      page: () => const ProfileCompletionView(),
+      binding: OnboardingBinding(),
     ),
 
     // Main Pages

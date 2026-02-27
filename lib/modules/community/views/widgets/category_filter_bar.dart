@@ -4,33 +4,28 @@ import '../../../../core/constants/app_constants.dart';
 import '../../controllers/post_controller.dart';
 import '../../models/post_model.dart';
 
-/// Horizontal scrollable category filter bar
+/// Category filter bar — uses Wrap so chips flow naturally on all screen sizes.
 class CategoryFilterBar extends GetView<PostController> {
   const CategoryFilterBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: controller.categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final category = controller.categories[index];
-          // Only wrap the reactive part (isSelected check) with Obx
-          return Obx(() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Obx(() {
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: controller.categories.map((category) {
             final isSelected = controller.selectedCategory.value == category;
             return _buildCategoryChip(
               label: _getCategoryLabel(category),
               isSelected: isSelected,
               onTap: () => controller.filterByCategory(category),
             );
-          });
-        },
-      ),
+          }).toList(),
+        );
+      }),
     );
   }
 
@@ -43,7 +38,7 @@ class CategoryFilterBar extends GetView<PostController> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppConstants.primaryGreen : Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -53,14 +48,13 @@ class CategoryFilterBar extends GetView<PostController> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppConstants.primaryGreen.withOpacity(0.3),
+                    color: AppConstants.primaryGreen.withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
                 ]
               : null,
         ),
-        alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(

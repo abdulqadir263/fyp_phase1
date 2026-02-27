@@ -10,12 +10,13 @@ import '../models/post_model.dart';
 import '../services/community_service.dart';
 import 'post_controller.dart';
 
-/// Controller for creating new posts
+/// Controller for creating and editing posts
 /// Handles:
 /// - Post form management
 /// - Image picking
 /// - Post creation and upload
-/// - Navigation after creation
+/// - Post editing (pre-fill + update)
+/// - Navigation after creation/edit
 class CreatePostController extends GetxController {
   /// Auth provider to access current user data
   final AuthProvider _authProvider = Get.find<AuthProvider>();
@@ -44,6 +45,13 @@ class CreatePostController extends GetxController {
   /// Flag to track if controller is still active
   bool _isDisposed = false;
 
+  // ==================== Edit Mode State ====================
+  /// Whether we are in edit mode (true) or create mode (false)
+  final RxBool isEditMode = false.obs;
+
+  /// The post ID being edited (null in create mode)
+  String? editingPostId;
+
   /// Get current user ID from auth provider
   String? get currentUserId => _authProvider.currentUser.value?.uid;
 
@@ -52,6 +60,27 @@ class CreatePostController extends GetxController {
 
   /// Get current user avatar URL
   String get currentUserAvatar => _authProvider.currentUser.value?.profileImage ?? '';
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Check if edit arguments were passed via Get.arguments
+    final args = Get.arguments;
+    if (args is PostModel) {
+      _initEditMode(args);
+    }
+  }
+
+  /// Initialize edit mode with existing post data
+  void _initEditMode(PostModel post) {
+    isEditMode.value = true;
+    editingPostId = post.id;
+    titleController.text = post.title;
+    descriptionController.text = post.description;
+    postCategory.value = post.category;
+    // NOTE: existing images are URLs, not local files — we don't re-pick them.
+    // Edit mode only changes text fields and category.
+  }
 
   @override
   void onClose() {
@@ -123,6 +152,8 @@ class CreatePostController extends GetxController {
     descriptionController.clear();
     selectedImages.clear();
     postCategory.value = 'crops';
+    isEditMode.value = false;
+    editingPostId = null;
   }
 
   /// Validate create post form
@@ -151,6 +182,49 @@ class CreatePostController extends GetxController {
     }
 
     return true;
+  }
+
+  /// Submit — either creates a new post or updates an existing one
+  Future<void> submitPost() async {
+    if (isEditMode.value) {
+      await _updatePost();
+    } else {
+      await createPost();
+    }
+  }
+
+  /// Update existing post (edit mode)
+  Future<void> _updatePost() async {
+    if (isCreatingPost.value) return;
+    if (!validateForm()) return;
+    if (editingPostId == null) return;
+
+    try {
+      isCreatingPost.value = true;
+
+      if (Get.isRegistered<PostController>()) {
+        await Get.find<PostController>().editPost(
+          postId: editingPostId!,
+          title: titleController.text.trim(),
+          description: descriptionController.text.trim(),
+          category: postCategory.value.trim(),
+        );
+      }
+
+      if (_isDisposed) return;
+
+      clearForm();
+      Get.back();
+    } catch (e) {
+      if (!_isDisposed) {
+        AppSnackbar.error('Failed to update post');
+      }
+      debugPrint('Error updating post: $e');
+    } finally {
+      if (!_isDisposed) {
+        isCreatingPost.value = false;
+      }
+    }
   }
 
   /// Create new post
@@ -202,7 +276,7 @@ class CreatePostController extends GetxController {
         title: titleController.text.trim(),
         description: descriptionController.text.trim(),
         imageUrls: imageUrls,
-        category: postCategory.value,
+        category: postCategory.value.trim(),
         createdAt: DateTime.now(),
       );
 

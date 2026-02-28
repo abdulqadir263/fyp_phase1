@@ -11,6 +11,26 @@ import '../../modules/community/views/community_view.dart';
 import '../../modules/community/views/create_post_view.dart';
 import '../../modules/community/views/post_detail_view.dart';
 import '../../modules/community/views/bookmarks_view.dart';
+// ========== FIELD VISIT MODULE IMPORTS ==========
+import '../../modules/appointments/views/appointments_view.dart';
+import '../../modules/appointments/views/expert_profile_view.dart';
+import '../../modules/appointments/views/request_visit_view.dart';
+import '../../modules/appointments/views/farmer_visits_view.dart';
+import '../../modules/appointments/views/appointment_detail_view.dart';
+import '../../modules/appointments/views/expert_dashboard_view.dart';
+import '../../modules/appointments/bindings/appointment_binding.dart';
+// ========== MARKETPLACE MODULE IMPORTS ==========
+import '../../modules/marketplace/views/marketplace_view.dart';
+import '../../modules/marketplace/views/product_detail_view.dart';
+import '../../modules/marketplace/views/cart_view.dart';
+import '../../modules/marketplace/views/checkout_view.dart';
+import '../../modules/marketplace/views/my_products_view.dart';
+import '../../modules/marketplace/views/add_product_view.dart';
+import '../../modules/marketplace/views/seller_orders_view.dart';
+import '../../modules/marketplace/views/seller_dashboard_view.dart';
+import '../../modules/marketplace/views/order_history_view.dart';
+import '../../modules/marketplace/views/order_detail_view.dart';
+import '../../modules/marketplace/bindings/marketplace_binding.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/onboarding_binding.dart';
 import '../bindings/home_binding.dart';
@@ -70,6 +90,96 @@ class AppPages {
       name: AppRoutes.CHATBOT,
       page: () => const ChatbotView(),
       binding: ChatbotBinding(),
+    ),
+
+    // ========== FIELD VISIT / APPOINTMENTS MODULE ==========
+    // Expert list screen (farmer browses experts)
+    GetPage(
+      name: AppRoutes.APPOINTMENTS,
+      page: () => const ExpertListView(),
+      binding: AppointmentBinding(),
+    ),
+    // Expert profile detail (farmer views expert info)
+    GetPage(
+      name: AppRoutes.EXPERT_PROFILE,
+      page: () => const ExpertProfileView(),
+      binding: AppointmentBinding(),
+    ),
+    // Request visit form (farmer fills form)
+    GetPage(
+      name: AppRoutes.REQUEST_VISIT,
+      page: () => const RequestVisitView(),
+      binding: AppointmentBinding(),
+    ),
+    // Farmer's own visits list
+    GetPage(
+      name: AppRoutes.MY_VISITS,
+      page: () => const FarmerVisitsView(),
+      binding: AppointmentBinding(),
+    ),
+    // Visit detail (full view)
+    GetPage(
+      name: AppRoutes.VISIT_DETAIL,
+      page: () => const AppointmentDetailView(),
+      binding: AppointmentBinding(),
+    ),
+    // Expert dashboard (expert manages visits)
+    GetPage(
+      name: AppRoutes.EXPERT_DASHBOARD,
+      page: () => const ExpertDashboardView(),
+      binding: AppointmentBinding(),
+    ),
+
+    // ========== MARKETPLACE MODULE ==========
+    GetPage(
+      name: AppRoutes.MARKETPLACE,
+      page: () => const MarketplaceHomeView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.MARKETPLACE_PRODUCT,
+      page: () => const ProductDetailView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.MARKETPLACE_CART,
+      page: () => const CartView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.MARKETPLACE_CHECKOUT,
+      page: () => const CheckoutView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SELLER_PRODUCTS,
+      page: () => const SellerProductsView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SELLER_ADD_PRODUCT,
+      page: () => const AddProductView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SELLER_ORDERS,
+      page: () => const SellerOrdersView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SELLER_DASHBOARD,
+      page: () => const SellerDashboardView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ORDER_HISTORY,
+      page: () => const OrderHistoryView(),
+      binding: MarketplaceBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ORDER_DETAIL,
+      page: () => const OrderDetailView(),
+      binding: MarketplaceBinding(),
     ),
 
     // Community

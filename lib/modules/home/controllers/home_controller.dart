@@ -185,10 +185,23 @@ class HomeController extends GetxController {
     // Navigate to the selected feature
     switch (feature) {
       case 'appointments':
-        Get.toNamed(AppRoutes.APPOINTMENTS);
+        // Route based on user type: experts see dashboard, farmers see expert list
+        if (user.value?.userType == 'expert') {
+          Get.toNamed(AppRoutes.EXPERT_DASHBOARD);
+        } else {
+          Get.toNamed(AppRoutes.APPOINTMENTS);
+        }
+        break;
+      case 'my_visits':
+        Get.toNamed(AppRoutes.MY_VISITS);
         break;
       case 'marketplace':
-        Get.toNamed(AppRoutes.MARKETPLACE);
+        // Route based on user type: companies see seller dashboard, farmers see buyer marketplace
+        if (user.value?.userType == 'company') {
+          Get.toNamed(AppRoutes.SELLER_DASHBOARD);
+        } else {
+          Get.toNamed(AppRoutes.MARKETPLACE);
+        }
         break;
       case 'weather':
         Get.toNamed(AppRoutes.WEATHER);

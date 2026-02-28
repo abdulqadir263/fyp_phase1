@@ -12,6 +12,8 @@ import 'app/data/services/weather_service.dart';
 import 'app/data/providers/auth_provider.dart';
 import 'app/services/gemini_service.dart';
 import 'modules/community/services/community_service.dart';
+import 'modules/appointments/services/appointment_service.dart';
+import 'modules/marketplace/services/marketplace_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -40,6 +42,8 @@ void main() async {
   Get.put(GeminiService(), permanent: true);
   Get.put(AuthProvider(), permanent: true);
   Get.put(CommunityService(), permanent: true);
+  Get.put(AppointmentService(), permanent: true);
+  Get.put(MarketplaceService(), permanent: true);
 
   // Global error handler
   FlutterError.onError = (FlutterErrorDetails details) {

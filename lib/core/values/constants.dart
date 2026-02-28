@@ -17,6 +17,7 @@ class AppConstants {
   static const String CROPS_COLLECTION = 'crops';
   static const String COMMUNITY_POSTS_COLLECTION = 'communityPosts';
   static const String COMMENTS_COLLECTION = 'comments';
+  static const String FIELD_VISITS_COLLECTION = 'fieldVisits';
 
   // Firebase Storage paths
   static const String PROFILE_IMAGES_PATH = 'profile_images';

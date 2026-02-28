@@ -17,8 +17,17 @@ class AppConstants {
   static const String communityPostsCollection = 'communityPosts';
   static const String commentsCollection = 'comments';
   static const String reportedPostsCollection = 'reportedPosts';
+  static const String fieldVisitsCollection = 'fieldVisits';
   static const String chatMessagesCollection = 'chatMessages';
+  static const String ordersCollection = 'orders';
   static const String otpCollection = 'password_reset_otps';
+
+  // Marketplace
+  static const double deliveryFee = 150.0;
+  static const List<String> productCategories = ['seeds', 'fertilizers', 'pesticides'];
+  static const List<String> orderStatuses = [
+    'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'
+  ];
 
   // Firebase Storage paths
   static const String profileImagesPath = 'profile_images';

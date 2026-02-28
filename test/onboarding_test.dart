@@ -130,7 +130,7 @@ void main() {
     test('should validate bio length (max 200 chars)', () {
       // Arrange
       const String shortBio = 'I am an agricultural expert.';
-      final String longBio = List.filled(250, 'A').join(); // 250 characters
+      final String longBio = 'A' * 250; // 250 characters
 
       // Act
       final isShortValid = shortBio.length <= 200;
@@ -190,7 +190,7 @@ void main() {
     test('should validate business description length (max 200 chars)', () {
       // Arrange
       const String shortDesc = 'We supply quality seeds.';
-      final String longDesc = List.filled(250, 'B').join(); // 250 characters
+      final String longDesc = 'B' * 250; // 250 characters
 
       // Act
       final isShortValid = shortDesc.length <= 200;

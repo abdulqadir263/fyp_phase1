@@ -2,24 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
-import '../../../app/data/providers/auth_provider.dart';
-import '../../../app/routes/app_routes.dart';
+import '../../../core/utils/role_guard.dart';
 import '../controllers/cart_controller.dart';
 import '../models/cart_item_model.dart';
 
 /// CartView — Shows cart items, quantities, totals, and checkout button
-/// Companies are redirected away from this screen
+/// Non-authorized roles are redirected by middleware + defensive fallback
 class CartView extends GetView<CartController> {
   const CartView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ── Role guard: company cannot access cart ──
-    final userType =
-        Get.find<AuthProvider>().currentUser.value?.userType ?? '';
-    if (userType == 'company') {
+    // ── Defensive fallback: only cart-authorized roles ──
+    if (!RoleGuard.currentUserCanAccess(RoleGuard.cart)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offNamed(AppRoutes.SELLER_DASHBOARD);
+        Get.offNamed(RoleGuard.currentDefaultRoute);
       });
       return const Scaffold(
         body: Center(

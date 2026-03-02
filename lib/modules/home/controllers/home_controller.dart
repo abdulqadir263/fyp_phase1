@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../app/data/models/user_model.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../core/utils/role_guard.dart';
 
 /// This controller manages the home screen functionality
 /// It handles:
@@ -55,40 +56,42 @@ class HomeController extends GetxController {
     await _authProvider.refreshUserData();
   }
 
-  /// Handle bottom navigation bar page changes
-  /// - Home (0): Shows home content within the home screen
-  /// - Marketplace (1): Shows coming soon placeholder
-  /// - Weather (2): Navigates to full Weather screen
-  /// - Crop Tracker (3): Shows coming soon placeholder
-  /// - Community (4): Navigates to full Community screen
-  /// 
-  /// Note: For Weather and Community, we navigate to full screens rather than
-  /// showing content within IndexedStack. We don't update currentIndex for these
-  /// because when user returns via back navigation, they should see the tab
-  /// they were previously viewing, not the Weather/Community tab.
+  /// Role-aware bottom navigation tabs for the current user
+  List<String> get bottomNavTabs => RoleGuard.bottomNavTabs;
+
+  /// Handle bottom navigation bar page changes (role-aware)
   void changePage(int index) {
-    switch (index) {
-      case 0:
-        // Home tab - show home content
+    final tabs = bottomNavTabs;
+    if (index < 0 || index >= tabs.length) return;
+
+    final tab = tabs[index];
+    switch (tab) {
+      case 'home':
         currentIndex.value = index;
         break;
-      case 1:
-        // Marketplace - not yet implemented, show placeholder
-        currentIndex.value = index;
+      case 'marketplace':
+        if (user.value?.userType == 'company') {
+          currentIndex.value = index;
+          Get.toNamed(AppRoutes.SELLER_DASHBOARD);
+        } else {
+          currentIndex.value = index;
+        }
         break;
-      case 2:
-        // Weather - navigate to full Weather screen
-        // Don't update currentIndex so user returns to previous tab
+      case 'weather':
         Get.toNamed(AppRoutes.WEATHER);
         break;
-      case 3:
-        // Crop Tracker - not yet implemented, show placeholder
+      case 'crop_tracker':
         currentIndex.value = index;
         break;
-      case 4:
-        // Community - navigate to full Community screen
-        // Don't update currentIndex so user returns to previous tab
+      case 'community':
         Get.toNamed(AppRoutes.COMMUNITY);
+        break;
+      case 'appointments':
+        if (user.value?.userType == 'expert') {
+          Get.toNamed(AppRoutes.EXPERT_DASHBOARD);
+        } else {
+          Get.toNamed(AppRoutes.APPOINTMENTS);
+        }
         break;
       default:
         currentIndex.value = 0;
@@ -165,14 +168,15 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Navigate to a feature screen based on feature name
-  /// Some features are restricted for guest users
+  /// Navigate to a feature screen based on feature name.
+  /// Uses RoleGuard for centralized access control.
   void navigateToFeature(String feature) {
     // Features that require login
     final List<String> restrictedFeatures = [
       'appointments',
       'marketplace',
       'crop_tracker',
+      'crop_recommendation',
       'community',
     ];
 
@@ -180,6 +184,34 @@ class HomeController extends GetxController {
     if (isGuestUser && restrictedFeatures.contains(feature)) {
       handleGuestUserAccess(feature);
       return;
+    }
+
+    // ── Role-based access check using RoleGuard ──
+    final moduleMap = {
+      'appointments': RoleGuard.appointments,
+      'my_visits': RoleGuard.appointments,
+      'marketplace': RoleGuard.marketplace,
+      'weather': RoleGuard.weather,
+      'crop_tracker': RoleGuard.cropTracker,
+      'crop_recommendation': RoleGuard.cropRecommendation,
+      'community': RoleGuard.community,
+      'chatbot': RoleGuard.chatbot,
+    };
+
+    final module = moduleMap[feature];
+    if (module != null) {
+      // Company accessing marketplace → allow (routes to seller panel)
+      final userType = user.value?.userType ?? '';
+      if (feature == 'marketplace' && userType == 'company') {
+        // Company sees seller dashboard — sellerPanel is the right check
+        if (!RoleGuard.canAccess(RoleGuard.sellerPanel, userType)) {
+          Get.snackbar('Access Denied', 'You do not have access to this feature.');
+          return;
+        }
+      } else if (!RoleGuard.canAccess(module, userType)) {
+        Get.snackbar('Access Denied', 'You do not have access to this feature.');
+        return;
+      }
     }
 
     // Navigate to the selected feature
@@ -219,7 +251,7 @@ class HomeController extends GetxController {
         Get.snackbar('Info', 'Disease Detection coming soon!');
         break;
       case 'crop_recommendation':
-        Get.snackbar('Info', 'Crop Recommendation coming soon!');
+        Get.toNamed(AppRoutes.CROP_RECOMMENDATION);
         break;
       default:
         Get.snackbar('Error', 'Feature not available yet!');

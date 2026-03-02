@@ -104,8 +104,10 @@ class AppointmentController extends GetxController {
   Future<void> loadExperts() async {
     try {
       isLoadingExperts.value = true;
+      debugPrint('[AppointmentController] Loading experts...');
       final result = await _service.fetchExperts();
       experts.assignAll(result);
+      debugPrint('[AppointmentController] Loaded ${result.length} experts');
     } catch (e) {
       debugPrint('[AppointmentController] Error loading experts: $e');
       AppSnackbar.error('Unable to load experts. Please try again.');

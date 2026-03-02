@@ -43,6 +43,11 @@ class AppRoutes {
   static const COMMUNITY = '/community';
   static const CHATBOT = '/chatbot';
 
+  // Feature Routes — Crop Recommendation
+  static const CROP_RECOMMENDATION = '/crop-recommendation';
+  static const CROP_RECOMMENDATION_RESULTS = '/crop-recommendation/results';
+  static const CROP_RECOMMENDATION_HISTORY = '/crop-recommendation/history';
+
   // Additional Routes
   static const SETTINGS = '/settings';
   static const ABOUT = '/about';

@@ -76,13 +76,17 @@ class FieldVisitModel {
       longitude: (data['longitude'] ?? 0.0).toDouble(),
       fullAddress: data['fullAddress'] ?? '',
       farmSize: (data['farmSize'] ?? 0.0).toDouble(),
-      preferredDate: (data['preferredDate'] as Timestamp).toDate(),
+      preferredDate: data['preferredDate'] != null
+          ? (data['preferredDate'] as Timestamp).toDate()
+          : DateTime.now(),
       confirmedDate: data['confirmedDate'] != null
           ? (data['confirmedDate'] as Timestamp).toDate()
           : null,
       status: data['status'] ?? 'pending',
       expertNotes: data['expertNotes'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 

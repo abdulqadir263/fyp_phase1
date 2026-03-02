@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
-import '../../../app/data/providers/auth_provider.dart';
-import '../../../app/routes/app_routes.dart';
+import '../../../core/utils/role_guard.dart';
 import '../controllers/cart_controller.dart';
 
 /// CheckoutView — Delivery address & phone, then place COD order
-/// Companies are redirected away from this screen
+/// Non-authorized roles are redirected by middleware + defensive fallback
 class CheckoutView extends GetView<CartController> {
   const CheckoutView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ── Role guard: company cannot access checkout ──
-    final userType =
-        Get.find<AuthProvider>().currentUser.value?.userType ?? '';
-    if (userType == 'company') {
+    // ── Defensive fallback: only cart-authorized roles ──
+    if (!RoleGuard.currentUserCanAccess(RoleGuard.cart)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offNamed(AppRoutes.SELLER_DASHBOARD);
+        Get.offNamed(RoleGuard.currentDefaultRoute);
       });
       return const Scaffold(
         body: Center(

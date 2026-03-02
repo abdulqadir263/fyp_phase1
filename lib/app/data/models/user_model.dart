@@ -89,7 +89,10 @@ class UserModel {
       specialization: data['specialization'],
       companyName: data['companyName'],
       profileImage: data['profileImage'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      // Safely parse createdAt — fallback to DateTime.now() if missing/null
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
       updatedAt: data['updatedAt'] != null
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,

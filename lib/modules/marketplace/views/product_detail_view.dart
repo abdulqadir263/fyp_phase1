@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
-import '../../../app/data/providers/auth_provider.dart';
+import '../../../core/utils/role_guard.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 
 /// ProductDetailView — Full product info with quantity selector & add to cart
-/// Cart actions hidden for company users
+/// Cart actions hidden for roles without cart access
 class ProductDetailView extends GetView<MarketplaceController> {
   const ProductDetailView({super.key});
 
-  bool get _isBuyer =>
-      (Get.find<AuthProvider>().currentUser.value?.userType ?? '') != 'company';
+  /// Whether current user can buy (has cart permission)
+  bool get _isBuyer => RoleGuard.currentUserCanAccess(RoleGuard.cart);
 
   @override
   Widget build(BuildContext context) {

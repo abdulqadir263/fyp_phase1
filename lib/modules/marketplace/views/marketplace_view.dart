@@ -3,24 +3,22 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../app/routes/app_routes.dart';
-import '../../../app/data/providers/auth_provider.dart';
+import '../../../core/utils/role_guard.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../models/product_model.dart';
 
 /// MarketplaceHomeView — Role-aware entry point
-/// Company → redirected to seller dashboard
+/// Company → redirected to seller dashboard (handled by middleware + fallback)
 /// Farmer  → buyer UI with search, categories, cart, order history
 class MarketplaceHomeView extends GetView<MarketplaceController> {
   const MarketplaceHomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ── Role guard: redirect company to seller dashboard ──
-    final userType =
-        Get.find<AuthProvider>().currentUser.value?.userType ?? '';
-    if (userType == 'company') {
-      // Schedule after build to avoid navigation during build
+    // ── Defensive fallback: redirect company to seller dashboard ──
+    // Primary guard is RoleMiddleware, but this catches edge cases
+    if (RoleGuard.currentUserType == 'company') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.offNamed(AppRoutes.SELLER_DASHBOARD);
       });

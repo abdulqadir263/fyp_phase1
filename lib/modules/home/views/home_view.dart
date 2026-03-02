@@ -5,6 +5,7 @@ import '../../../app/routes/app_routes.dart';
 import '../controllers/home_controller.dart';
 import '../../../app/widgets/custom_card.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/role_guard.dart';
 
 // Home screen ka UI
 class HomeView extends GetView<HomeController> {
@@ -52,17 +53,15 @@ class HomeView extends GetView<HomeController> {
       // Side Drawer
       drawer: _buildDrawer(context),
 
-      // Body with pull-to-refresh
-      body: Obx(() => IndexedStack(
-        index: controller.currentIndex.value,
-        children: [
-          _buildHomeContent(context), // Home tab content
-          _buildMarketplaceContent(), // Marketplace tab content
-          _buildWeatherContent(), // Weather tab content
-          _buildCropTrackerContent(), // Crop Tracker tab content
-          _buildCommunityContent(), // Community tab content
-        ],
-      )),
+      // Body — role-aware tab content
+      body: Obx(() {
+        final tabs = controller.bottomNavTabs;
+        final idx = controller.currentIndex.value.clamp(0, tabs.length - 1);
+        return IndexedStack(
+          index: idx,
+          children: tabs.map((tab) => _contentForTab(tab, context)).toList(),
+        );
+      }),
 
       // Floating Action Button for quick access
       floatingActionButton: _buildFloatingActionButton(),
@@ -212,37 +211,98 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  // Bottom Navigation Bar build karna
+  // Bottom Navigation Bar — dynamic per role
   Widget _buildBottomNavigationBar() {
-    return Obx(() => BottomNavigationBar(
-      currentIndex: controller.currentIndex.value,
-      onTap: controller.changePage,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Theme.of(Get.context!).primaryColor,
-      unselectedItemColor: Colors.grey,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.store),
-          label: 'Marketplace',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.cloud),
-          label: 'Weather',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.agriculture),
-          label: 'Crop Tracker',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people),
-          label: 'Community',
-        ),
-      ],
-    ));
+    return Obx(() {
+      final tabs = controller.bottomNavTabs;
+      final idx = controller.currentIndex.value.clamp(0, tabs.length - 1);
+      return BottomNavigationBar(
+        currentIndex: idx,
+        onTap: controller.changePage,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Theme.of(Get.context!).primaryColor,
+        unselectedItemColor: Colors.grey,
+        items: tabs.map((tab) => _navItemForTab(tab)).toList(),
+      );
+    });
+  }
+
+  /// Map tab identifier → BottomNavigationBarItem
+  BottomNavigationBarItem _navItemForTab(String tab) {
+    switch (tab) {
+      case 'home':
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.home), label: 'Home');
+      case 'marketplace':
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.store), label: 'Marketplace');
+      case 'weather':
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.cloud), label: 'Weather');
+      case 'crop_tracker':
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.agriculture), label: 'Crop Tracker');
+      case 'community':
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.people), label: 'Community');
+      case 'appointments':
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today), label: 'Appointments');
+      default:
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.circle), label: '');
+    }
+  }
+
+  /// Map tab identifier → content widget
+  Widget _contentForTab(String tab, BuildContext context) {
+    switch (tab) {
+      case 'home':
+        return _buildHomeContent(context);
+      case 'marketplace':
+        return _buildMarketplaceContent();
+      case 'weather':
+        return _buildWeatherContent();
+      case 'crop_tracker':
+        return _buildCropTrackerContent();
+      case 'community':
+        return _buildCommunityContent();
+      case 'appointments':
+        return _buildAppointmentsContent();
+      default:
+        return _buildHomeContent(context);
+    }
+  }
+
+  /// Placeholder content for Appointments tab (experts)
+  Widget _buildAppointmentsContent() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isLargeScreen = constraints.maxWidth > 600;
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(isLargeScreen ? 32.0 : 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.calendar_today,
+                    size: isLargeScreen ? 80 : 60, color: Colors.blue),
+                SizedBox(height: isLargeScreen ? 24 : 16),
+                Text('Appointments',
+                    style: TextStyle(
+                        fontSize: isLargeScreen ? 32 : 24,
+                        fontWeight: FontWeight.bold)),
+                SizedBox(height: isLargeScreen ? 16 : 12),
+                Text('Coming Soon!',
+                    style: TextStyle(
+                        fontSize: isLargeScreen ? 18 : 16,
+                        color: Colors.grey)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // Home tab content
@@ -591,59 +651,86 @@ class HomeView extends GetView<HomeController> {
           mainAxisSpacing: mainAxisSpacing,
           childAspectRatio: childAspectRatio,
           padding: EdgeInsets.zero,
-          children: [
-            _buildFeatureCard(
-              title: 'Book Appointment',
-              icon: Icons.calendar_today,
-              color: Colors.blue,
-              onTap: () => controller.navigateToFeature('appointments'),
-            ),
-            _buildFeatureCard(
-              title: 'Marketplace',
-              icon: Icons.shopping_cart,
-              color: Colors.green,
-              onTap: () => controller.navigateToFeature('marketplace'),
-            ),
-            _buildFeatureCard(
-              title: 'Weather Advice',
-              icon: Icons.cloud,
-              color: Colors.orange,
-              onTap: () => controller.navigateToFeature('weather'),
-            ),
-            _buildFeatureCard(
-              title: 'Crop Tracker',
-              icon: Icons.agriculture,
-              color: Colors.brown,
-              onTap: () => controller.navigateToFeature('crop_tracker'),
-            ),
-            _buildFeatureCard(
-              title: 'Community',
-              icon: Icons.people,
-              color: Colors.purple,
-              onTap: () => controller.navigateToFeature('community'),
-            ),
-            _buildFeatureCard(
-              title: 'Agri Chatbot',
-              icon: Icons.chat,
-              color: Colors.teal,
-              onTap: () => controller.navigateToFeature('chatbot'),
-            ),
-            _buildFeatureCard(
-              title: 'Disease Detection',
-              icon: Icons.bug_report,
-              color: Colors.red,
-              onTap: () => controller.navigateToFeature('disease_detection'),
-            ),
-            _buildFeatureCard(
-              title: 'Crop Recommendation',
-              icon: Icons.eco,
-              color: Colors.lightGreen,
-              onTap: () => controller.navigateToFeature('crop_recommendation'),
-            ),
-          ],
+          children: _buildRoleAwareFeatureCards(),
         );
       },
     );
+  }
+
+  /// Build feature cards based on RoleGuard.allowedFeatures
+  List<Widget> _buildRoleAwareFeatureCards() {
+    final allowed = RoleGuard.allowedFeatures;
+    final cards = <Widget>[];
+
+    // Map feature identifiers to card configs
+    final allCards = {
+      'appointments': {
+        'title': 'Book Appointment',
+        'icon': Icons.calendar_today,
+        'color': Colors.blue,
+        'feature': 'appointments',
+      },
+      'marketplace': {
+        'title': 'Marketplace',
+        'icon': Icons.shopping_cart,
+        'color': Colors.green,
+        'feature': 'marketplace',
+      },
+      'weather': {
+        'title': 'Weather Advice',
+        'icon': Icons.cloud,
+        'color': Colors.orange,
+        'feature': 'weather',
+      },
+      'crop_tracker': {
+        'title': 'Crop Tracker',
+        'icon': Icons.agriculture,
+        'color': Colors.brown,
+        'feature': 'crop_tracker',
+      },
+      'community': {
+        'title': 'Community',
+        'icon': Icons.people,
+        'color': Colors.purple,
+        'feature': 'community',
+      },
+      'chatbot': {
+        'title': 'Agri Chatbot',
+        'icon': Icons.chat,
+        'color': Colors.teal,
+        'feature': 'chatbot',
+      },
+      'crop_recommendation': {
+        'title': 'Crop Recommendation',
+        'icon': Icons.eco,
+        'color': Colors.lightGreen,
+        'feature': 'crop_recommendation',
+      },
+    };
+
+    for (final id in allowed) {
+      final cfg = allCards[id];
+      if (cfg != null) {
+        cards.add(_buildFeatureCard(
+          title: cfg['title'] as String,
+          icon: cfg['icon'] as IconData,
+          color: cfg['color'] as Color,
+          onTap: () => controller.navigateToFeature(cfg['feature'] as String),
+        ));
+      }
+    }
+
+    // Always add upcoming features for farmers
+    if (RoleGuard.currentUserType == 'farmer') {
+      cards.add(_buildFeatureCard(
+        title: 'Disease Detection',
+        icon: Icons.bug_report,
+        color: Colors.red,
+        onTap: () => controller.navigateToFeature('disease_detection'),
+      ));
+    }
+
+    return cards;
   }
 
   // ✅ IMPROVED: Feature Card widget with better responsiveness

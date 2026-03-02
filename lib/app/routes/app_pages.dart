@@ -31,6 +31,12 @@ import '../../modules/marketplace/views/seller_dashboard_view.dart';
 import '../../modules/marketplace/views/order_history_view.dart';
 import '../../modules/marketplace/views/order_detail_view.dart';
 import '../../modules/marketplace/bindings/marketplace_binding.dart';
+// ========== CROP RECOMMENDATION MODULE IMPORTS ==========
+import '../../modules/crop_recommendation/views/crop_input_screen.dart';
+import '../../modules/crop_recommendation/views/crop_result_screen.dart';
+import '../../modules/crop_recommendation/views/recommendation_history_screen.dart';
+import '../../modules/crop_recommendation/bindings/crop_recommendation_binding.dart';
+import '../middleware/role_middleware.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/onboarding_binding.dart';
 import '../bindings/home_binding.dart';
@@ -83,6 +89,7 @@ class AppPages {
       name: AppRoutes.WEATHER,
       page: () => WeatherView(),
       binding: WeatherBinding(),
+      middlewares: [RoleMiddleware()],
     ),
 
     // Chatbot
@@ -90,6 +97,7 @@ class AppPages {
       name: AppRoutes.CHATBOT,
       page: () => const ChatbotView(),
       binding: ChatbotBinding(),
+      middlewares: [RoleMiddleware()],
     ),
 
     // ========== FIELD VISIT / APPOINTMENTS MODULE ==========
@@ -98,36 +106,42 @@ class AppPages {
       name: AppRoutes.APPOINTMENTS,
       page: () => const ExpertListView(),
       binding: AppointmentBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     // Expert profile detail (farmer views expert info)
     GetPage(
       name: AppRoutes.EXPERT_PROFILE,
       page: () => const ExpertProfileView(),
       binding: AppointmentBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     // Request visit form (farmer fills form)
     GetPage(
       name: AppRoutes.REQUEST_VISIT,
       page: () => const RequestVisitView(),
       binding: AppointmentBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     // Farmer's own visits list
     GetPage(
       name: AppRoutes.MY_VISITS,
       page: () => const FarmerVisitsView(),
       binding: AppointmentBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     // Visit detail (full view)
     GetPage(
       name: AppRoutes.VISIT_DETAIL,
       page: () => const AppointmentDetailView(),
       binding: AppointmentBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     // Expert dashboard (expert manages visits)
     GetPage(
       name: AppRoutes.EXPERT_DASHBOARD,
       page: () => const ExpertDashboardView(),
       binding: AppointmentBinding(),
+      middlewares: [RoleMiddleware()],
     ),
 
     // ========== MARKETPLACE MODULE ==========
@@ -135,51 +149,81 @@ class AppPages {
       name: AppRoutes.MARKETPLACE,
       page: () => const MarketplaceHomeView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.MARKETPLACE_PRODUCT,
       page: () => const ProductDetailView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.MARKETPLACE_CART,
       page: () => const CartView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.MARKETPLACE_CHECKOUT,
       page: () => const CheckoutView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.SELLER_PRODUCTS,
       page: () => const SellerProductsView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.SELLER_ADD_PRODUCT,
       page: () => const AddProductView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.SELLER_ORDERS,
       page: () => const SellerOrdersView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.SELLER_DASHBOARD,
       page: () => const SellerDashboardView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.ORDER_HISTORY,
       page: () => const OrderHistoryView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: AppRoutes.ORDER_DETAIL,
       page: () => const OrderDetailView(),
       binding: MarketplaceBinding(),
+      middlewares: [RoleMiddleware()],
+    ),
+
+    // ========== CROP RECOMMENDATION MODULE ==========
+    GetPage(
+      name: AppRoutes.CROP_RECOMMENDATION,
+      page: () => const CropInputScreen(),
+      binding: CropRecommendationBinding(),
+      middlewares: [RoleMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.CROP_RECOMMENDATION_RESULTS,
+      page: () => const CropResultScreen(),
+      binding: CropRecommendationBinding(),
+      middlewares: [RoleMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.CROP_RECOMMENDATION_HISTORY,
+      page: () => const RecommendationHistoryScreen(),
+      binding: CropRecommendationBinding(),
+      middlewares: [RoleMiddleware()],
     ),
 
     // Community
@@ -187,21 +231,25 @@ class AppPages {
       name: AppRoutes.COMMUNITY,
       page: () => const CommunityView(),
       binding: CommunityBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: '/community/create',
       page: () => const CreatePostView(),
       binding: CommunityBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: '/community/post/:id',
       page: () => const PostDetailView(),
       binding: CommunityBinding(),
+      middlewares: [RoleMiddleware()],
     ),
     GetPage(
       name: '/community/bookmarks',
       page: () => const BookmarksView(),
       binding: CommunityBinding(),
+      middlewares: [RoleMiddleware()],
     ),
   ];
 }

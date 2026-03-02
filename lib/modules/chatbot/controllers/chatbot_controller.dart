@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../app/services/gemini_service.dart';
+import '../../../app/services/groq_service.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/message_model.dart';
 
 /// Controller for chatbot functionality
+/// Uses Groq API (LLaMA 3) — strictly agriculture-only responses
 class ChatbotController extends GetxController {
-  final GeminiService _geminiService = Get.find<GeminiService>();
+  final GroqService _groqService = Get.find<GroqService>();
   final AuthProvider _authProvider = Get.find<AuthProvider>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -151,13 +152,13 @@ class ChatbotController extends GetxController {
     await _getAIResponse(text);
   }
 
-  /// Get AI response for text message
+  /// Get AI response for text message (via Groq — agriculture only)
   Future<void> _getAIResponse(String text) async {
     try {
       isLoading.value = true;
       isTyping.value = true;
 
-      final response = await _geminiService.sendMessage(text);
+      final response = await _groqService.sendMessage(text);
 
       isTyping.value = false;
 
@@ -250,8 +251,8 @@ class ChatbotController extends GetxController {
           debugPrint('Error clearing chat history: $e');
         }
 
-        // Start new chat session
-        _geminiService.startNewChat();
+        // Start new chat session with Groq
+        _groqService.startNewChat();
       },
     );
   }

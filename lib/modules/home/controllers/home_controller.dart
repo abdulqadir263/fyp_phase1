@@ -71,10 +71,9 @@ class HomeController extends GetxController {
         break;
       case 'marketplace':
         if (user.value?.userType == 'company') {
-          currentIndex.value = index;
           Get.toNamed(AppRoutes.SELLER_DASHBOARD);
         } else {
-          currentIndex.value = index;
+          Get.toNamed(AppRoutes.MARKETPLACE);
         }
         break;
       case 'weather':

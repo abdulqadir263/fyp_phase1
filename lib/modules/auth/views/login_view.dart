@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 import '../../../app/widgets/custom_button.dart';
 import '../../../app/widgets/custom_text_field.dart';
+import '../../../core/utils/responsive_helper.dart';
 
 class LoginView extends GetView<AuthController> {
   @override
@@ -10,7 +11,8 @@ class LoginView extends GetView<AuthController> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ResponsiveHelper.tabletCenter(
+          child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
@@ -33,6 +35,7 @@ class LoginView extends GetView<AuthController> {
               _buildGuestLoginSection(),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -66,7 +69,7 @@ class LoginView extends GetView<AuthController> {
 
         // App Title
         Text(
-          'Aasaan Kisaan',
+          'app_name'.tr,
           style: Get.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.grey[800],
@@ -76,7 +79,7 @@ class LoginView extends GetView<AuthController> {
 
         // App Subtitle
         Text(
-          'Your Smart Farming Companion',
+          'app_subtitle'.tr,
           style: Get.textTheme.bodyMedium?.copyWith(
             color: Colors.grey[600],
           ),
@@ -108,7 +111,7 @@ class LoginView extends GetView<AuthController> {
           children: [
             // Form Title
             Text(
-              controller.isLogin.value ? 'Welcome Back' : 'Create Account',
+              controller.isLogin.value ? 'welcome_back'.tr : 'create_account'.tr,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -118,8 +121,8 @@ class LoginView extends GetView<AuthController> {
             const SizedBox(height: 4),
             Text(
               controller.isLogin.value
-                  ? 'Sign in to continue'
-                  : 'Join our farming community',
+                  ? 'sign_in_to_continue'.tr
+                  : 'join_farming_community'.tr,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -131,8 +134,8 @@ class LoginView extends GetView<AuthController> {
             if (!controller.isLogin.value)
               CustomTextField(
                 controller: controller.nameController,
-                labelText: 'Full Name',
-                hintText: 'Enter your full name',
+                labelText: 'full_name'.tr,
+                hintText: 'enter_full_name'.tr,
                 prefixIcon: Icons.person_outline,
               ),
 
@@ -141,8 +144,8 @@ class LoginView extends GetView<AuthController> {
             // Email Field
             CustomTextField(
               controller: controller.emailController,
-              labelText: 'Email Address',
-              hintText: 'Enter your email',
+              labelText: 'email_address'.tr,
+              hintText: 'enter_email'.tr,
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
@@ -152,8 +155,8 @@ class LoginView extends GetView<AuthController> {
             if (!controller.isLogin.value)
               CustomTextField(
                 controller: controller.phoneController,
-                labelText: 'Phone Number',
-                hintText: 'Enter your phone number',
+                labelText: 'phone_number'.tr,
+                hintText: 'enter_phone'.tr,
                 prefixIcon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
               ),
@@ -163,8 +166,8 @@ class LoginView extends GetView<AuthController> {
             // Password Field
             CustomTextField(
               controller: controller.passwordController,
-              labelText: 'Password',
-              hintText: 'Enter your password',
+              labelText: 'password'.tr,
+              hintText: 'enter_password'.tr,
               prefixIcon: Icons.lock_outline,
               obscureText: !controller.isPasswordVisible.value,
               suffixIcon: IconButton(
@@ -184,8 +187,8 @@ class LoginView extends GetView<AuthController> {
             if (!controller.isLogin.value)
               CustomTextField(
                 controller: controller.confirmPasswordController,
-                labelText: 'Confirm Password',
-                hintText: 'Re-enter your password',
+                labelText: 'confirm_password'.tr,
+                hintText: 'reenter_password'.tr,
                 prefixIcon: Icons.lock_outline,
                 obscureText: !controller.isConfirmPasswordVisible.value,
                 suffixIcon: IconButton(
@@ -212,7 +215,7 @@ class LoginView extends GetView<AuthController> {
       children: [
         // Submit Button
         Obx(() => CustomButton(
-          text: controller.isLogin.value ? 'Sign In' : 'Create Account',
+          text: controller.isLogin.value ? 'sign_in'.tr : 'create_account'.tr,
           onPressed: controller.submit,
           isLoading: controller.isLoading.value,
         )),
@@ -224,7 +227,7 @@ class LoginView extends GetView<AuthController> {
             ? GestureDetector(
           onTap: controller.navigateToForgotPassword,
           child: Text(
-            'Forgot Password?',
+            'forgot_password'.tr,
             style: TextStyle(
               color: Get.theme.primaryColor,
               fontWeight: FontWeight.w600,
@@ -248,15 +251,15 @@ class LoginView extends GetView<AuthController> {
             children: [
               Text(
                 controller.isLogin.value
-                    ? "Don't have an account?"
-                    : "Already have an account?",
+                    ? 'dont_have_account'.tr
+                    : 'already_have_account'.tr,
                 style: TextStyle(color: Colors.grey[600]),
               ),
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: controller.toggleAuthMode,
                 child: Text(
-                  controller.isLogin.value ? 'Sign Up' : 'Sign In',
+                  controller.isLogin.value ? 'sign_up'.tr : 'sign_in'.tr,
                   style: TextStyle(
                     color: Get.theme.primaryColor,
                     fontWeight: FontWeight.bold,
@@ -280,7 +283,7 @@ class LoginView extends GetView<AuthController> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'OR',
+                'or'.tr,
                 style: TextStyle(
                   color: Colors.grey[500],
                   fontWeight: FontWeight.w500,
@@ -304,7 +307,7 @@ class LoginView extends GetView<AuthController> {
             ),
           ),
           child: Text(
-            'Continue as Guest',
+            'continue_as_guest'.tr,
             style: TextStyle(
               color: Get.theme.primaryColor,
               fontWeight: FontWeight.w600,

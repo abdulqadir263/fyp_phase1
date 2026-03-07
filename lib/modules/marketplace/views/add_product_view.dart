@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/seller_controller.dart';
 import '../models/product_model.dart';
 
@@ -18,7 +19,10 @@ class AddProductView extends GetView<SellerController> {
             : 'Edit Product'),
         centerTitle: true,
       ),
-      body: Obx(() {
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
         return Stack(
           children: [
             SingleChildScrollView(
@@ -27,7 +31,7 @@ class AddProductView extends GetView<SellerController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Image ──
-                  const Text('Product Image',
+                  Text('product_image'.tr,
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
@@ -118,7 +122,7 @@ class AddProductView extends GetView<SellerController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Save Product',
+                      child: Text('save_product'.tr,
                           style: TextStyle(fontSize: 17, color: Colors.white)),
                     ),
                   ),
@@ -156,6 +160,8 @@ class AddProductView extends GetView<SellerController> {
           ],
         );
       }),
+      ),
+    ),
     );
   }
 

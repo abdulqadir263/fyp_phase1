@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/order_controller.dart';
 import '../models/order_model.dart';
 
@@ -12,126 +13,131 @@ class OrderDetailView extends GetView<OrderController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Order Details'), centerTitle: true),
-      body: StreamBuilder<OrderModel?>(
-        stream: controller.orderStream,
-        initialData: controller.selectedOrder.value,
-        builder: (context, snapshot) {
-          final order = snapshot.data;
-          if (order == null) {
-            return const Center(child: Text('Order not found.'));
-          }
+      appBar: AppBar(title: Text('order_details'.tr), centerTitle: true),
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: StreamBuilder<OrderModel?>(
+            stream: controller.orderStream,
+            initialData: controller.selectedOrder.value,
+            builder: (context, snapshot) {
+              final order = snapshot.data;
+              if (order == null) {
+                return const Center(child: Text('Order not found.'));
+              }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Order ID + Date ──
-                Text(
-                  'Order #${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length).toUpperCase()}',
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt),
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                ),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Order ID + Date ──
+                    Text(
+                      'Order #${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length).toUpperCase()}',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt),
+                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                    ),
 
-                const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                // ── Status Tracker (live) ──
-                const Text('Order Status',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                _StatusTracker(currentStatus: order.status),
+                    // ── Status Tracker (live) ──
+                    Text('order_status'.tr,
+                        style:
+                            TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    _StatusTracker(currentStatus: order.status),
 
-                const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                // ── Items ──
-                const Text('Items',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ...order.items.map((item) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
+                    // ── Items ──
+                    Text('items'.tr,
+                        style:
+                            TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...order.items.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(item['name'] ?? '',
+                                        style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600)),
+                                    Text(
+                                        'Qty: ${item['quantity']}  ×  Rs. ${(item['price'] as num).toStringAsFixed(0)}',
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600)),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                'Rs. ${((item['price'] as num) * (item['quantity'] as num)).toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                            ],
+                          ),
+                        )),
+
+                    const Divider(height: 20),
+
+                    // ── Price breakdown ──
+                    _priceRow('Subtotal',
+                        'Rs. ${order.subtotal.toStringAsFixed(0)}'),
+                    _priceRow('Delivery Fee',
+                        'Rs. ${order.deliveryFee.toStringAsFixed(0)}'),
+                    const Divider(height: 16),
+                    _priceRow('Total',
+                        'Rs. ${order.totalAmount.toStringAsFixed(0)}',
+                        bold: true),
+
+                    const SizedBox(height: 20),
+
+                    // ── Delivery info ──
+                    Text('delivery_details'.tr,
+                        style:
+                            TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    _infoTile(Icons.location_on_outlined, order.deliveryAddress),
+                    const SizedBox(height: 4),
+                    _infoTile(Icons.phone_outlined, order.phone),
+                    const SizedBox(height: 10),
+
+                    // ── Payment method ──
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: const Row(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(item['name'] ?? '',
-                                    style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600)),
-                                Text(
-                                    'Qty: ${item['quantity']}  ×  Rs. ${(item['price'] as num).toStringAsFixed(0)}',
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey.shade600)),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            'Rs. ${((item['price'] as num) * (item['quantity'] as num)).toStringAsFixed(0)}',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15),
-                          ),
+                          Icon(Icons.payments_outlined,
+                              color: Colors.orange, size: 22),
+                          SizedBox(width: 10),
+                          Text('Cash on Delivery',
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600)),
                         ],
                       ),
-                    )),
-
-                const Divider(height: 20),
-
-                // ── Price breakdown ──
-                _priceRow('Subtotal',
-                    'Rs. ${order.subtotal.toStringAsFixed(0)}'),
-                _priceRow('Delivery Fee',
-                    'Rs. ${order.deliveryFee.toStringAsFixed(0)}'),
-                const Divider(height: 16),
-                _priceRow('Total',
-                    'Rs. ${order.totalAmount.toStringAsFixed(0)}',
-                    bold: true),
-
-                const SizedBox(height: 20),
-
-                // ── Delivery info ──
-                const Text('Delivery Details',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                _infoTile(Icons.location_on_outlined, order.deliveryAddress),
-                const SizedBox(height: 4),
-                _infoTile(Icons.phone_outlined, order.phone),
-                const SizedBox(height: 10),
-
-                // ── Payment method ──
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.orange.shade200),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.payments_outlined,
-                          color: Colors.orange, size: 22),
-                      SizedBox(width: 10),
-                      Text('Cash on Delivery',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -310,4 +316,3 @@ class _StatusTracker extends StatelessWidget {
     }
   }
 }
-

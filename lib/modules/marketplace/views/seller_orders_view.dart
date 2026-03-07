@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/seller_controller.dart';
 import '../models/order_model.dart';
 
@@ -14,39 +15,44 @@ class SellerOrdersView extends GetView<SellerController> {
     controller.loadSellerOrders();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Customer Orders'), centerTitle: true),
-      body: Obx(() {
-        if (controller.isLoadingOrders.value) {
-          return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen));
-        }
+      appBar: AppBar(title: Text('customer_orders'.tr), centerTitle: true),
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
+            if (controller.isLoadingOrders.value) {
+              return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primaryGreen));
+            }
 
-        if (controller.sellerOrders.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.receipt_long_outlined,
-                    size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 12),
-                Text('No orders yet.',
-                    style:
-                        TextStyle(fontSize: 16, color: Colors.grey.shade600)),
-              ],
-            ),
-          );
-        }
+            if (controller.sellerOrders.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.receipt_long_outlined,
+                        size: 64, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    Text('No orders yet.',
+                        style:
+                            TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                  ],
+                ),
+              );
+            }
 
-        return RefreshIndicator(
-          onRefresh: controller.loadSellerOrders,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.sellerOrders.length,
-            itemBuilder: (_, i) =>
-                _OrderCard(order: controller.sellerOrders[i]),
-          ),
-        );
-      }),
+            return RefreshIndicator(
+              onRefresh: controller.loadSellerOrders,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.sellerOrders.length,
+                itemBuilder: (_, i) =>
+                    _OrderCard(order: controller.sellerOrders[i]),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
@@ -97,7 +103,7 @@ class _OrderCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total',
+                Text('total'.tr,
                     style:
                         TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 Text('Rs. ${order.totalAmount.toStringAsFixed(0)}',
@@ -134,7 +140,7 @@ class _OrderCard extends StatelessWidget {
                 onPressed: () => ctrl.updateOrderStatus(order, 'confirmed'),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen),
-                child: const Text('Confirm',
+                child: Text('confirm'.tr,
                     style: TextStyle(color: Colors.white)),
               ),
             ),
@@ -144,7 +150,7 @@ class _OrderCard extends StatelessWidget {
                 onPressed: () => ctrl.updateOrderStatus(order, 'cancelled'),
                 style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red)),
-                child: const Text('Cancel',
+                child: Text('cancel'.tr,
                     style: TextStyle(color: Colors.red)),
               ),
             ),
@@ -157,7 +163,7 @@ class _OrderCard extends StatelessWidget {
             onPressed: () => ctrl.updateOrderStatus(order, 'shipped'),
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade700),
-            child: const Text('Mark as Shipped',
+            child: Text('mark_shipped'.tr,
                 style: TextStyle(color: Colors.white)),
           ),
         );
@@ -168,7 +174,7 @@ class _OrderCard extends StatelessWidget {
             onPressed: () => ctrl.updateOrderStatus(order, 'delivered'),
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen),
-            child: const Text('Mark as Delivered',
+            child: Text('mark_delivered'.tr,
                 style: TextStyle(color: Colors.white)),
           ),
         );
@@ -223,4 +229,3 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
-

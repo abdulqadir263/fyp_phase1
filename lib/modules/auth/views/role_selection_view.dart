@@ -14,9 +14,16 @@ class RoleSelectionView extends GetView<OnboardingController> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.sizeOf(context).height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom - 48,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
 
@@ -26,15 +33,16 @@ class RoleSelectionView extends GetView<OnboardingController> {
               const SizedBox(height: 48),
 
               // ========== ROLE CARDS ==========
-              Expanded(
-                child: _buildRoleCards(),
-              ),
+              _buildRoleCards(),
+
+              const SizedBox(height: 24),
 
               // ========== GUEST OPTION ==========
               _buildGuestOption(),
 
               const SizedBox(height: 20),
             ],
+          ),
           ),
         ),
       ),
@@ -62,7 +70,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
 
         // Title
         Text(
-          'Select Your Role',
+          'select_your_role'.tr,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -73,7 +81,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
 
         // Subtitle
         Text(
-          'Choose how you want to use Aasaan Kisaan',
+          'choose_how_use'.tr,
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[600],
@@ -92,8 +100,8 @@ class RoleSelectionView extends GetView<OnboardingController> {
         // Farmer Card
         _buildRoleCard(
           role: 'farmer',
-          title: 'Farmer',
-          description: 'I grow crops and manage a farm',
+          title: 'farmer'.tr,
+          description: 'farmer_desc'.tr,
           icon: Icons.grass,
           color: AppConstants.primaryGreen,
         ),
@@ -103,8 +111,8 @@ class RoleSelectionView extends GetView<OnboardingController> {
         // Expert Card
         _buildRoleCard(
           role: 'expert',
-          title: 'Expert',
-          description: 'I provide agricultural advice',
+          title: 'expert'.tr,
+          description: 'expert_desc'.tr,
           icon: Icons.school,
           color: Colors.blue[700]!,
         ),
@@ -114,8 +122,8 @@ class RoleSelectionView extends GetView<OnboardingController> {
         // Company/Seller Card
         _buildRoleCard(
           role: 'company',
-          title: 'Company (Seller)',
-          description: 'I sell agricultural products',
+          title: 'company_seller'.tr,
+          description: 'company_desc'.tr,
           icon: Icons.store,
           color: Colors.orange[700]!,
         ),
@@ -213,7 +221,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
         TextButton(
           onPressed: controller.continueAsGuest,
           child: Text(
-            'Continue as Guest',
+            'continue_as_guest'.tr,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -223,7 +231,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
         ),
 
         Text(
-          'Limited features available',
+          'limited_features'.tr,
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey[400],

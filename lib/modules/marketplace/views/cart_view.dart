@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../core/utils/role_guard.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/cart_controller.dart';
 import '../models/cart_item_model.dart';
 
@@ -25,7 +26,7 @@ class CartView extends GetView<CartController> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Cart'), centerTitle: true),
+      appBar: AppBar(title: Text('my_cart'.tr), centerTitle: true),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -40,7 +41,7 @@ class CartView extends GetView<CartController> {
                 Icon(Icons.shopping_cart_outlined,
                     size: 80, color: Colors.grey.shade400),
                 const SizedBox(height: 12),
-                Text('Your cart is empty.',
+                Text('your_cart_empty'.tr,
                     style:
                         TextStyle(fontSize: 18, color: Colors.grey.shade600)),
                 const SizedBox(height: 16),
@@ -48,7 +49,7 @@ class CartView extends GetView<CartController> {
                   onPressed: () => Get.back(),
                   style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryGreen),
-                  child: const Text('Browse Products',
+                  child: Text('browse_products'.tr,
                       style: TextStyle(color: Colors.white)),
                 ),
               ],
@@ -82,17 +83,17 @@ class CartView extends GetView<CartController> {
               ),
               child: Column(
                 children: [
-                  _summaryRow('Subtotal',
+                  _summaryRow('subtotal'.tr,
                       'Rs. ${controller.subtotal.toStringAsFixed(0)}'),
                   const SizedBox(height: 4),
-                  _summaryRow('Delivery Fee',
+                  _summaryRow('delivery_fee'.tr,
                       'Rs. ${controller.deliveryFee.toStringAsFixed(0)}'),
                   const Divider(height: 16),
-                  _summaryRow('Total',
+                  _summaryRow('total'.tr,
                       'Rs. ${controller.totalAmount.toStringAsFixed(0)}',
                       bold: true),
                   const SizedBox(height: 8),
-                  const Text('💵 Cash on Delivery — Pay when product is delivered.',
+                  Text('💵 ${'cod_message'.tr}',
                       style: TextStyle(fontSize: 12, color: Colors.grey)),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -105,8 +106,8 @@ class CartView extends GetView<CartController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Proceed to Checkout',
-                          style: TextStyle(fontSize: 17, color: Colors.white)),
+                      child: Text('proceed_to_checkout'.tr,
+                          style: const TextStyle(fontSize: 17, color: Colors.white)),
                     ),
                   ),
                 ],

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/utils/role_guard.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../models/product_model.dart';
@@ -30,7 +31,7 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Marketplace'),
+        title: Text('marketplace'.tr),
         centerTitle: true,
         actions: [
           // Order history
@@ -78,7 +79,7 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
               controller: controller.searchController,
               onChanged: controller.onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search products...',
+                hintText: 'search_products'.tr,
                 prefixIcon:
                     const Icon(Icons.search, color: AppColors.primaryGreen),
                 border: OutlineInputBorder(
@@ -92,27 +93,25 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
             ),
           ),
 
-          // ── Category chips ──
+          // ── Category chips (Wrap prevents overflow on small screens) ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Obx(() => Row(
+            child: Obx(() => Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     _chip('All', controller.selectedCategory.value.isEmpty,
                         () => controller.setCategory('')),
-                    const SizedBox(width: 8),
-                    ...ProductModel.categories.map((cat) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: _chip(
-                            '${cat[0].toUpperCase()}${cat.substring(1)}',
-                            controller.selectedCategory.value == cat,
-                            () => controller.setCategory(cat),
-                          ),
+                    ...ProductModel.categories.map((cat) => _chip(
+                          '${cat[0].toUpperCase()}${cat.substring(1)}',
+                          controller.selectedCategory.value == cat,
+                          () => controller.setCategory(cat),
                         )),
                   ],
                 )),
           ),
 
-          // ── Products grid ──
+          // ── Products grid (responsive columns) ──
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
@@ -140,23 +139,28 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
 
               return RefreshIndicator(
                 onRefresh: controller.loadProducts,
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.68,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemCount: controller.products.length,
-                  itemBuilder: (_, i) => _ProductCard(
-                    product: controller.products[i],
-                    onTap: () =>
-                        controller.openProductDetail(controller.products[i]),
-                    onAddToCart: () => Get.find<CartController>()
-                        .addToCart(controller.products[i]),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final r = ResponsiveHelper.of(context);
+                    return GridView.builder(
+                      padding: EdgeInsets.all(r.padding),
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: r.gridCrossAxisCount(minItemWidth: 160),
+                        childAspectRatio: r.productGridAspectRatio,
+                        crossAxisSpacing: r.scale(12),
+                        mainAxisSpacing: r.scale(12),
+                      ),
+                      itemCount: controller.products.length,
+                      itemBuilder: (_, i) => _ProductCard(
+                        product: controller.products[i],
+                        onTap: () =>
+                            controller.openProductDetail(controller.products[i]),
+                        onAddToCart: () => Get.find<CartController>()
+                            .addToCart(controller.products[i]),
+                      ),
+                    );
+                  },
                 ),
               );
             }),

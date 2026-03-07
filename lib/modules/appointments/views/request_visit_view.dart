@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/appointment_controller.dart';
 
 /// RequestVisitView — Form for farmer to request a field visit
@@ -16,7 +17,8 @@ class RequestVisitView extends GetView<AppointmentController> {
         title: const Text('Request Field Visit'),
         centerTitle: true,
       ),
-      body: Obx(() {
+      body: ResponsiveHelper.tabletCenter(
+        child: Obx(() {
         // Show loading overlay when submitting
         return Stack(
           children: [
@@ -271,6 +273,7 @@ class RequestVisitView extends GetView<AppointmentController> {
           ],
         );
       }),
+      ),
     );
   }
 

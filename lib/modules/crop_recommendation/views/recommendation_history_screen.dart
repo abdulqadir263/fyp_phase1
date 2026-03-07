@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/crop_recommendation_controller.dart';
 import '../models/recommendation_model.dart';
 
@@ -17,9 +18,10 @@ class RecommendationHistoryScreen
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recommendation History'),
+        title: Text('recommendation_history'.tr),
       ),
-      body: Obx(() {
+      body: ResponsiveHelper.tabletCenter(
+        child: Obx(() {
         if (controller.isHistoryLoading.value) {
           return const Center(
             child: CircularProgressIndicator(color: AppColors.primaryGreen),
@@ -43,6 +45,7 @@ class RecommendationHistoryScreen
           ),
         );
       }),
+      ),
     );
   }
 
@@ -71,7 +74,7 @@ class RecommendationHistoryScreen
           OutlinedButton.icon(
             onPressed: () => Get.back(),
             icon: const Icon(Icons.eco_rounded),
-            label: const Text('Get Recommendation'),
+            label: Text('get_recommendation'.tr),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryGreen,
               side: const BorderSide(color: AppColors.primaryGreen),

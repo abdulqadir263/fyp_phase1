@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/crop_recommendation_controller.dart';
 import '../models/recommendation_model.dart';
 
@@ -12,7 +13,7 @@ class CropResultScreen extends GetView<CropRecommendationController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Results'),
+        title: Text('results'.tr),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Get.back(),
@@ -34,7 +35,10 @@ class CropResultScreen extends GetView<CropRecommendationController> {
       BuildContext context, RecommendationModel recommendation) {
     final results = recommendation.results;
 
-    return ListView(
+    return SafeArea(
+      top: false,
+      child: ResponsiveHelper.tabletCenter(
+        child: ListView(
       padding: const EdgeInsets.all(16),
       children: [
         // Success Header
@@ -74,7 +78,7 @@ class CropResultScreen extends GetView<CropRecommendationController> {
             Get.back();
           },
           icon: const Icon(Icons.refresh_rounded),
-          label: const Text('New Recommendation'),
+          label: Text('new_recommendation'.tr),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.primaryGreen,
             side: const BorderSide(color: AppColors.primaryGreen),
@@ -86,6 +90,8 @@ class CropResultScreen extends GetView<CropRecommendationController> {
         ),
         const SizedBox(height: 16),
       ],
+      ),
+    ),
     );
   }
 

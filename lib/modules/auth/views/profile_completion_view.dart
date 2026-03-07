@@ -4,6 +4,7 @@ import '../controllers/onboarding_controller.dart';
 import '../../../app/widgets/custom_button.dart';
 import '../../../app/widgets/custom_text_field.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
 
 /// ProfileCompletionView - Dynamic profile form based on selected role
 /// Shows different fields for Farmer, Expert, and Company (Seller)
@@ -61,17 +62,17 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Get app bar title based on role
+  /// Get app bar title based on role (localized)
   String _getAppBarTitle() {
     switch (controller.selectedRole.value) {
       case 'farmer':
-        return 'Farmer Profile';
+        return 'farmer_profile'.tr;
       case 'expert':
-        return 'Expert Profile';
+        return 'expert_profile'.tr;
       case 'company':
-        return 'Business Profile';
+        return 'business_profile'.tr;
       default:
-        return 'Complete Profile';
+        return 'complete_profile'.tr;
     }
   }
 
@@ -86,22 +87,22 @@ class ProfileCompletionView extends GetView<OnboardingController> {
       case 'farmer':
         icon = Icons.grass;
         color = AppConstants.primaryGreen;
-        message = 'Tell us about your farm';
+        message = 'tell_about_farm'.tr;
         break;
       case 'expert':
         icon = Icons.school;
         color = Colors.blue[700]!;
-        message = 'Share your expertise';
+        message = 'share_expertise'.tr;
         break;
       case 'company':
         icon = Icons.store;
         color = Colors.orange[700]!;
-        message = 'Tell us about your business';
+        message = 'tell_about_business'.tr;
         break;
       default:
         icon = Icons.person;
         color = AppConstants.primaryGreen;
-        message = 'Complete your profile';
+        message = 'complete_your_profile'.tr;
     }
 
     return Row(
@@ -129,7 +130,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Fields marked with * are required',
+                'fields_required'.tr,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[500],
@@ -167,8 +168,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Name Field
         CustomTextField(
           controller: controller.nameController,
-          labelText: 'Full Name *',
-          hintText: 'Enter your full name',
+          labelText: '${'full_name'.tr} *',
+          hintText: 'enter_full_name'.tr,
           prefixIcon: Icons.person,
         ),
         const SizedBox(height: 16),
@@ -176,8 +177,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Phone Field
         CustomTextField(
           controller: controller.phoneController,
-          labelText: 'Phone Number',
-          hintText: 'Enter your phone number',
+          labelText: 'phone_number'.tr,
+          hintText: 'enter_phone'.tr,
           prefixIcon: Icons.phone,
           keyboardType: TextInputType.phone,
         ),
@@ -186,8 +187,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Location Field
         CustomTextField(
           controller: controller.locationController,
-          labelText: 'Farm Location *',
-          hintText: 'Enter your farm location',
+          labelText: 'farm_location'.tr,
+          hintText: 'enter_farm_location'.tr,
           prefixIcon: Icons.location_on,
         ),
         const SizedBox(height: 16),
@@ -195,8 +196,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Farm Size Field
         CustomTextField(
           controller: controller.farmSizeController,
-          labelText: 'Farm Size (acres)',
-          hintText: 'Enter your farm size',
+          labelText: 'farm_size'.tr,
+          hintText: 'enter_farm_size'.tr,
           prefixIcon: Icons.square_foot,
           keyboardType: TextInputType.number,
         ),
@@ -214,7 +215,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Crops Grown *',
+          'crops_grown'.tr,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -223,7 +224,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Select all crops you grow',
+          'select_crops'.tr,
           style: TextStyle(
             fontSize: 14,
             color: Colors.grey[500],
@@ -235,15 +236,21 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         Obx(() {
           // Force reactive dependency by reading selectedCrops.length
           final _ = controller.selectedCrops.length;
-          return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-          ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final r = ResponsiveHelper.of(context);
+              // Dynamic columns: 2 on phones, 3+ on tablets
+              final crossAxisCount = r.gridCrossAxisCount(minItemWidth: 150);
+              final aspectRatio = r.isSmallPhone ? 3.5 : 3.0;
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: aspectRatio,
+                  crossAxisSpacing: r.scale(12),
+                  mainAxisSpacing: r.scale(12),
+                ),
           itemCount: OnboardingController.availableCrops.length,
           itemBuilder: (context, index) {
             final crop = OnboardingController.availableCrops[index];
@@ -293,7 +300,9 @@ class ProfileCompletionView extends GetView<OnboardingController> {
               ),
             );
           },
-        );
+              );
+            },
+          );
         }),
       ],
     );
@@ -307,8 +316,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Name Field
         CustomTextField(
           controller: controller.nameController,
-          labelText: 'Full Name *',
-          hintText: 'Enter your full name',
+          labelText: '${'full_name'.tr} *',
+          hintText: 'enter_full_name'.tr,
           prefixIcon: Icons.person,
         ),
         const SizedBox(height: 16),
@@ -316,8 +325,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Phone Field
         CustomTextField(
           controller: controller.phoneController,
-          labelText: 'Phone Number',
-          hintText: 'Enter your phone number',
+          labelText: 'phone_number'.tr,
+          hintText: 'enter_phone'.tr,
           prefixIcon: Icons.phone,
           keyboardType: TextInputType.phone,
         ),
@@ -326,8 +335,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Location Field
         CustomTextField(
           controller: controller.locationController,
-          labelText: 'Location',
-          hintText: 'Enter your location',
+          labelText: 'location'.tr,
+          hintText: 'enter_location'.tr,
           prefixIcon: Icons.location_on,
         ),
         const SizedBox(height: 16),
@@ -339,8 +348,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Years of Experience
         CustomTextField(
           controller: controller.yearsExperienceController,
-          labelText: 'Years of Experience *',
-          hintText: 'Enter years of experience',
+          labelText: 'years_experience'.tr,
+          hintText: 'enter_years_experience'.tr,
           prefixIcon: Icons.work_history,
           keyboardType: TextInputType.number,
         ),
@@ -349,8 +358,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Certifications
         CustomTextField(
           controller: controller.certificationsController,
-          labelText: 'Certifications',
-          hintText: 'Enter your certifications',
+          labelText: 'certifications'.tr,
+          hintText: 'enter_certifications'.tr,
           prefixIcon: Icons.card_membership,
         ),
         const SizedBox(height: 16),
@@ -358,8 +367,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Bio
         CustomTextField(
           controller: controller.bioController,
-          labelText: 'Short Bio',
-          hintText: 'Tell farmers about yourself (max 200 chars)',
+          labelText: 'short_bio'.tr,
+          hintText: 'bio_hint'.tr,
           prefixIcon: Icons.description,
           maxLines: 3,
         ),
@@ -377,7 +386,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Specialization *',
+          'specialization'.tr,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -397,7 +406,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
             filled: true,
             fillColor: Colors.grey[50],
           ),
-          hint: const Text('Select your specialization'),
+          hint: Text('select_specialization'.tr),
           items: OnboardingController.expertSpecializations
               .map((spec) => DropdownMenuItem(
                     value: spec,
@@ -432,15 +441,15 @@ class ProfileCompletionView extends GetView<OnboardingController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Available for Appointments',
-                  style: TextStyle(
+                Text(
+                  'available_appointments'.tr,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
-                  'Let farmers book consultations with you',
+                  'let_farmers_book'.tr,
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -475,8 +484,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Company Name Field
         CustomTextField(
           controller: controller.companyNameController,
-          labelText: 'Company Name *',
-          hintText: 'Enter your company name',
+          labelText: 'company_name'.tr,
+          hintText: 'enter_company_name'.tr,
           prefixIcon: Icons.business,
         ),
         const SizedBox(height: 16),
@@ -484,8 +493,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Owner Name Field
         CustomTextField(
           controller: controller.ownerNameController,
-          labelText: 'Owner Name',
-          hintText: 'Enter owner/manager name',
+          labelText: 'owner_name'.tr,
+          hintText: 'enter_owner_name'.tr,
           prefixIcon: Icons.person,
         ),
         const SizedBox(height: 16),
@@ -493,8 +502,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Phone Field
         CustomTextField(
           controller: controller.phoneController,
-          labelText: 'Phone Number',
-          hintText: 'Enter business phone number',
+          labelText: 'phone_number'.tr,
+          hintText: 'business_phone'.tr,
           prefixIcon: Icons.phone,
           keyboardType: TextInputType.phone,
         ),
@@ -503,8 +512,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Business Location Field
         CustomTextField(
           controller: controller.locationController,
-          labelText: 'Business Location',
-          hintText: 'Enter your business location',
+          labelText: 'business_location'.tr,
+          hintText: 'enter_business_location'.tr,
           prefixIcon: Icons.location_on,
         ),
         const SizedBox(height: 16),
@@ -516,8 +525,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Years in Business
         CustomTextField(
           controller: controller.yearsInBusinessController,
-          labelText: 'Years in Business',
-          hintText: 'How many years in business?',
+          labelText: 'years_in_business'.tr,
+          hintText: 'how_many_years'.tr,
           prefixIcon: Icons.work_history,
           keyboardType: TextInputType.number,
         ),
@@ -526,8 +535,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // License Number (Optional)
         CustomTextField(
           controller: controller.licenseNumberController,
-          labelText: 'License Number (Optional)',
-          hintText: 'Enter your business license number',
+          labelText: 'license_number'.tr,
+          hintText: 'enter_license_number'.tr,
           prefixIcon: Icons.badge,
         ),
         const SizedBox(height: 16),
@@ -535,8 +544,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         // Business Description
         CustomTextField(
           controller: controller.businessDescriptionController,
-          labelText: 'Business Description',
-          hintText: 'Describe your business (max 200 chars)',
+          labelText: 'business_description'.tr,
+          hintText: 'business_desc_hint'.tr,
           prefixIcon: Icons.description,
           maxLines: 3,
         ),
@@ -550,7 +559,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Business Type *',
+          'business_type'.tr,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -570,7 +579,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
             filled: true,
             fillColor: Colors.grey[50],
           ),
-          hint: const Text('Select your business type'),
+          hint: Text('select_business_type'.tr),
           items: OnboardingController.businessTypes
               .map((type) => DropdownMenuItem(
                     value: type,
@@ -590,7 +599,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
   /// Build save button
   Widget _buildSaveButton() {
     return Obx(() => CustomButton(
-      text: 'Save & Continue',
+      text: 'save_continue'.tr,
       onPressed: controller.saveProfile,
       isLoading: controller.isLoading.value,
     ));

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
 import '../../../app/widgets/custom_button.dart';
 import '../../../app/widgets/custom_text_field.dart';
+import '../../../core/utils/responsive_helper.dart';
+import '../../../core/localization/language_controller.dart';
 
 // Profile screen ka UI
 class ProfileView extends GetView<ProfileController> {
@@ -12,7 +14,7 @@ class ProfileView extends GetView<ProfileController> {
       // ✅ FIXED: AppBar with proper layout
       appBar: AppBar(
         title: Text(
-          'My Profile',
+          'my_profile'.tr,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -26,14 +28,17 @@ class ProfileView extends GetView<ProfileController> {
               controller.isEditing.value ? Icons.save : Icons.edit,
             ),
             onPressed: controller.isEditing.value ? controller.updateProfile : controller.toggleEditMode,
-            tooltip: controller.isEditing.value ? 'Save' : 'Edit',
+            tooltip: controller.isEditing.value ? 'save'.tr : 'edit'.tr,
           )),
         ],
       ),
 
-      body: Obx(() {
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
         if (controller.user.value == null) {
-          return Center(child: Text('User data not found.'));
+          return Center(child: Text('user_data_not_found'.tr));
         }
 
         return SingleChildScrollView(
@@ -48,9 +53,12 @@ class ProfileView extends GetView<ProfileController> {
               // User Information Form
               _buildUserInformationForm(),
 
-              SizedBox(height: 32),
+              SizedBox(height: 24),
 
-              // User Type Section (sirf edit mode mein dikhega)
+              // ========== LANGUAGE TOGGLE SECTION ==========
+              _buildLanguageToggle(),
+
+              SizedBox(height: 32),
               if (controller.isEditing.value) _buildUserTypeSection(),
 
               SizedBox(height: 32),
@@ -61,6 +69,8 @@ class ProfileView extends GetView<ProfileController> {
           ),
         );
       }),
+        ),
+      ),
     );
   }
 
@@ -143,7 +153,7 @@ class ProfileView extends GetView<ProfileController> {
         // Name Field
         CustomTextField(
           controller: controller.nameController,
-          labelText: 'Full Name',
+          labelText: 'full_name'.tr,
           prefixIcon: Icons.person,
           enabled: controller.isEditing.value,
         ),
@@ -152,7 +162,7 @@ class ProfileView extends GetView<ProfileController> {
         // Email Field
         CustomTextField(
           controller: controller.emailController,
-          labelText: 'Email',
+          labelText: 'email'.tr,
           prefixIcon: Icons.email,
           enabled: false, // Email change nahi ho sakta
         ),
@@ -161,7 +171,7 @@ class ProfileView extends GetView<ProfileController> {
         // Phone Field
         CustomTextField(
           controller: controller.phoneController,
-          labelText: 'Phone Number',
+          labelText: 'phone_number'.tr,
           prefixIcon: Icons.phone,
           enabled: controller.isEditing.value,
           keyboardType: TextInputType.phone,
@@ -172,7 +182,7 @@ class ProfileView extends GetView<ProfileController> {
         if (controller.selectedUserType.value == 'farmer') ...[
           CustomTextField(
             controller: controller.locationController,
-            labelText: 'Farm Location',
+            labelText: 'farm_location'.tr,
             prefixIcon: Icons.location_on,
             enabled: controller.isEditing.value,
           ),
@@ -181,7 +191,7 @@ class ProfileView extends GetView<ProfileController> {
           // Farm Size Field
           CustomTextField(
             controller: controller.farmSizeController,
-            labelText: 'Farm Size (acres)',
+            labelText: 'farm_size'.tr,
             prefixIcon: Icons.square_foot,
             enabled: controller.isEditing.value,
             keyboardType: TextInputType.number,
@@ -193,7 +203,7 @@ class ProfileView extends GetView<ProfileController> {
         if (controller.selectedUserType.value == 'expert') ...[
           CustomTextField(
             controller: controller.specializationController,
-            labelText: 'Specialization',
+            labelText: 'specialization'.tr,
             prefixIcon: Icons.workspace_premium,
             enabled: controller.isEditing.value,
           ),
@@ -204,7 +214,7 @@ class ProfileView extends GetView<ProfileController> {
         if (controller.selectedUserType.value == 'company') ...[
           CustomTextField(
             controller: controller.companyNameController,
-            labelText: 'Company Name',
+            labelText: 'company_name'.tr,
             prefixIcon: Icons.business,
             enabled: controller.isEditing.value,
           ),
@@ -223,7 +233,7 @@ class ProfileView extends GetView<ProfileController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'User Type',
+              'user_type'.tr,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
@@ -234,9 +244,9 @@ class ProfileView extends GetView<ProfileController> {
               ),
               onChanged: controller.onUserTypeChanged,
               items: [
-                DropdownMenuItem(value: 'farmer', child: Text('Farmer')),
-                DropdownMenuItem(value: 'expert', child: Text('Agricultural Expert')),
-                DropdownMenuItem(value: 'company', child: Text('Company')),
+                DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
+                DropdownMenuItem(value: 'expert', child: Text('agricultural_expert'.tr)),
+                DropdownMenuItem(value: 'company', child: Text('company'.tr)),
               ],
             )),
           ],
@@ -257,7 +267,7 @@ class ProfileView extends GetView<ProfileController> {
               side: BorderSide(color: Colors.grey),
               minimumSize: Size(double.infinity, 50),
             ),
-            child: Text('Create Profile Later'),
+            child: Text('create_profile_later'.tr),
           ),
           SizedBox(height: 12),
         ],
@@ -265,7 +275,7 @@ class ProfileView extends GetView<ProfileController> {
         // Cancel Button (sirf edit mode mein dikhega)
         if (controller.isEditing.value)
           CustomButton(
-            text: 'Cancel',
+            text: 'cancel'.tr,
             onPressed: controller.toggleEditMode,
             color: Colors.grey,
           ),
@@ -279,9 +289,59 @@ class ProfileView extends GetView<ProfileController> {
             side: BorderSide(color: Colors.red),
             minimumSize: Size(double.infinity, 50),
           ),
-          child: Text('Delete Account', style: TextStyle(color: Colors.red)),
+          child: Text('delete_account'.tr, style: TextStyle(color: Colors.red)),
         ),
       ],
+    );
+  }
+
+  /// Language toggle section — allows switching between English and Urdu
+  Widget _buildLanguageToggle() {
+    final langController = Get.find<LanguageController>();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'language'.tr,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Obx(() => Row(
+                  children: [
+                    const Icon(Icons.language, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        langController.isUrdu ? 'اردو' : 'English',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    Switch(
+                      value: langController.isUrdu,
+                      onChanged: (_) => langController.toggleLanguage(),
+                      activeTrackColor: const Color(0xFF4CAF50).withValues(alpha: 0.5),
+                      thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return const Color(0xFF4CAF50);
+                        }
+                        return Colors.grey;
+                      }),
+                    ),
+                  ],
+                )),
+            const SizedBox(height: 4),
+            Obx(() => Text(
+                  langController.isUrdu
+                      ? 'Switch to English'
+                      : 'اردو میں تبدیل کریں',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                )),
+          ],
+        ),
+      ),
     );
   }
 

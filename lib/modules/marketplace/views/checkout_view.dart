@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../core/utils/role_guard.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/cart_controller.dart';
 
 /// CheckoutView — Delivery address & phone, then place COD order
@@ -23,8 +24,10 @@ class CheckoutView extends GetView<CartController> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout'), centerTitle: true),
-      body: Obx(() {
+      appBar: AppBar(title: Text('checkout'.tr), centerTitle: true),
+      body: SafeArea(
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
         return Stack(
           children: [
             SingleChildScrollView(
@@ -33,8 +36,8 @@ class CheckoutView extends GetView<CartController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Order summary
-                  const Text('Order Summary',
-                      style:
+                  Text('order_details'.tr,
+                      style: const
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   ...controller.cartItems.map((item) => Padding(
@@ -53,20 +56,20 @@ class CheckoutView extends GetView<CartController> {
                         ),
                       )),
                   const Divider(height: 16),
-                  _row('Subtotal',
+                  _row('subtotal'.tr,
                       'Rs. ${controller.subtotal.toStringAsFixed(0)}'),
-                  _row('Delivery Fee',
+                  _row('delivery_fee'.tr,
                       'Rs. ${controller.deliveryFee.toStringAsFixed(0)}'),
                   const Divider(height: 16),
-                  _row('Total',
+                  _row('total'.tr,
                       'Rs. ${controller.totalAmount.toStringAsFixed(0)}',
                       bold: true),
 
                   const SizedBox(height: 24),
 
                   // Delivery address
-                  const Text('Delivery Address',
-                      style:
+                  Text('delivery_details'.tr,
+                      style: const
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   TextField(
@@ -85,8 +88,8 @@ class CheckoutView extends GetView<CartController> {
                   const SizedBox(height: 16),
 
                   // Phone
-                  const Text('Phone Number',
-                      style:
+                  Text('phone_number'.tr,
+                      style: const
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   TextField(
@@ -142,7 +145,7 @@ class CheckoutView extends GetView<CartController> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Place Order (Cash on Delivery)',
+                      child: Text('place_order'.tr,
                           style: TextStyle(fontSize: 17, color: Colors.white)),
                     ),
                   ),
@@ -176,6 +179,8 @@ class CheckoutView extends GetView<CartController> {
           ],
         );
       }),
+      ),
+    ),
     );
   }
 

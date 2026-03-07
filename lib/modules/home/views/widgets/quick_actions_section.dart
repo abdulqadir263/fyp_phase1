@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/responsive_helper.dart';
 import '../../controllers/home_controller.dart';
 
 /// Quick actions section with grid of action cards
@@ -81,19 +82,26 @@ class QuickActionsSection extends GetView<HomeController> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.0,
-        ),
-        itemCount: actions.length,
-        itemBuilder: (context, index) {
-          final action = actions[index];
-          return _buildActionCard(action);
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final r = ResponsiveHelper.of(context);
+          // Dynamic columns: 2 on very small, 3 on phone, 4+ on tablet
+          final crossAxisCount = r.gridCrossAxisCount(minItemWidth: 100);
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: r.scale(12),
+              mainAxisSpacing: r.scale(12),
+              childAspectRatio: 1.0,
+            ),
+            itemCount: actions.length,
+            itemBuilder: (context, index) {
+              final action = actions[index];
+              return _buildActionCard(action);
+            },
+          );
         },
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,6 +7,8 @@ import 'package:get/get.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/themes/app_theme.dart';
+import 'app/translations/app_translations.dart';
+import 'core/localization/language_controller.dart';
 import 'app/data/services/firebase_service.dart';
 import 'app/data/services/cloudinary_service.dart';
 import 'app/data/services/weather_service.dart';
@@ -36,6 +39,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Load saved language preference before app starts
+  final savedLocale = await LanguageController.getSavedLocale();
+
   // Initialize all core services as permanent for better performance
   Get.put(FirebaseService(), permanent: true);
   Get.put(CloudinaryService(), permanent: true);
@@ -47,17 +53,21 @@ void main() async {
   Get.put(AppointmentService(), permanent: true);
   Get.put(MarketplaceService(), permanent: true);
 
+  // Initialize language controller (permanent — lives for app lifetime)
+  Get.put(LanguageController(), permanent: true);
+
   // Global error handler
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     debugPrint('Flutter Error: ${details.exception}');
   };
 
-  runApp(const FarmAssistApp());
+  runApp(FarmAssistApp(savedLocale: savedLocale));
 }
 
 class FarmAssistApp extends StatelessWidget {
-  const FarmAssistApp({super.key});
+  final Locale savedLocale;
+  const FarmAssistApp({super.key, required this.savedLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -70,15 +80,17 @@ class FarmAssistApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
 
+      // ========== LOCALIZATION ==========
+      translations: AppTranslations(),
+      locale: savedLocale,
+      fallbackLocale: const Locale('en'),
+
       initialRoute: AppRoutes.LOGIN,
       getPages: AppPages.routes,
       
       // Optimized transitions for smoother navigation
       defaultTransition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 150),
-      
-      locale: const Locale('en', 'US'),
-      fallbackLocale: const Locale('en', 'US'),
     );
   }
 }

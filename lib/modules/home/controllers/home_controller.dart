@@ -4,6 +4,7 @@ import '../../../app/data/models/user_model.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/utils/role_guard.dart';
+import '../../../core/localization/language_controller.dart';
 
 /// This controller manages the home screen functionality
 /// It handles:
@@ -100,10 +101,10 @@ class HomeController extends GetxController {
   /// Show logout confirmation dialog and sign out if confirmed
   void logout() {
     Get.defaultDialog(
-      title: 'Logout',
+      title: 'logout'.tr,
       titleStyle: const TextStyle(fontSize: 18),
-      middleText: 'Are you sure you want to logout?',
-      textCancel: 'No',
+      middleText: 'logout_confirm'.tr,
+      textCancel: 'no'.tr,
       onCancel: () => Get.back(),
       confirm: TextButton(
         style: TextButton.styleFrom(
@@ -114,7 +115,7 @@ class HomeController extends GetxController {
           _authProvider.signOut();
         },
         child: Text(
-          'Yes',
+          'yes'.tr,
           style: TextStyle(color: Get.theme.colorScheme.onPrimary),
         ),
       ),
@@ -128,26 +129,26 @@ class HomeController extends GetxController {
 
   /// Navigate to settings screen (not yet implemented)
   void goToSettings() {
-    Get.snackbar('Info', 'Settings coming soon!');
+    Get.snackbar('info'.tr, 'settings_coming_soon'.tr);
   }
 
   /// Navigate to about screen (not yet implemented)
   void goToAbout() {
-    Get.snackbar('Info', 'About coming soon!');
+    Get.snackbar('info'.tr, 'about_coming_soon'.tr);
   }
 
-  /// Toggle app language (not yet implemented)
+  /// Toggle app language between English and Urdu
   void toggleLanguage() {
-    Get.snackbar('Info', 'Language toggle coming soon!');
+    Get.find<LanguageController>().toggleLanguage();
   }
 
   /// Show dialog prompting guest users to sign up for restricted features
   void handleGuestUserAccess(String featureName) {
     if (isGuestUser) {
       Get.defaultDialog(
-        title: 'Sign Up Required',
-        middleText: 'To use this feature, please create an account or log in.',
-        textCancel: 'Cancel',
+        title: 'signup_required'.tr,
+        middleText: 'signup_to_use'.tr,
+        textCancel: 'cancel'.tr,
         confirm: TextButton(
           style: TextButton.styleFrom(
             backgroundColor: Get.theme.primaryColor,
@@ -156,8 +157,8 @@ class HomeController extends GetxController {
             Get.back();
             Get.offAllNamed(AppRoutes.LOGIN);
           },
-          child: const Text(
-            'Sign Up',
+          child: Text(
+            'sign_up'.tr,
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -204,11 +205,11 @@ class HomeController extends GetxController {
       if (feature == 'marketplace' && userType == 'company') {
         // Company sees seller dashboard — sellerPanel is the right check
         if (!RoleGuard.canAccess(RoleGuard.sellerPanel, userType)) {
-          Get.snackbar('Access Denied', 'You do not have access to this feature.');
+          Get.snackbar('access_denied'.tr, 'no_access_feature'.tr);
           return;
         }
       } else if (!RoleGuard.canAccess(module, userType)) {
-        Get.snackbar('Access Denied', 'You do not have access to this feature.');
+        Get.snackbar('access_denied'.tr, 'no_access_feature'.tr);
         return;
       }
     }
@@ -247,27 +248,27 @@ class HomeController extends GetxController {
         Get.toNamed(AppRoutes.CHATBOT);
         break;
       case 'disease_detection':
-        Get.snackbar('Info', 'Disease Detection coming soon!');
+        Get.snackbar('info'.tr, 'disease_detection_coming_soon'.tr);
         break;
       case 'crop_recommendation':
         Get.toNamed(AppRoutes.CROP_RECOMMENDATION);
         break;
       default:
-        Get.snackbar('Error', 'Feature not available yet!');
+        Get.snackbar('error'.tr, 'feature_not_available'.tr);
     }
   }
 
-  /// Generate personalized welcome message based on time of day
+  /// Generate personalized welcome message based on time of day (localized)
   String get welcomeMessage {
-    final userName = user.value?.name ?? 'Farmer';
+    final userName = user.value?.name ?? 'farmer'.tr;
     final hour = DateTime.now().hour;
 
     if (hour < 12) {
-      return 'Good Morning, $userName! 🌱';
+      return '${'good_morning'.tr}, $userName! 🌱';
     } else if (hour < 17) {
-      return 'Good Afternoon, $userName! ☀️';
+      return '${'good_afternoon'.tr}, $userName! ☀️';
     } else {
-      return 'Good Evening, $userName! 🌾';
+      return '${'good_evening'.tr}, $userName! 🌾';
     }
   }
 }

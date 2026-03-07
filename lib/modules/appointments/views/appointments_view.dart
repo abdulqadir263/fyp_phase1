@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/appointment_controller.dart';
 
 /// ExpertListView — Shows list of available experts for farmers
@@ -15,10 +16,11 @@ class ExpertListView extends GetView<AppointmentController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Find an Expert'),
+        title: Text('find_expert'.tr),
         centerTitle: true,
       ),
-      body: Obx(() {
+      body: ResponsiveHelper.tabletCenter(
+        child: Obx(() {
         // Loading state
         if (controller.isLoadingExperts.value) {
           return const Center(
@@ -38,7 +40,7 @@ class ExpertListView extends GetView<AppointmentController> {
                       size: 80, color: Colors.grey.shade400),
                   const SizedBox(height: 16),
                   Text(
-                    'No experts available right now.',
+                    'no_experts_available'.tr,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey.shade600,
@@ -49,7 +51,7 @@ class ExpertListView extends GetView<AppointmentController> {
                   ElevatedButton.icon(
                     onPressed: controller.loadExperts,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Try Again'),
+                    label: Text('try_again'.tr),
                   ),
                 ],
               ),
@@ -76,6 +78,7 @@ class ExpertListView extends GetView<AppointmentController> {
           ),
         );
       }),
+      ),
     );
   }
 }

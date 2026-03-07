@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/seller_controller.dart';
 import '../models/product_model.dart';
 
@@ -14,7 +15,7 @@ class SellerProductsView extends GetView<SellerController> {
     controller.loadMyProducts();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Products'), centerTitle: true),
+      appBar: AppBar(title: Text('my_products'.tr), centerTitle: true),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'add_product_fab',
         onPressed: () {
@@ -23,9 +24,12 @@ class SellerProductsView extends GetView<SellerController> {
         },
         backgroundColor: AppColors.primaryGreen,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Add Product', style: TextStyle(color: Colors.white, fontSize: 15)),
+        label: Text('add_to_cart'.tr, style: const TextStyle(color: Colors.white, fontSize: 15)),
       ),
-      body: Obx(() {
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
               child: CircularProgressIndicator(color: AppColors.primaryGreen));
@@ -57,6 +61,8 @@ class SellerProductsView extends GetView<SellerController> {
           ),
         );
       }),
+        ),
+      ),
     );
   }
 }
@@ -163,7 +169,7 @@ class _SellerProductCard extends StatelessWidget {
                       Get.toNamed('/marketplace/seller/add-product');
                     },
                     icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Edit'),
+                    label: Text('edit'.tr),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primaryGreen,
                       side: const BorderSide(color: AppColors.primaryGreen),
@@ -194,18 +200,18 @@ class _SellerProductCard extends StatelessWidget {
                 OutlinedButton(
                   onPressed: () {
                     Get.dialog(AlertDialog(
-                      title: const Text('Delete Product?'),
-                      content: const Text('This cannot be undone.'),
+                      title: Text('delete_product'.tr),
+                      content: Text('cannot_be_undone'.tr),
                       actions: [
                         TextButton(
                             onPressed: () => Get.back(),
-                            child: const Text('Cancel')),
+                            child: Text('cancel'.tr)),
                         TextButton(
                           onPressed: () {
                             Get.back();
                             ctrl.deleteProduct(product);
                           },
-                          child: const Text('Delete',
+                          child: Text('delete'.tr,
                               style: TextStyle(color: Colors.red)),
                         ),
                       ],

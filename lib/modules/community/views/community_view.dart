@@ -55,7 +55,7 @@ class CommunityView extends GetView<PostController> {
   /// Build the app bar with bookmark action
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: const Text('Community'),
+      title: Text('community'.tr),
       centerTitle: true,
       backgroundColor: AppConstants.primaryGreen,
       foregroundColor: Colors.white,
@@ -248,7 +248,7 @@ class CommunityView extends GetView<PostController> {
             ElevatedButton.icon(
               onPressed: () => Get.toNamed('/community/create'),
               icon: const Icon(Icons.add),
-              label: const Text('Create Post'),
+              label: Text('create_post'.tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppConstants.primaryGreen,
                 foregroundColor: Colors.white,

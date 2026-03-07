@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/appointment_controller.dart';
 
 /// ExpertProfileView — Shows expert details and "Request Visit" button
@@ -12,10 +13,13 @@ class ExpertProfileView extends GetView<AppointmentController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expert Profile'),
+        title: Text('profile'.tr),
         centerTitle: true,
       ),
-      body: Obx(() {
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
         final expert = controller.selectedExpert.value;
 
         if (expert == null) {
@@ -178,6 +182,8 @@ class ExpertProfileView extends GetView<AppointmentController> {
           ),
         );
       }),
+      ),
+    ),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../core/utils/role_guard.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/marketplace_controller.dart';
 import '../controllers/cart_controller.dart';
 
@@ -19,8 +20,11 @@ class ProductDetailView extends GetView<MarketplaceController> {
     final quantity = 1.obs;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product Details'), centerTitle: true),
-      body: Obx(() {
+      appBar: AppBar(title: Text('product_details'.tr), centerTitle: true),
+      body: SafeArea(
+        top: false, // AppBar already handles top
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
         final product = controller.selectedProduct.value;
         if (product == null) {
           return const Center(child: Text('Product not found.'));
@@ -118,7 +122,7 @@ class ProductDetailView extends GetView<MarketplaceController> {
                     const SizedBox(height: 16),
 
                     // Description
-                    const Text('Description',
+                    Text('description'.tr,
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 6),
@@ -129,7 +133,7 @@ class ProductDetailView extends GetView<MarketplaceController> {
 
                     // ── Quantity selector (buyer only) ──
                     if (product.stock > 0 && _isBuyer) ...[
-                      const Text('Quantity',
+                      Text('quantity'.tr,
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
@@ -166,7 +170,7 @@ class ProductDetailView extends GetView<MarketplaceController> {
                           },
                           icon: const Icon(Icons.add_shopping_cart,
                               color: Colors.white),
-                          label: const Text('Add to Cart',
+                          label: Text('add_to_cart'.tr,
                               style: TextStyle(
                                   fontSize: 18, color: Colors.white)),
                           style: ElevatedButton.styleFrom(
@@ -184,6 +188,8 @@ class ProductDetailView extends GetView<MarketplaceController> {
           ),
         );
       }),
+      ),
+    ),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/expert_dashboard_controller.dart';
 import '../models/field_visit_model.dart';
 
@@ -17,9 +18,11 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Expert Dashboard'),
+          title: Text('seller_dashboard'.tr),
           centerTitle: true,
           bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             labelColor: AppColors.primaryGreen,
             unselectedLabelColor: Colors.grey,
             indicatorColor: AppColors.primaryGreen,
@@ -132,21 +135,21 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
   void _showRejectDialog(FieldVisitModel visit) {
     Get.dialog(
       AlertDialog(
-        title: const Text('Reject Visit Request?'),
+        title: Text('delete'.tr),
         content: Text(
           'Reject the visit request from ${visit.farmerName}?',
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               Get.back();
               controller.rejectVisit(visit);
             },
-            child: const Text('Reject', style: TextStyle(color: Colors.red)),
+            child: Text('delete'.tr, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

@@ -394,17 +394,17 @@ class PostController extends GetxController {
 
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
-        title: const Text('Delete Post'),
-        content: const Text('Are you sure you want to delete this post?'),
+        title: Text('delete'.tr),
+        content: Text('cannot_be_undone'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text('delete'.tr),
           ),
         ],
       ),
@@ -514,12 +514,12 @@ class PostController extends GetxController {
 
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
-        title: const Text('Report Post'),
+        title: Text('Report Post'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Why are you reporting this post?'),
+            Text('Why are you reporting this post?'),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
@@ -537,12 +537,12 @@ class PostController extends GetxController {
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Cancel'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Report'),
+            child: Text('submit'.tr),
           ),
         ],
       ),

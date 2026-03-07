@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/create_post_controller.dart';
 import '../models/post_model.dart';
 
@@ -15,7 +16,8 @@ class CreatePostView extends GetView<CreatePostController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
-      body: SingleChildScrollView(
+      body: ResponsiveHelper.tabletCenter(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,6 +36,7 @@ class CreatePostView extends GetView<CreatePostController> {
             _buildPublishButton(),
           ],
         ),
+      ),
       ),
     );
   }
@@ -261,7 +264,7 @@ class CreatePostView extends GetView<CreatePostController> {
             ListTile(
               leading: const Icon(Icons.photo_library_outlined,
                   color: AppConstants.primaryGreen),
-              title: const Text('Choose from Gallery'),
+              title: Text('choose_from_gallery'.tr),
               onTap: () {
                 Get.back();
                 controller.pickImages();
@@ -270,7 +273,7 @@ class CreatePostView extends GetView<CreatePostController> {
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined,
                   color: AppConstants.primaryGreen),
-              title: const Text('Take Photo'),
+              title: Text('Take Photo'),
               onTap: () {
                 Get.back();
                 controller.takePhoto();

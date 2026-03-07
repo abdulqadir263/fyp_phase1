@@ -18,14 +18,14 @@ class AppointmentDetailView extends StatelessWidget {
 
     if (visit == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Visit Details')),
-        body: const Center(child: Text('Visit not found.')),
+        appBar: AppBar(title: Text('order_details'.tr)),
+        body: Center(child: Text('user_data_not_found'.tr)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visit Details'),
+        title: Text('order_details'.tr),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

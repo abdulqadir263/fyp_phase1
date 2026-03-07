@@ -56,9 +56,9 @@ class ChatbotView extends GetView<ChatbotController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'AgriBot',
-                  style: TextStyle(
+                Text(
+                  'agribot'.tr,
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
@@ -76,9 +76,9 @@ class ChatbotView extends GetView<ChatbotController> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Text(
-                      'Online',
-                      style: TextStyle(
+                    Text(
+                      'online'.tr,
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                         color: Colors.white70,

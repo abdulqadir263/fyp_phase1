@@ -5,6 +5,7 @@ import '../../../app/data/models/weather_model.dart';
 import '../controllers/weather_controller.dart';
 import '../../../app/widgets/custom_card.dart';
 import '../../../app/widgets/custom_button.dart';
+import '../../../core/utils/responsive_helper.dart';
 
 class WeatherView extends GetView<WeatherController> {
   const WeatherView({super.key});
@@ -13,7 +14,7 @@ class WeatherView extends GetView<WeatherController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weather Advisory'),
+        title: Text('weather_advisory'.tr),
         centerTitle: true,
         actions: [
           IconButton(
@@ -40,13 +41,13 @@ class WeatherView extends GetView<WeatherController> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Loading weather data...'),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text('loading_weather'.tr),
         ],
       ),
     );
@@ -62,12 +63,12 @@ class WeatherView extends GetView<WeatherController> {
             const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              'Failed to load weather data',
+              'failed_load_weather'.tr,
               style: Get.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Please check your internet connection and try again',
+              'check_internet'.tr,
               textAlign: TextAlign.center,
               style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
@@ -86,21 +87,26 @@ class WeatherView extends GetView<WeatherController> {
   }
 
   Widget _buildWeatherContent(WeatherModel weather) {
-    return RefreshIndicator(
-      onRefresh: () => controller.refreshWeather(),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCurrentWeatherCard(weather),
-            const SizedBox(height: 24),
-            _buildAgricultureAdvisoryCard(weather),
-            const SizedBox(height: 24),
-            _buildForecastCard(),
-            const SizedBox(height: 16),
-            _buildLastUpdatedInfo(),
-          ],
+    return SafeArea(
+      top: false,
+      child: ResponsiveHelper.tabletCenter(
+        child: RefreshIndicator(
+          onRefresh: () => controller.refreshWeather(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCurrentWeatherCard(weather),
+                const SizedBox(height: 24),
+                _buildAgricultureAdvisoryCard(weather),
+                const SizedBox(height: 24),
+                _buildForecastCard(),
+                const SizedBox(height: 16),
+                _buildLastUpdatedInfo(),
+              ],
+            ),
+          ),
         ),
       ),
     );

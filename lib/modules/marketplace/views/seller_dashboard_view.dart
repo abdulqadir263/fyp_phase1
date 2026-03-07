@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/seller_controller.dart';
 
 /// SellerDashboardView — Company landing page with summary cards + navigation
@@ -16,7 +17,7 @@ class SellerDashboardView extends GetView<SellerController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Seller Dashboard'),
+        title: Text('seller_dashboard'.tr),
         centerTitle: true,
       ),
       body: Obx(() {
@@ -30,63 +31,73 @@ class SellerDashboardView extends GetView<SellerController> {
             .where((o) => o.status == 'delivered')
             .length;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Overview',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 14),
+        return SafeArea(
+          child: ResponsiveHelper.tabletCenter(
+            child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('overview'.tr,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 14),
 
-              // ── Summary cards grid ──
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.5,
-                children: [
-                  _SummaryCard(
-                    icon: Icons.inventory_2,
-                    label: 'Total Products',
-                    value: '$totalProducts',
-                    color: Colors.blue,
-                  ),
-                  _SummaryCard(
-                    icon: Icons.check_circle,
-                    label: 'Active Products',
-                    value: '$activeProducts',
-                    color: AppColors.primaryGreen,
-                  ),
-                  _SummaryCard(
-                    icon: Icons.pending_actions,
-                    label: 'Pending Orders',
-                    value: '$pendingOrders',
-                    color: Colors.orange,
-                  ),
-                  _SummaryCard(
-                    icon: Icons.done_all,
-                    label: 'Completed',
-                    value: '$completedOrders',
-                    color: Colors.teal,
-                  ),
-                ],
-              ),
+                // ── Summary cards grid (responsive) ──
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final r = ResponsiveHelper.of(context);
+                    // Adjust aspect ratio based on available width
+                    final aspectRatio = r.isSmallPhone ? 1.3 : 1.5;
+                    final crossAxisCount = r.isTablet ? 4 : 2;
+                    return GridView.count(
+                      crossAxisCount: crossAxisCount,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: r.scale(12),
+                      mainAxisSpacing: r.scale(12),
+                      childAspectRatio: aspectRatio,
+                 children: [
+                   _SummaryCard(
+                     icon: Icons.inventory_2,
+                     label: 'total_products'.tr,
+                     value: '$totalProducts',
+                     color: Colors.blue,
+                   ),
+                   _SummaryCard(
+                     icon: Icons.check_circle,
+                     label: 'active_products'.tr,
+                     value: '$activeProducts',
+                     color: AppColors.primaryGreen,
+                   ),
+                   _SummaryCard(
+                     icon: Icons.pending_actions,
+                     label: 'pending_orders'.tr,
+                     value: '$pendingOrders',
+                     color: Colors.orange,
+                   ),
+                   _SummaryCard(
+                     icon: Icons.done_all,
+                     label: 'completed'.tr,
+                     value: '$completedOrders',
+                     color: Colors.teal,
+                   ),
+                 ],
+                    );
+                  },
+                ),
 
               const SizedBox(height: 28),
 
               // ── Quick actions ──
-              const Text('Quick Actions',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('quick_actions'.tr,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
 
               // Manage Products
               _ActionCard(
                 icon: Icons.storefront,
-                title: 'My Products',
-                subtitle: 'Add, edit or manage your products',
+                title: 'my_products'.tr,
+                subtitle: 'manage_products'.tr,
                 onTap: () => Get.toNamed(AppRoutes.SELLER_PRODUCTS),
               ),
               const SizedBox(height: 10),
@@ -127,6 +138,8 @@ class SellerDashboardView extends GetView<SellerController> {
               ),
             ],
           ),
+          ),
+        ),
         );
       }),
     );

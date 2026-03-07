@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/order_controller.dart';
 import '../models/order_model.dart';
 
@@ -12,43 +13,48 @@ class OrderHistoryView extends GetView<OrderController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Orders'), centerTitle: true),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen));
-        }
+      appBar: AppBar(title: Text('my_orders'.tr), centerTitle: true),
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primaryGreen));
+            }
 
-        if (controller.orders.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.receipt_long_outlined,
-                    size: 72, color: Colors.grey.shade400),
-                const SizedBox(height: 14),
-                Text('No orders yet.',
-                    style:
-                        TextStyle(fontSize: 17, color: Colors.grey.shade600)),
-                const SizedBox(height: 8),
-                Text('Your order history will appear here.',
-                    style:
-                        TextStyle(fontSize: 13, color: Colors.grey.shade500)),
-              ],
-            ),
-          );
-        }
+            if (controller.orders.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.receipt_long_outlined,
+                        size: 72, color: Colors.grey.shade400),
+                    const SizedBox(height: 14),
+                    Text('No orders yet.',
+                        style:
+                            TextStyle(fontSize: 17, color: Colors.grey.shade600)),
+                    const SizedBox(height: 8),
+                    Text('Your order history will appear here.',
+                        style:
+                            TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                  ],
+                ),
+              );
+            }
 
-        return RefreshIndicator(
-          onRefresh: controller.loadOrders,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.orders.length,
-            itemBuilder: (_, i) =>
-                _OrderHistoryCard(order: controller.orders[i]),
-          ),
-        );
-      }),
+            return RefreshIndicator(
+              onRefresh: controller.loadOrders,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.orders.length,
+                itemBuilder: (_, i) =>
+                    _OrderHistoryCard(order: controller.orders[i]),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
@@ -190,4 +196,3 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
-

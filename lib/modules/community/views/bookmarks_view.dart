@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/post_controller.dart';
 import 'widgets/post_card.dart';
 
@@ -30,13 +31,14 @@ class _BookmarksViewState extends State<BookmarksView> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Bookmarks'),
+        title: Text('bookmarks'.tr),
         centerTitle: true,
         backgroundColor: AppConstants.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 2,
       ),
-      body: Obx(() {
+      body: ResponsiveHelper.tabletCenter(
+        child: Obx(() {
         if (controller.isLoadingBookmarks.value) {
           return const Center(
             child: CircularProgressIndicator(
@@ -72,6 +74,7 @@ class _BookmarksViewState extends State<BookmarksView> {
           ),
         );
       }),
+      ),
     );
   }
 
@@ -109,7 +112,7 @@ class _BookmarksViewState extends State<BookmarksView> {
             ElevatedButton.icon(
               onPressed: () => Get.back(),
               icon: const Icon(Icons.arrow_back),
-              label: const Text('Browse Posts'),
+              label: Text('browse_posts'.tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppConstants.primaryGreen,
                 foregroundColor: Colors.white,

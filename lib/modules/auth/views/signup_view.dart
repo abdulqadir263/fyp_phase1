@@ -11,7 +11,7 @@ class SignupView extends GetView<AuthController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Account'),
+        title: Text('create_account'.tr),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -29,7 +29,7 @@ class SignupView extends GetView<AuthController> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Create Account',
+                  'create_account'.tr,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 40),
@@ -41,7 +41,7 @@ class SignupView extends GetView<AuthController> {
                       // Name field
                       CustomTextField(
                         controller: controller.nameController,
-                        labelText: 'Full Name',
+                        labelText: 'full_name'.tr,
                         prefixIcon: Icons.person,
                       ),
                       const SizedBox(height: 16),
@@ -49,7 +49,7 @@ class SignupView extends GetView<AuthController> {
                       // Email field
                       CustomTextField(
                         controller: controller.emailController,
-                        labelText: 'Email',
+                        labelText: 'email'.tr,
                         prefixIcon: Icons.email,
                         keyboardType: TextInputType.emailAddress,
                       ),
@@ -58,7 +58,7 @@ class SignupView extends GetView<AuthController> {
                       // Phone field
                       CustomTextField(
                         controller: controller.phoneController,
-                        labelText: 'Phone Number',
+                        labelText: 'phone_number'.tr,
                         prefixIcon: Icons.phone,
                         keyboardType: TextInputType.phone,
                       ),
@@ -69,7 +69,7 @@ class SignupView extends GetView<AuthController> {
                       // Password field
                       CustomTextField(
                         controller: controller.passwordController,
-                        labelText: 'Password',
+                        labelText: 'password'.tr,
                         prefixIcon: Icons.lock,
                         obscureText: true,
                       ),
@@ -81,7 +81,7 @@ class SignupView extends GetView<AuthController> {
 
                 // Submit Button
                 Obx(() => CustomButton(
-                  text: 'Sign Up',
+                  text: 'sign_up'.tr,
                   onPressed: controller.submit,
                   isLoading: controller.isLoading.value,
                 )),
@@ -91,7 +91,7 @@ class SignupView extends GetView<AuthController> {
                 // Login link
                 TextButton(
                   onPressed: () => Get.back(), // Login screen par wapas jayein
-                  child: Text('Already have an account? Login'),
+                  child: Text('already_have_account_login'.tr),
                 ),
               ],
             ),

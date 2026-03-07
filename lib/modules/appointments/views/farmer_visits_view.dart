@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/appointment_controller.dart';
 import '../models/field_visit_model.dart';
 
@@ -17,7 +18,7 @@ class FarmerVisitsView extends GetView<AppointmentController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Visit Requests'),
+        title: Text('appointments'.tr),
         centerTitle: true,
       ),
 
@@ -30,7 +31,8 @@ class FarmerVisitsView extends GetView<AppointmentController> {
             style: TextStyle(color: Colors.white)),
       ),
 
-      body: Obx(() {
+      body: ResponsiveHelper.tabletCenter(
+        child: Obx(() {
         // Loading state
         if (controller.isLoadingVisits.value) {
           return const Center(
@@ -88,6 +90,7 @@ class FarmerVisitsView extends GetView<AppointmentController> {
           ),
         );
       }),
+      ),
     );
   }
 

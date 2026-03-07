@@ -16,7 +16,7 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       // App Bar
       appBar: AppBar(
-        title: const Text('Aasaan Kisaan'),
+        title: Text('app_name'.tr),
         centerTitle: true,
         actions: [
           // Notification bell icon with badge
@@ -24,8 +24,8 @@ class HomeView extends GetView<HomeController> {
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                onPressed: () => Get.snackbar('Info', 'Notifications coming soon!'),
-                tooltip: 'Notifications',
+                onPressed: () => Get.snackbar('info'.tr, 'notifications_coming_soon'.tr),
+                tooltip: 'notifications'.tr,
               ),
               Positioned(
                 right: 8,
@@ -45,7 +45,7 @@ class HomeView extends GetView<HomeController> {
           IconButton(
             icon: const Icon(Icons.language),
             onPressed: controller.toggleLanguage,
-            tooltip: 'Change Language',
+            tooltip: 'change_language'.tr,
           ),
         ],
       ),
@@ -77,7 +77,7 @@ class HomeView extends GetView<HomeController> {
       onPressed: () => controller.navigateToFeature('chatbot'),
       backgroundColor: AppConstants.primaryGreen,
       child: const Icon(Icons.chat, color: Colors.white),
-      tooltip: 'AgriBot Assistant',
+      tooltip: 'agri_chatbot'.tr,
     );
   }
 
@@ -98,7 +98,7 @@ class HomeView extends GetView<HomeController> {
         children: [
           // Drawer Header with guest user handling
           Obx(() {
-            final userName = controller.user.value?.name ?? 'Guest User';
+            final userName = controller.user.value?.name ?? 'guest_user'.tr;
             final userEmail =
                 controller.user.value?.email ?? 'guest@example.com';
             final isGuest = controller.isGuestUser;
@@ -144,7 +144,7 @@ class HomeView extends GetView<HomeController> {
           // Drawer items
           ListTile(
             leading: const Icon(Icons.home),
-            title: const Text('Home'),
+            title: Text('home'.tr),
             onTap: () {
               Get.back(); // Drawer close karo
               controller.changePage(0); // Home tab select karo
@@ -155,7 +155,7 @@ class HomeView extends GetView<HomeController> {
           Obx(() => ListTile(
             leading: const Icon(Icons.person),
             title:
-            Text(controller.isGuestUser ? 'Create Account' : 'Profile'),
+            Text(controller.isGuestUser ? 'create_account'.tr : 'profile'.tr),
             onTap: () {
               Get.back(); // Drawer close karo
               if (controller.isGuestUser) {
@@ -169,7 +169,7 @@ class HomeView extends GetView<HomeController> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text('settings'.tr),
             onTap: () {
               Get.back(); // Drawer close karo
               controller.goToSettings();
@@ -177,7 +177,7 @@ class HomeView extends GetView<HomeController> {
           ),
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('About'),
+            title: Text('about'.tr),
             onTap: () {
               Get.back(); // Drawer close karo
               controller.goToAbout();
@@ -192,7 +192,7 @@ class HomeView extends GetView<HomeController> {
               color: controller.isGuestUser ? Colors.green : Colors.red,
             ),
             title: Text(
-              controller.isGuestUser ? 'Login / Sign Up' : 'Logout',
+              controller.isGuestUser ? 'login_signup'.tr : 'logout'.tr,
               style: TextStyle(
                 color: controller.isGuestUser ? Colors.green : Colors.red,
               ),
@@ -227,27 +227,27 @@ class HomeView extends GetView<HomeController> {
     });
   }
 
-  /// Map tab identifier → BottomNavigationBarItem
+  /// Map tab identifier → BottomNavigationBarItem (localized)
   BottomNavigationBarItem _navItemForTab(String tab) {
     switch (tab) {
       case 'home':
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.home), label: 'Home');
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.home), label: 'home'.tr);
       case 'marketplace':
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.store), label: 'Marketplace');
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.store), label: 'marketplace'.tr);
       case 'weather':
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.cloud), label: 'Weather');
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.cloud), label: 'weather_forecast'.tr);
       case 'crop_tracker':
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.agriculture), label: 'Crop Tracker');
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.agriculture), label: 'crop_tracker'.tr);
       case 'community':
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.people), label: 'Community');
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.people), label: 'community'.tr);
       case 'appointments':
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today), label: 'Appointments');
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.calendar_today), label: 'appointments'.tr);
       default:
         return const BottomNavigationBarItem(
             icon: Icon(Icons.circle), label: '');
@@ -288,13 +288,14 @@ class HomeView extends GetView<HomeController> {
                 Icon(Icons.calendar_today,
                     size: isLargeScreen ? 80 : 60, color: Colors.blue),
                 SizedBox(height: isLargeScreen ? 24 : 16),
-                Text('Appointments',
+                Text('appointments'.tr,
                     style: TextStyle(
                         fontSize: isLargeScreen ? 32 : 24,
                         fontWeight: FontWeight.bold)),
                 SizedBox(height: isLargeScreen ? 16 : 12),
-                Text('Coming Soon!',
-                    style: TextStyle(
+                Text(
+                  'coming_soon'.tr,
+                  style: TextStyle(
                         fontSize: isLargeScreen ? 18 : 16,
                         color: Colors.grey)),
               ],
@@ -356,7 +357,7 @@ class HomeView extends GetView<HomeController> {
                               SizedBox(width: isLargeScreen ? 12 : 8),
                               Expanded(
                                 child: Text(
-                                  'You are browsing as a guest. Some features may be limited.',
+                                  'browsing_as_guest'.tr,
                                   style: TextStyle(
                                     color: Colors.orange.shade800,
                                     fontSize: isLargeScreen ? 16 : 14,
@@ -385,7 +386,7 @@ class HomeView extends GetView<HomeController> {
                               SizedBox(width: isLargeScreen ? 12 : 8),
                               Expanded(
                                 child: Text(
-                                  'Your profile is incomplete. Please complete your profile to access all features.',
+                                  'profile_incomplete'.tr,
                                   style: TextStyle(
                                     color: Colors.blue.shade800,
                                     fontSize: isLargeScreen ? 16 : 14,
@@ -400,13 +401,13 @@ class HomeView extends GetView<HomeController> {
                                     backgroundColor: Colors.blue.shade800,
                                     foregroundColor: Colors.white,
                                   ),
-                                  child: const Text('Complete Now'),
+                                  child: Text('complete_now'.tr),
                                 ),
                               ] else ...[
                                 TextButton(
                                   onPressed: () => controller.goToProfile(),
                                   child: Text(
-                            'Complete Now',
+                            'complete_now'.tr,
                             style: TextStyle(
                               color: Colors.blue.shade800,
                               fontWeight: FontWeight.bold,
@@ -423,11 +424,11 @@ class HomeView extends GetView<HomeController> {
                 SizedBox(height: isLargeScreen ? 8 : 4),
 
                 // Quick Actions Section
-                _buildSectionTitle('Quick Actions', context),
+                _buildSectionTitle('quick_actions'.tr, context),
                 const SizedBox(height: 12),
 
                 Text(
-                  'What would you like to do today?',
+                  'what_to_do_today'.tr,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.grey[600],
                     fontSize: isLargeScreen ? 18 : 16,
@@ -506,7 +507,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Tap to view detailed forecast',
+                    'tap_detailed_forecast'.tr,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
                       fontSize: 13,
@@ -540,16 +541,16 @@ class HomeView extends GetView<HomeController> {
   // Farmer Tips Carousel
   Widget _buildFarmerTipsCarousel(bool isLargeScreen) {
     final tips = [
-      {'icon': Icons.water_drop, 'tip': 'Water your crops early morning for best results', 'color': Colors.blue},
-      {'icon': Icons.bug_report, 'tip': 'Check for pests regularly to prevent crop damage', 'color': Colors.red},
-      {'icon': Icons.eco, 'tip': 'Use organic fertilizers for healthier soil', 'color': Colors.green},
-      {'icon': Icons.cloud, 'tip': 'Monitor weather forecasts for farming decisions', 'color': Colors.orange},
+      {'icon': Icons.water_drop, 'tip': 'tip_water', 'color': Colors.blue},
+      {'icon': Icons.bug_report, 'tip': 'tip_pest', 'color': Colors.red},
+      {'icon': Icons.eco, 'tip': 'tip_organic', 'color': Colors.green},
+      {'icon': Icons.cloud, 'tip': 'tip_weather', 'color': Colors.orange},
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Farming Tips', Get.context!),
+        _buildSectionTitle('farming_tips'.tr, Get.context!),
         const SizedBox(height: 12),
         SizedBox(
           height: isLargeScreen ? 120 : 100,
@@ -579,7 +580,7 @@ class HomeView extends GetView<HomeController> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        tip['tip'] as String,
+                        (tip['tip'] as String).tr,
                         style: TextStyle(
                           fontSize: isLargeScreen ? 14 : 12,
                           color: Colors.grey[800],
@@ -662,46 +663,46 @@ class HomeView extends GetView<HomeController> {
     final allowed = RoleGuard.allowedFeatures;
     final cards = <Widget>[];
 
-    // Map feature identifiers to card configs
+    // Map feature identifiers to card configs (localized)
     final allCards = {
       'appointments': {
-        'title': 'Book Appointment',
+        'title': 'book_appointment',
         'icon': Icons.calendar_today,
         'color': Colors.blue,
         'feature': 'appointments',
       },
       'marketplace': {
-        'title': 'Marketplace',
+        'title': 'marketplace',
         'icon': Icons.shopping_cart,
         'color': Colors.green,
         'feature': 'marketplace',
       },
       'weather': {
-        'title': 'Weather Advice',
+        'title': 'weather_advice',
         'icon': Icons.cloud,
         'color': Colors.orange,
         'feature': 'weather',
       },
       'crop_tracker': {
-        'title': 'Crop Tracker',
+        'title': 'crop_tracker',
         'icon': Icons.agriculture,
         'color': Colors.brown,
         'feature': 'crop_tracker',
       },
       'community': {
-        'title': 'Community',
+        'title': 'community',
         'icon': Icons.people,
         'color': Colors.purple,
         'feature': 'community',
       },
       'chatbot': {
-        'title': 'Agri Chatbot',
+        'title': 'agri_chatbot',
         'icon': Icons.chat,
         'color': Colors.teal,
         'feature': 'chatbot',
       },
       'crop_recommendation': {
-        'title': 'Crop Recommendation',
+        'title': 'crop_recommendation',
         'icon': Icons.eco,
         'color': Colors.lightGreen,
         'feature': 'crop_recommendation',
@@ -712,7 +713,7 @@ class HomeView extends GetView<HomeController> {
       final cfg = allCards[id];
       if (cfg != null) {
         cards.add(_buildFeatureCard(
-          title: cfg['title'] as String,
+          title: (cfg['title'] as String).tr,
           icon: cfg['icon'] as IconData,
           color: cfg['color'] as Color,
           onTap: () => controller.navigateToFeature(cfg['feature'] as String),
@@ -723,7 +724,7 @@ class HomeView extends GetView<HomeController> {
     // Always add upcoming features for farmers
     if (RoleGuard.currentUserType == 'farmer') {
       cards.add(_buildFeatureCard(
-        title: 'Disease Detection',
+        title: 'disease_detection'.tr,
         icon: Icons.bug_report,
         color: Colors.red,
         onTap: () => controller.navigateToFeature('disease_detection'),
@@ -816,7 +817,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 24 : 16),
                 Text(
-                  'Marketplace',
+                  'marketplace'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 32 : 24,
                     fontWeight: FontWeight.bold,
@@ -824,7 +825,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 16 : 12),
                 Text(
-                  'Coming Soon!',
+                  'coming_soon'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 18 : 16,
                     color: Colors.grey,
@@ -834,7 +835,7 @@ class HomeView extends GetView<HomeController> {
                 if (isLargeScreen)
                   ElevatedButton(
                     onPressed: () {},
-                    child: const Text('Get Notified'),
+                    child: Text('get_notified'.tr),
                   ),
               ],
             ),
@@ -862,7 +863,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 24 : 16),
                 Text(
-                  'Weather Forecast',
+                  'weather_forecast'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 32 : 24,
                     fontWeight: FontWeight.bold,
@@ -870,7 +871,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 16 : 12),
                 Text(
-                  'Coming Soon!',
+                  'coming_soon'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 18 : 16,
                     color: Colors.grey,
@@ -902,7 +903,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 24 : 16),
                 Text(
-                  'Crop Tracker',
+                  'crop_tracker'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 32 : 24,
                     fontWeight: FontWeight.bold,
@@ -910,7 +911,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 16 : 12),
                 Text(
-                  'Coming Soon!',
+                  'coming_soon'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 18 : 16,
                     color: Colors.grey,
@@ -942,7 +943,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 24 : 16),
                 Text(
-                  'Community',
+                  'community'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 32 : 24,
                     fontWeight: FontWeight.bold,
@@ -950,7 +951,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 SizedBox(height: isLargeScreen ? 16 : 12),
                 Text(
-                  'Coming Soon!',
+                  'coming_soon'.tr,
                   style: TextStyle(
                     fontSize: isLargeScreen ? 18 : 16,
                     color: Colors.grey,
@@ -964,7 +965,7 @@ class HomeView extends GetView<HomeController> {
                     backgroundColor: Colors.purple,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Join Community'),
+                  child: Text('join_community'.tr),
                 ),
               ],
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/crop_recommendation_controller.dart';
 
 /// Input screen for crop recommendation.
@@ -13,7 +14,7 @@ class CropInputScreen extends GetView<CropRecommendationController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crop Recommendation'),
+        title: Text('crop_recommendation_title'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.history_rounded),
@@ -23,9 +24,11 @@ class CropInputScreen extends GetView<CropRecommendationController> {
         ],
       ),
       body: SafeArea(
-        child: Form(
-          key: controller.formKey,
-          child: ListView(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: Form(
+            key: controller.formKey,
+            child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
               // Header
@@ -171,6 +174,7 @@ class CropInputScreen extends GetView<CropRecommendationController> {
               const SizedBox(height: 16),
             ],
           ),
+        ),
         ),
       ),
     );

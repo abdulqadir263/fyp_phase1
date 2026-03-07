@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/post_controller.dart';
 import '../controllers/comment_controller.dart';
 import '../models/post_model.dart';
@@ -57,7 +58,8 @@ class _PostDetailViewState extends State<PostDetailView> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: _buildAppBar(),
-      body: Obx(() {
+      body: ResponsiveHelper.tabletCenter(
+        child: Obx(() {
         if (postController.isLoading.value &&
             postController.currentPost.value == null) {
           return const Center(
@@ -101,12 +103,13 @@ class _PostDetailViewState extends State<PostDetailView> {
           ],
         );
       }),
+      ),
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: const Text('Post'),
+      title: Text('post'.tr),
       centerTitle: true,
       backgroundColor: AppConstants.primaryGreen,
       foregroundColor: Colors.white,

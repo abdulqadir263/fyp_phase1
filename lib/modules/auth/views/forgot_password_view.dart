@@ -4,6 +4,7 @@ import '../controllers/auth_controller.dart';
 import '../../../app/widgets/custom_button.dart';
 import '../../../app/widgets/custom_text_field.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/responsive_helper.dart';
 
 class ForgotPasswordView extends GetView<AuthController> {
   ForgotPasswordView({super.key});
@@ -22,7 +23,7 @@ class ForgotPasswordView extends GetView<AuthController> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Reset Password',
+          'reset_password'.tr,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: Colors.grey[800],
@@ -37,10 +38,12 @@ class ForgotPasswordView extends GetView<AuthController> {
         ),
       ),
       body: SafeArea(
-        child: Obx(() => AnimatedSwitcher(
+        child: ResponsiveHelper.tabletCenter(
+          child: Obx(() => AnimatedSwitcher(
               duration: AppConstants.mediumAnimation,
               child: _buildCurrentStep(),
             )),
+        ),
       ),
     );
   }
@@ -65,15 +68,14 @@ class ForgotPasswordView extends GetView<AuthController> {
         children: [
           _buildHeaderSection(
             icon: Icons.lock_reset_outlined,
-            title: 'Reset Your Password',
-            subtitle:
-                'Enter your email address and we will send you a link to reset your password.',
+            title: 'reset_your_password'.tr,
+            subtitle: 'enter_email_reset'.tr,
           ),
           const SizedBox(height: 40),
           _buildEmailFormSection(),
           const SizedBox(height: 40),
           Obx(() => CustomButton(
-                text: 'Send Reset Link',
+                text: 'send_reset_link'.tr,
                 onPressed: () =>
                     controller.sendPasswordResetEmail(emailController.text.trim()),
                 isLoading: controller.isLoading.value,
@@ -92,7 +94,7 @@ class ForgotPasswordView extends GetView<AuthController> {
         children: [
           _buildHeaderSection(
             icon: Icons.mark_email_read_outlined,
-            title: 'Check Your Email',
+            title: 'check_your_email'.tr,
             subtitle:
                 'We have sent a password reset link to ${controller.resetEmail.value}. Please check your email inbox and spam folder.',
           ),
@@ -102,7 +104,7 @@ class ForgotPasswordView extends GetView<AuthController> {
           _buildResendSection(),
           const SizedBox(height: 40),
           CustomButton(
-            text: 'Back to Login',
+            text: 'back_to_login'.tr,
             onPressed: () => Get.back(),
           ),
         ],
@@ -169,8 +171,8 @@ class ForgotPasswordView extends GetView<AuthController> {
         children: [
           CustomTextField(
             controller: emailController,
-            labelText: 'Email Address',
-            hintText: 'Enter your email address',
+            labelText: 'email_address'.tr,
+            hintText: 'enter_email'.tr,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
           ),
@@ -187,7 +189,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Make sure you enter the same email address you used when creating your account.',
+                    'same_email_info'.tr,
                     style: TextStyle(
                       color: Colors.blue[800],
                       fontSize: 12,
@@ -220,7 +222,7 @@ class ForgotPasswordView extends GetView<AuthController> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Email Sent!',
+            'email_sent'.tr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -229,7 +231,7 @@ class ForgotPasswordView extends GetView<AuthController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Please check your inbox and spam folder for the password reset link. Click the link in the email to reset your password.',
+            'check_inbox_spam'.tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.green[700],
@@ -249,13 +251,13 @@ class ForgotPasswordView extends GetView<AuthController> {
         child: Column(
           children: [
             Text(
-              "Didn't receive the email?",
+              'didnt_receive_email'.tr,
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             timer > 0
                 ? Text(
-                    'Resend in $timer seconds',
+                    'Resend in $timer ${'seconds'.tr}',
                     style: TextStyle(
                       color: Colors.grey[500],
                       fontWeight: FontWeight.w500,
@@ -265,7 +267,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                     onPressed: () => controller
                         .sendPasswordResetEmail(controller.resetEmail.value),
                     child: Text(
-                      'Resend Email',
+                      'resend_email'.tr,
                       style: TextStyle(
                         color: AppConstants.primaryGreen,
                         fontWeight: FontWeight.bold,

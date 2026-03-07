@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/data/models/weather_model.dart';
 import '../../../app/widgets/custom_card.dart';
+import '../../../core/utils/responsive_helper.dart';
 import '../controllers/weather_controller.dart';
 
 class WeatherDetailView extends GetView<WeatherController> {
@@ -14,11 +15,14 @@ class WeatherDetailView extends GetView<WeatherController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weather Details'),
+        title: Text('weather_details'.tr),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
+        top: false,
+        child: ResponsiveHelper.tabletCenter(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -39,6 +43,8 @@ class WeatherDetailView extends GetView<WeatherController> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

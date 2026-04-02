@@ -7,17 +7,12 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
 
 class ForgotPasswordView extends GetView<AuthController> {
-  ForgotPasswordView({super.key});
-
-  final TextEditingController emailController = TextEditingController();
+  const ForgotPasswordView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get email from arguments if available
-    final String? initialEmail = Get.arguments as String?;
-    if (initialEmail != null && initialEmail.isNotEmpty) {
-      emailController.text = initialEmail;
-    }
+    // Email is pre-filled by AuthController.navigateToForgotPassword()
+    // No local TextEditingController needed — avoids a memory leak
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -49,14 +44,10 @@ class ForgotPasswordView extends GetView<AuthController> {
   }
 
   Widget _buildCurrentStep() {
-    switch (controller.forgotPasswordStep.value) {
-      case 0:
-        return _buildEmailStep();
-      case 1:
-        return _buildSuccessStep();
-      default:
-        return _buildEmailStep();
-    }
+    // resetStep 0 = enter email, 1 = success screen
+    return controller.resetStep.value == 0
+        ? _buildEmailStep()
+        : _buildSuccessStep();
   }
 
   Widget _buildEmailStep() {
@@ -76,8 +67,9 @@ class ForgotPasswordView extends GetView<AuthController> {
           const SizedBox(height: 40),
           Obx(() => CustomButton(
                 text: 'send_reset_link'.tr,
-                onPressed: () =>
-                    controller.sendPasswordResetEmail(emailController.text.trim()),
+                onPressed: () => controller.sendPasswordResetEmail(
+                  controller.forgotEmailController.text.trim(),
+                ),
                 isLoading: controller.isLoading.value,
               )),
         ],
@@ -96,7 +88,7 @@ class ForgotPasswordView extends GetView<AuthController> {
             icon: Icons.mark_email_read_outlined,
             title: 'check_your_email'.tr,
             subtitle:
-                'We have sent a password reset link to ${controller.resetEmail.value}. Please check your email inbox and spam folder.',
+                'We have sent a password reset link to ${controller.resetEmailSentTo.value}. Please check your inbox and spam folder.',
           ),
           const SizedBox(height: 40),
           _buildEmailInfoCard(),
@@ -169,8 +161,9 @@ class ForgotPasswordView extends GetView<AuthController> {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
+          // Uses forgotEmailController from the controller (properly disposed)
           CustomTextField(
-            controller: emailController,
+            controller: controller.forgotEmailController,
             labelText: 'email_address'.tr,
             hintText: 'enter_email'.tr,
             prefixIcon: Icons.email_outlined,
@@ -246,7 +239,7 @@ class ForgotPasswordView extends GetView<AuthController> {
 
   Widget _buildResendSection() {
     return Obx(() {
-      final timer = controller.resendTimer.value;
+      final cooldown = controller.resendCooldown.value;  // renamed from resendTimer
       return Center(
         child: Column(
           children: [
@@ -255,25 +248,26 @@ class ForgotPasswordView extends GetView<AuthController> {
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
-            timer > 0
-                ? Text(
-                    'Resend in $timer ${'seconds'.tr}',
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  )
-                : TextButton(
-                    onPressed: () => controller
-                        .sendPasswordResetEmail(controller.resetEmail.value),
-                    child: Text(
-                      'resend_email'.tr,
-                      style: TextStyle(
-                        color: AppConstants.primaryGreen,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            if (cooldown > 0)
+              Text(
+                'Resend in $cooldown ${'seconds'.tr}',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.w500,
+                ),
+              )
+            else
+              TextButton(
+                onPressed: () => controller
+                    .sendPasswordResetEmail(controller.resetEmailSentTo.value),
+                child: Text(
+                  'resend_email'.tr,
+                  style: TextStyle(
+                    color: AppConstants.primaryGreen,
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+              ),
           ],
         ),
       );

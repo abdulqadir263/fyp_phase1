@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import '../../../core/values/constants.dart';
 import '../models/user_model.dart';
 
-// Firebase se directly interaction karne ke liye service
+// Firebase interaction layer — all auth and Firestore calls live here.
+// Controllers and providers call this; they never touch Firebase directly.
 class FirebaseService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance; // Private property
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -45,9 +46,20 @@ class FirebaseService extends GetxService {
     }
   }
 
-  // Logout
+  /// Sign out current user (works for both email and anonymous users)
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  /// Anonymous sign-in for the guest farmer flow.
+  /// Returns a real Firebase UserCredential with a permanent UID.
+  /// The UID stays the same across app restarts until the user signs out.
+  Future<UserCredential> signInAnonymously() async {
+    try {
+      return await _auth.signInAnonymously();
+    } on FirebaseAuthException catch (e) {
+      throw _getErrorMessage(e);
+    }
   }
 
   // User ko Firestore mein save/update karna

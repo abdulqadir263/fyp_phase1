@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/data/models/user_model.dart';
@@ -6,44 +7,41 @@ import '../../../app/data/services/firebase_service.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 
-/// OnboardingController - Manages the role selection and profile completion flow
-/// Handles different profile fields based on user role (Farmer, Expert, Company)
+/// OnboardingController — ViewModel for the Role Selection and Profile Completion screens.
+///
+/// Handles the one-time onboarding flow:
+/// 1. User picks a role (Farmer / Expert / Company)
+/// 2. Fills role-specific profile fields
+/// 3. Profile saved to Firestore → navigated to Home
 class OnboardingController extends GetxController {
-  final AuthProvider _authProvider = Get.find<AuthProvider>();
+  final AuthProvider    _authProvider    = Get.find<AuthProvider>();
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
 
-  // ========== ROLE SELECTION STATE ==========
+  // --- Role selection ---
   final RxString selectedRole = ''.obs;
-  final RxBool isLoading = false.obs;
+  final RxBool   isLoading    = false.obs;
 
-  // ========== COMMON PROFILE FIELDS ==========
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
+  // --- Common profile fields ---
+  final nameController     = TextEditingController();
+  final phoneController    = TextEditingController();
+  final locationController = TextEditingController();
 
-  // ========== FARMER-SPECIFIC FIELDS ==========
-  final TextEditingController farmSizeController = TextEditingController();
+  // --- Farmer-specific ---
+  final farmSizeController         = TextEditingController();
   final RxList<String> selectedCrops = <String>[].obs;
 
-  /// Available crops for multi-selection (farmer-friendly names)
   static const List<String> availableCrops = [
-    'Wheat',
-    'Rice',
-    'Potatoes',
-    'Maize',
-    'Cotton',
-    'Sugarcane',
-    'Canola',
+    'Wheat', 'Rice', 'Potatoes', 'Maize',
+    'Cotton', 'Sugarcane', 'Canola',
   ];
 
-  // ========== EXPERT-SPECIFIC FIELDS ==========
-  final RxString selectedSpecialization = ''.obs;
-  final TextEditingController yearsExperienceController = TextEditingController();
-  final TextEditingController certificationsController = TextEditingController();
-  final TextEditingController bioController = TextEditingController();
+  // --- Expert-specific ---
+  final RxString selectedSpecialization       = ''.obs;
+  final yearsExperienceController             = TextEditingController();
+  final certificationsController              = TextEditingController();
+  final bioController                         = TextEditingController();
   final RxBool isAvailableForConsultation = true.obs;
 
-  /// Available specializations for experts
   static const List<String> expertSpecializations = [
     'Crop Management',
     'Pest & Disease Control',
@@ -56,15 +54,14 @@ class OnboardingController extends GetxController {
     'Fertilizer & Nutrient Management',
   ];
 
-  // ========== COMPANY/SELLER-SPECIFIC FIELDS ==========
-  final TextEditingController companyNameController = TextEditingController();
-  final TextEditingController ownerNameController = TextEditingController();
-  final RxString selectedBusinessType = ''.obs;
-  final TextEditingController yearsInBusinessController = TextEditingController();
-  final TextEditingController licenseNumberController = TextEditingController();
-  final TextEditingController businessDescriptionController = TextEditingController();
+  // --- Company/Seller-specific ---
+  final companyNameController          = TextEditingController();
+  final ownerNameController            = TextEditingController();
+  final RxString selectedBusinessType  = ''.obs;
+  final yearsInBusinessController      = TextEditingController();
+  final licenseNumberController        = TextEditingController();
+  final businessDescriptionController  = TextEditingController();
 
-  /// Available business types for company/seller
   static const List<String> businessTypes = [
     'Seeds Supplier',
     'Fertilizer Dealer',
@@ -75,44 +72,62 @@ class OnboardingController extends GetxController {
     'General Agri Store',
   ];
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // COMPUTED GETTERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// True when the current user signed in anonymously (guest farmer flow).
+  /// Used by ProfileCompletionView to hide the "Skip" button.
+  bool get isAnonymousFarmer =>
+      (_authProvider.currentUser.value?.isAnonymous ?? false) &&
+      selectedRole.value == 'farmer';
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────────────────────────────────
+
   @override
   void onInit() {
     super.onInit();
-    _initializeFromCurrentUser();
+    _prefillFromCurrentUser();
   }
 
-  /// Initialize fields from current user data if available
-  void _initializeFromCurrentUser() {
+  /// Pre-fill fields with any existing user data (returning user or signup carry-over).
+  void _prefillFromCurrentUser() {
     final user = _authProvider.currentUser.value;
-    if (user != null) {
-      nameController.text = user.name;
-      phoneController.text = user.phone;
-      locationController.text = user.location ?? '';
-      // Only set role if user already has a userType (returning user)
-      if (user.userType.isNotEmpty) {
-        selectedRole.value = user.userType;
-      }
+    if (user == null) return;
+
+    nameController.text     = user.name;
+    phoneController.text    = user.phone;
+    locationController.text = user.location ?? '';
+
+    if (user.userType.isNotEmpty) {
+      selectedRole.value = user.userType;
     }
   }
 
-  // ========== ROLE SELECTION METHODS ==========
+  // ─────────────────────────────────────────────────────────────────────────
+  // ROLE SELECTION
+  // ─────────────────────────────────────────────────────────────────────────
 
-  /// Select a role and navigate to profile completion
+  /// User tapped a role card — set the role and navigate to profile completion.
   void selectRole(String role) {
     selectedRole.value = role;
-    debugPrint('OnboardingController: Role selected - $role');
     Get.toNamed(AppRoutes.PROFILE_COMPLETION);
   }
 
-  /// Continue as guest - no Firestore profile created
+  /// "Continue as Guest" on Role Selection — skip onboarding, go straight to Home.
+  /// The user is already authenticated (email or anonymous) at this point.
   void continueAsGuest() {
-    debugPrint('OnboardingController: Continuing as guest');
-    _authProvider.signInAsGuest();
+    Get.offAllNamed(AppRoutes.HOME);
   }
 
-  // ========== FARMER CROP SELECTION METHODS ==========
+  void goBackToRoleSelection() => Get.back();
 
-  /// Toggle crop selection
+  // ─────────────────────────────────────────────────────────────────────────
+  // CROP SELECTION (Farmers only)
+  // ─────────────────────────────────────────────────────────────────────────
+
   void toggleCropSelection(String crop) {
     if (selectedCrops.contains(crop)) {
       selectedCrops.remove(crop);
@@ -121,21 +136,30 @@ class OnboardingController extends GetxController {
     }
   }
 
-  /// Check if a crop is selected
-  bool isCropSelected(String crop) {
-    return selectedCrops.contains(crop);
+  bool isCropSelected(String crop) => selectedCrops.contains(crop);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // VALIDATION
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Shared check — name must be at least 3 characters.
+  bool _validateName() {
+    if (nameController.text.trim().length < 3) {
+      AppSnackbar.error('Please enter your name (at least 3 characters)');
+      return false;
+    }
+    return true;
   }
 
-  // ========== VALIDATION METHODS ==========
-
-  /// Validate farmer profile fields
+  /// Farmer profile: name + phone + location are required. Crops required too.
   bool _validateFarmerProfile() {
-    if (nameController.text.trim().isEmpty) {
-      AppSnackbar.error('Please enter your name');
+    if (!_validateName()) return false;
+    if (phoneController.text.trim().length < 11) {
+      AppSnackbar.error('Please enter a valid phone number');
       return false;
     }
     if (locationController.text.trim().isEmpty) {
-      AppSnackbar.error('Please enter your location');
+      AppSnackbar.error('Please enter your farm location');
       return false;
     }
     if (selectedCrops.isEmpty) {
@@ -145,29 +169,22 @@ class OnboardingController extends GetxController {
     return true;
   }
 
-  /// Validate expert profile fields
+  /// Expert profile: name + specialization + years of experience required.
   bool _validateExpertProfile() {
-    if (nameController.text.trim().isEmpty) {
-      AppSnackbar.error('Please enter your name');
-      return false;
-    }
+    if (!_validateName()) return false;
     if (selectedSpecialization.value.isEmpty) {
       AppSnackbar.error('Please select your specialization');
       return false;
     }
-    if (yearsExperienceController.text.trim().isEmpty) {
-      AppSnackbar.error('Please enter your years of experience');
-      return false;
-    }
     final years = int.tryParse(yearsExperienceController.text.trim());
     if (years == null || years < 0) {
-      AppSnackbar.error('Please enter a valid number for experience');
+      AppSnackbar.error('Please enter a valid number for years of experience');
       return false;
     }
     return true;
   }
 
-  /// Validate company profile fields
+  /// Company profile: company name + business type required.
   bool _validateCompanyProfile() {
     if (companyNameController.text.trim().isEmpty) {
       AppSnackbar.error('Please enter your company name');
@@ -180,102 +197,88 @@ class OnboardingController extends GetxController {
     return true;
   }
 
-  /// Main validation method based on selected role
+  /// Dispatches to the correct role validator.
   bool validateProfile() {
     switch (selectedRole.value) {
-      case 'farmer':
-        return _validateFarmerProfile();
-      case 'expert':
-        return _validateExpertProfile();
-      case 'company':
-        return _validateCompanyProfile();
+      case 'farmer':  return _validateFarmerProfile();
+      case 'expert':  return _validateExpertProfile();
+      case 'company': return _validateCompanyProfile();
       default:
         AppSnackbar.error('Please select a role first');
         return false;
     }
   }
 
-  // ========== PROFILE SAVE METHODS ==========
+  // ─────────────────────────────────────────────────────────────────────────
+  // SAVE PROFILE
+  // ─────────────────────────────────────────────────────────────────────────
 
-  /// Save completed profile to Firestore
+  /// Validate, build the updated UserModel, save to Firestore, navigate home.
   Future<void> saveProfile() async {
     if (!validateProfile()) return;
 
-    // Dismiss keyboard
     FocusManager.instance.primaryFocus?.unfocus();
+    isLoading.value = true;
 
     try {
-      isLoading.value = true;
-
-      final currentUser = _authProvider.currentUser.value;
-      if (currentUser == null) {
-        AppSnackbar.error('User session expired. Please login again.');
+      final current = _authProvider.currentUser.value;
+      if (current == null) {
+        AppSnackbar.error('Session expired. Please login again.');
         Get.offAllNamed(AppRoutes.LOGIN);
         return;
       }
 
-      // Build updated user model based on role
-      UserModel updatedUser;
+      // Pre-trim once — avoids repeating .trim() throughout the switch
+      final name     = nameController.text.trim();
+      final phone    = phoneController.text.trim();
+      final location = locationController.text.trim();
+
+      UserModel updated;
 
       switch (selectedRole.value) {
         case 'farmer':
-          updatedUser = currentUser.copyWith(
-            name: nameController.text.trim(),
-            phone: phoneController.text.trim(),
-            userType: 'farmer',
-            location: locationController.text.trim(),
-            farmSize: farmSizeController.text.trim().isEmpty
-                ? null
-                : farmSizeController.text.trim(),
-            cropsGrown: selectedCrops.toList(),
+          updated = current.copyWith(
+            name:             name,
+            phone:            phone,
+            userType:         'farmer',
+            location:         location,
+            farmSize:         farmSizeController.text.trim().isEmpty ? null : farmSizeController.text.trim(),
+            cropsGrown:       selectedCrops.toList(),
             isProfileComplete: true,
-            updatedAt: DateTime.now(),
+            updatedAt:        DateTime.now(),
           );
           break;
 
         case 'expert':
-          updatedUser = currentUser.copyWith(
-            name: nameController.text.trim(),
-            phone: phoneController.text.trim(),
-            userType: 'expert',
-            location: locationController.text.trim().isEmpty
-                ? null
-                : locationController.text.trim(),
-            specialization: selectedSpecialization.value,
+          updated = current.copyWith(
+            name:             name,
+            phone:            phone,
+            userType:         'expert',
+            location:         location.isEmpty ? null : location,
+            specialization:   selectedSpecialization.value,
             yearsOfExperience: int.tryParse(yearsExperienceController.text.trim()),
-            certifications: certificationsController.text.trim().isEmpty
-                ? null
-                : certificationsController.text.trim(),
-            bio: bioController.text.trim().isEmpty
-                ? null
-                : bioController.text.trim(),
+            certifications:   certificationsController.text.trim().isEmpty ? null : certificationsController.text.trim(),
+            bio:              bioController.text.trim().isEmpty ? null : bioController.text.trim(),
             isAvailableForConsultation: isAvailableForConsultation.value,
             isProfileComplete: true,
-            updatedAt: DateTime.now(),
+            updatedAt:        DateTime.now(),
           );
           break;
 
         case 'company':
-          updatedUser = currentUser.copyWith(
-            name: ownerNameController.text.trim().isEmpty
-                ? nameController.text.trim()
-                : ownerNameController.text.trim(),
-            phone: phoneController.text.trim(),
-            userType: 'company',
-            location: locationController.text.trim().isEmpty
-                ? null
-                : locationController.text.trim(),
-            companyName: companyNameController.text.trim(),
-            businessType: selectedBusinessType.value,
-            yearsInBusiness: int.tryParse(yearsInBusinessController.text.trim()),
-            licenseNumber: licenseNumberController.text.trim().isEmpty
-                ? null
-                : licenseNumberController.text.trim(),
-            businessDescription: businessDescriptionController.text.trim().isEmpty
-                ? null
-                : businessDescriptionController.text.trim(),
-            isProfileComplete: true,
-            updatedAt: DateTime.now(),
+          final ownerName = ownerNameController.text.trim();
+          updated = current.copyWith(
+            name:                ownerName.isEmpty ? name : ownerName,
+            phone:               phone,
+            userType:            'company',
+            location:            location.isEmpty ? null : location,
+            companyName:         companyNameController.text.trim(),
+            businessType:        selectedBusinessType.value,
+            yearsInBusiness:     int.tryParse(yearsInBusinessController.text.trim()),
+            licenseNumber:       licenseNumberController.text.trim().isEmpty ? null : licenseNumberController.text.trim(),
+            businessDescription: businessDescriptionController.text.trim().isEmpty ? null : businessDescriptionController.text.trim(),
+            isProfileComplete:   true,
+            updatedAt:           DateTime.now(),
           );
           break;
 
@@ -284,33 +287,28 @@ class OnboardingController extends GetxController {
           return;
       }
 
-      // Save to Firestore (creates doc if it doesn't exist, merges if it does)
-      await _firebaseService.saveUserData(updatedUser);
+      // Persist to Firestore
+      await _firebaseService.saveUserData(updated);
 
-      // Update the auth provider's current user in memory
-      _authProvider.currentUser.value = updatedUser;
+      // Update in-memory state — no Firestore round-trip needed
+      _authProvider.currentUser.value = updated;
 
-      AppSnackbar.success('Profile saved successfully!');
-
-      // Navigate to home
+      AppSnackbar.success('Profile saved!');
       Get.offAllNamed(AppRoutes.HOME);
-
     } catch (e) {
-      debugPrint('OnboardingController: Error saving profile - $e');
+      if (kDebugMode) debugPrint('OnboardingController: saveProfile error → $e');
       AppSnackbar.error('Failed to save profile. Please try again.');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Go back to role selection
-  void goBackToRoleSelection() {
-    Get.back();
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // CLEANUP
+  // ─────────────────────────────────────────────────────────────────────────
 
   @override
   void onClose() {
-    // Dispose all controllers
     nameController.dispose();
     phoneController.dispose();
     locationController.dispose();
@@ -326,4 +324,3 @@ class OnboardingController extends GetxController {
     super.onClose();
   }
 }
-

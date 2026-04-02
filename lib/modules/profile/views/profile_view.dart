@@ -81,14 +81,13 @@ class ProfileView extends GetView<ProfileController> {
         children: [
           // Profile Image
           Obx(() {
-            // Check if image path is not empty
-            bool hasImage = controller.profileImagePath.value.isNotEmpty;
-
+            // profileImageUrl (renamed from profileImagePath)
+            final hasImage = controller.profileImageUrl.value.isNotEmpty;
             return CircleAvatar(
               radius: 60,
               backgroundColor: Colors.grey[300],
               backgroundImage: hasImage
-                  ? NetworkImage(controller.profileImagePath.value) as ImageProvider
+                  ? NetworkImage(controller.profileImageUrl.value) as ImageProvider
                   : null,
               child: !hasImage
                   ? Icon(Icons.person, size: 60, color: Colors.white)
@@ -98,10 +97,10 @@ class ProfileView extends GetView<ProfileController> {
 
           // Loading indicator for image upload
           Obx(() {
-            if (controller.isUploadingImage.value) {
+            // Show camera icon only in edit mode, spinner while uploading
+            if (controller.isUploadingImage.value)
               return Positioned(
-                bottom: 0,
-                right: 0,
+                bottom: 0, right: 0,
                 child: Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -109,24 +108,20 @@ class ProfileView extends GetView<ProfileController> {
                     shape: BoxShape.circle,
                   ),
                   child: SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 20, height: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
+                      color: Colors.white, strokeWidth: 2,
                     ),
                   ),
                 ),
               );
-            }
 
-            // Camera Icon (sirf edit mode mein dikhega)
+            // Camera Icon (edit mode only)
             if (controller.isEditing.value && !controller.isUploadingImage.value) {
               return Positioned(
-                bottom: 0,
-                right: 0,
+                bottom: 0, right: 0,
                 child: InkWell(
-                  onTap: controller.pickProfileImage,
+                  onTap: controller.pickAndUploadImage,  // renamed
                   child: Container(
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -139,7 +134,7 @@ class ProfileView extends GetView<ProfileController> {
               );
             }
 
-            return SizedBox.shrink(); // Empty widget when not editing
+            return SizedBox.shrink();
           }),
         ],
       ),
@@ -178,8 +173,8 @@ class ProfileView extends GetView<ProfileController> {
         ),
         SizedBox(height: 16),
 
-        // Location Field (sirf farmers ke liye)
-        if (controller.selectedUserType.value == 'farmer') ...[
+        // Location Field (farmers only)
+        if (controller.userType.value == 'farmer') ...[
           CustomTextField(
             controller: controller.locationController,
             labelText: 'farm_location'.tr,
@@ -199,8 +194,8 @@ class ProfileView extends GetView<ProfileController> {
           SizedBox(height: 16),
         ],
 
-        // Specialization Field (sirf experts ke liye)
-        if (controller.selectedUserType.value == 'expert') ...[
+        // Specialization Field (experts only)
+        if (controller.userType.value == 'expert') ...[
           CustomTextField(
             controller: controller.specializationController,
             labelText: 'specialization'.tr,
@@ -210,8 +205,8 @@ class ProfileView extends GetView<ProfileController> {
           SizedBox(height: 16),
         ],
 
-        // Company Name Field (sirf companies ke liye)
-        if (controller.selectedUserType.value == 'company') ...[
+        // Company Name Field (companies only)
+        if (controller.userType.value == 'company') ...[
           CustomTextField(
             controller: controller.companyNameController,
             labelText: 'company_name'.tr,
@@ -238,11 +233,11 @@ class ProfileView extends GetView<ProfileController> {
             ),
             SizedBox(height: 8),
             Obx(() => DropdownButtonFormField<String>(
-              value: controller.selectedUserType.value,
+              value: controller.userType.value,  // renamed from selectedUserType
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
               ),
-              onChanged: controller.onUserTypeChanged,
+              onChanged: controller.changeUserType,  // renamed from onUserTypeChanged
               items: [
                 DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
                 DropdownMenuItem(value: 'expert', child: Text('agricultural_expert'.tr)),
@@ -259,10 +254,10 @@ class ProfileView extends GetView<ProfileController> {
   Widget _buildActionButtons() {
     return Column(
       children: [
-        // Create Profile Later Button (sirf pehli bar ke liye)
-        if (!controller.isEditing.value && _isFirstTimeLogin()) ...[
+        // "Skip" button — only shown when profile is incomplete
+        if (!controller.isEditing.value && controller.isProfileIncomplete) ...[
           OutlinedButton(
-            onPressed: controller.createProfileLater,
+            onPressed: controller.skipProfileSetup,  // renamed from createProfileLater
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Colors.grey),
               minimumSize: Size(double.infinity, 50),
@@ -345,21 +340,4 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  // Check if it's first time login
-  bool _isFirstTimeLogin() {
-    // Simple check - if profile is incomplete, it's likely first time
-    final user = controller.user.value;
-    if (user == null) return false;
-
-    switch (user.userType) {
-      case 'farmer':
-        return user.location == null || user.location!.isEmpty;
-      case 'expert':
-        return user.specialization == null || user.specialization!.isEmpty;
-      case 'company':
-        return user.companyName == null || user.companyName!.isEmpty;
-      default:
-        return false;
-    }
-  }
 }

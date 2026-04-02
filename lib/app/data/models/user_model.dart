@@ -42,8 +42,13 @@ class UserModel {
   final String? businessDescription;
 
   // ========== PROFILE COMPLETION FLAG ==========
-  /// Flag to track if initial profile setup is complete
+  /// True when the user has finished the role + profile setup wizard
   final bool isProfileComplete;
+
+  // ========== ANONYMOUS FLAG ==========
+  /// True when signed in via Firebase Anonymous Auth (guest farmer flow)
+  /// These users have a real Firebase UID but no email/password
+  final bool isAnonymous;
 
   UserModel({
     required this.uid,
@@ -58,20 +63,21 @@ class UserModel {
     this.profileImage,
     required this.createdAt,
     this.updatedAt,
-    // New farmer fields
+    // Farmer fields
     this.cropsGrown,
-    // New expert fields
+    // Expert fields
     this.yearsOfExperience,
     this.certifications,
     this.bio,
     this.isAvailableForConsultation,
-    // New company fields
+    // Company/Seller fields
     this.businessType,
     this.yearsInBusiness,
     this.licenseNumber,
     this.businessDescription,
-    // Profile completion flag
+    // Flags
     this.isProfileComplete = false,
+    this.isAnonymous = false,
   });
 
 
@@ -110,8 +116,9 @@ class UserModel {
       yearsInBusiness: data['yearsInBusiness'],
       licenseNumber: data['licenseNumber'],
       businessDescription: data['businessDescription'],
-      // Profile completion flag
+      // Flags
       isProfileComplete: data['isProfileComplete'] ?? false,
+      isAnonymous: data['isAnonymous'] ?? false,
     );
   }
 
@@ -143,8 +150,9 @@ class UserModel {
       'yearsInBusiness': yearsInBusiness,
       'licenseNumber': licenseNumber,
       'businessDescription': businessDescription,
-      // Profile completion flag
+      // Flags
       'isProfileComplete': isProfileComplete,
+      'isAnonymous': isAnonymous,
     };
   }
 
@@ -172,6 +180,7 @@ class UserModel {
     String? licenseNumber,
     String? businessDescription,
     bool? isProfileComplete,
+    bool? isAnonymous,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -196,6 +205,7 @@ class UserModel {
       licenseNumber: licenseNumber ?? this.licenseNumber,
       businessDescription: businessDescription ?? this.businessDescription,
       isProfileComplete: isProfileComplete ?? this.isProfileComplete,
+      isAnonymous: isAnonymous ?? this.isAnonymous,
     );
   }
 }

@@ -596,13 +596,30 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Build save button
+  /// Build save button.
+  /// Anonymous farmers (guest flow) MUST complete their profile \u2014 no skip allowed.
   Widget _buildSaveButton() {
-    return Obx(() => CustomButton(
-      text: 'save_continue'.tr,
-      onPressed: controller.saveProfile,
-      isLoading: controller.isLoading.value,
-    ));
+    return Column(
+      children: [
+        Obx(() => CustomButton(
+          text: 'save_continue'.tr,
+          onPressed: controller.saveProfile,
+          isLoading: controller.isLoading.value,
+        )),
+
+        // Skip button \u2014 hidden for anonymous farmers (mandatory onboarding)
+        if (!controller.isAnonymousFarmer) ...[
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: controller.continueAsGuest,
+            child: Text(
+              'skip_for_now'.tr,
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ),
+        ],
+      ],
+    );
   }
 }
 

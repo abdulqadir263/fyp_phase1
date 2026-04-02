@@ -2,54 +2,52 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../app/utils/app_snackbar.dart';
 
-/// Controller for handling authentication UI logic
-/// Manages login, signup, and password reset forms
+/// AuthController — ViewModel for the Login/Signup screen.
+///
+/// Responsibilities:
+/// - Manages form state (text controllers, visibility toggles)
+/// - Validates user input before sending to AuthProvider
+/// - Manages password reset flow state
+/// - Never calls Firebase directly — all auth goes through AuthProvider
 class AuthController extends GetxController {
   final AuthProvider _authProvider = Get.find<AuthProvider>();
 
-  // Form Controllers
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  // --- Form controllers ---
+  final nameController            = TextEditingController();
+  final emailController           = TextEditingController();
+  final phoneController           = TextEditingController();
+  final passwordController        = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
-  // UI State
-  final RxBool isLogin = true.obs;
-  final RxBool isLoading = false.obs;
-  final RxBool isPasswordVisible = false.obs;
+  // Kept here (not in the view) so it gets properly disposed in onClose()
+  final forgotEmailController = TextEditingController();
+
+  // --- UI state ---
+  final RxBool isLogin                  = true.obs;   // true = login, false = signup
+  final RxBool isLoading                = false.obs;
+  final RxBool isPasswordVisible        = false.obs;
   final RxBool isConfirmPasswordVisible = false.obs;
-  final RxString selectedUserType = 'farmer'.obs;
-  
-  // Password Reset State
-  final RxInt forgotPasswordStep = 0.obs;
-  final RxString resetEmail = ''.obs;
-  final RxBool isEmailSent = false.obs;
-  final RxInt resendTimer = 0.obs;
-  
-  Timer? _resendTimerInstance;
-  bool _isDisposed = false;
 
-  @override
-  void onInit() {
-    super.onInit();
-    debugPrint('AuthController: Initialized');
-  }
+  // --- Password reset state ---
+  // 0 = enter email step, 1 = success/email-sent step
+  final RxInt    resetStep          = 0.obs;
+  final RxString resetEmailSentTo   = ''.obs;   // the address we sent the link to
+  final RxInt    resendCooldown     = 0.obs;    // seconds before resend is allowed
 
-  /// Check if email is valid
-  bool _isValidEmail(String email) {
-    return email.isNotEmpty && GetUtils.isEmail(email);
-  }
+  Timer? _resendTimer;
 
-  /// Toggle between login and signup modes
+  // ─────────────────────────────────────────────────────────────────────────
+  // TOGGLE HELPERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Switch between login and signup modes.
+  /// Clears signup-only fields when switching to avoid stale data.
   void toggleAuthMode() {
     isLogin.value = !isLogin.value;
-    
-    // Clear signup-only fields when switching to signup mode
     if (!isLogin.value) {
       nameController.clear();
       phoneController.clear();
@@ -57,211 +55,145 @@ class AuthController extends GetxController {
     }
   }
 
-  void togglePasswordVisibility() {
-    isPasswordVisible.value = !isPasswordVisible.value;
-  }
+  void togglePasswordVisibility()        => isPasswordVisible.value = !isPasswordVisible.value;
+  void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
 
-  void toggleConfirmPasswordVisibility() {
-    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // VALIDATION
+  // ─────────────────────────────────────────────────────────────────────────
 
-  /// Validate form fields
-  bool validateForm() {
-    // Signup-specific validations
+  bool _isValidEmail(String email) => email.isNotEmpty && GetUtils.isEmail(email);
+
+  /// Validates all active form fields.
+  /// Shows an error snackbar and returns false on first failure.
+  bool _validateForm() {
     if (!isLogin.value) {
-      if (nameController.text.isEmpty || nameController.text.length < 3) {
-        _showError('Please enter a valid name (at least 3 characters)');
+      // Signup-only checks
+      if (nameController.text.trim().length < 3) {
+        AppSnackbar.error('Please enter a valid name (at least 3 characters)');
         return false;
       }
-
-      if (phoneController.text.isEmpty || phoneController.text.length < 11) {
-        _showError('Please enter a valid phone number (at least 11 digits)');
+      if (phoneController.text.trim().length < 11) {
+        AppSnackbar.error('Please enter a valid phone number');
         return false;
       }
-
       if (passwordController.text != confirmPasswordController.text) {
-        _showError('Passwords do not match');
+        AppSnackbar.error('Passwords do not match');
         return false;
       }
     }
 
-    // Common validations
     if (!_isValidEmail(emailController.text)) {
-      _showError('Please enter a valid email address');
+      AppSnackbar.error('Please enter a valid email address');
       return false;
     }
-
-    if (passwordController.text.isEmpty || passwordController.text.length < 6) {
-      _showError('Password must be at least 6 characters');
+    if (passwordController.text.length < 6) {
+      AppSnackbar.error('Password must be at least 6 characters');
       return false;
     }
-
     return true;
   }
 
-  /// Show error snackbar
-  void _showError(String message) {
-    Get.snackbar('Error', message);
-  }
+  // ─────────────────────────────────────────────────────────────────────────
+  // AUTH ACTIONS
+  // ─────────────────────────────────────────────────────────────────────────
 
-  /// Submit form (login or signup)
+  /// Submit login or signup form.
   Future<void> submit() async {
-    // Prevent double submission
     if (isLoading.value) return;
-    if (!validateForm()) return;
+    if (!_validateForm()) return;
 
-    // Dismiss keyboard
     FocusManager.instance.primaryFocus?.unfocus();
-
     isLoading.value = true;
 
     try {
       if (isLogin.value) {
         await _authProvider.signIn(
-          email: emailController.text.trim(),
+          email:    emailController.text.trim(),
           password: passwordController.text.trim(),
         );
       } else {
         await _authProvider.signUp(
-          name: nameController.text.trim(),
-          email: emailController.text.trim(),
-          phone: phoneController.text.trim(),
+          name:     nameController.text.trim(),
+          email:    emailController.text.trim(),
+          phone:    phoneController.text.trim(),
           password: passwordController.text.trim(),
         );
       }
     } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
   }
 
-  /// Send password reset email
+  /// Start anonymous sign-in for the guest farmer flow.
+  /// Navigation is handled by AuthProvider after Firebase responds.
+  void signInAsGuest() => _authProvider.signInAnonymously();
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASSWORD RESET
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Navigate to forgot password screen, pre-filling the email field.
+  void navigateToForgotPassword() {
+    // Reset all state before opening the screen
+    resetStep.value = 0;
+    resetEmailSentTo.value = '';
+    resendCooldown.value = 0;
+    // Pre-fill from the login field if the user already typed their email
+    forgotEmailController.text = emailController.text.trim();
+    Get.toNamed(AppRoutes.FORGOT_PASSWORD);
+  }
+
+  /// Send a password reset email.
+  /// On success, advances to step 1 and starts the 60-second resend cooldown.
   Future<void> sendPasswordResetEmail(String email) async {
     if (isLoading.value) return;
-    
+
     if (!_isValidEmail(email)) {
-      Get.snackbar(
-        'Error', 
-        'Please enter a valid email address',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[900],
-      );
+      AppSnackbar.error('Please enter a valid email address');
       return;
     }
 
+    isLoading.value = true;
     try {
-      isLoading.value = true;
-
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-
-      resetEmail.value = email;
-      isEmailSent.value = true;
-      forgotPasswordStep.value = 1;
-      _startResendTimer();
-
-      Get.snackbar(
-        'Success',
-        'Password reset link sent to $email',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 5),
-        backgroundColor: Colors.green[100],
-        colorText: Colors.green[900],
-      );
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = _getFirebaseErrorMessage(e.code);
-      Get.snackbar(
-        'Error', 
-        errorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[900],
-      );
+      // Routed through AuthProvider — no direct Firebase in this controller
+      await _authProvider.forgotPassword(email);
+      resetEmailSentTo.value = email;
+      resetStep.value = 1;
+      _startResendCooldown();
+      AppSnackbar.success('Reset link sent to $email');
     } catch (e) {
-      Get.snackbar(
-        'Error', 
-        'An unexpected error occurred. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[900],
-      );
-      debugPrint('Password reset error: $e');
+      AppSnackbar.error('Failed to send reset email. Please try again.');
+      if (kDebugMode) debugPrint('AuthController: Reset email error → $e');
     } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
   }
 
-  /// Get user-friendly error message from Firebase error code
-  String _getFirebaseErrorMessage(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'No user found with this email address';
-      case 'invalid-email':
-        return 'Invalid email address format';
-      case 'too-many-requests':
-        return 'Too many requests. Please try again later';
-      default:
-        return 'Failed to send reset email';
-    }
-  }
+  /// 60-second countdown before the "Resend" button becomes active again.
+  void _startResendCooldown() {
+    _resendTimer?.cancel();
+    resendCooldown.value = 60;
 
-  /// Start countdown timer for resend button
-  void _startResendTimer() {
-    _resendTimerInstance?.cancel();
-    resendTimer.value = 60;
-    
-    _resendTimerInstance = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isDisposed || resendTimer.value <= 0) {
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendCooldown.value <= 0) {
         timer.cancel();
-        _resendTimerInstance = null;
+        _resendTimer = null;
         return;
       }
-      resendTimer.value--;
+      resendCooldown.value--;
     });
-  }
-
-  /// Legacy method - redirects to new implementation
-  Future<void> forgotPassword(String email) async {
-    await sendPasswordResetEmail(email);
-  }
-
-  /// Navigate to forgot password screen
-  void navigateToForgotPassword() {
-    // Reset state before navigating
-    forgotPasswordStep.value = 0;
-    resetEmail.value = '';
-    isEmailSent.value = false;
-    resendTimer.value = 0;
-    
-    Get.toNamed(AppRoutes.FORGOT_PASSWORD, arguments: emailController.text.trim());
-  }
-
-  /// Sign in as guest
-  void signInAsGuest() {
-    _authProvider.signInAsGuest();
-  }
-
-  /// Handle user type selection change
-  void onUserTypeChanged(String? value) {
-    if (value != null) {
-      selectedUserType.value = value;
-    }
   }
 
   @override
   void onClose() {
-    _isDisposed = true;
-    _resendTimerInstance?.cancel();
-    _resendTimerInstance = null;
-    
+    _resendTimer?.cancel();
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    forgotEmailController.dispose();
     super.onClose();
   }
 }

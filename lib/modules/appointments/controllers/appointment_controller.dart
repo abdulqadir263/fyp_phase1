@@ -325,8 +325,18 @@ class AppointmentController extends GetxController {
     }
 
     final user = _authProvider.currentUser.value;
-    if (user == null) {
-      AppSnackbar.error('You must be logged in to request a visit.');
+    if (user == null || user.uid.isEmpty) {
+      AppSnackbar.error('You must be logged in with a valid account to request a visit.');
+      return;
+    }
+
+    if (!user.isProfileComplete) {
+      AppSnackbar.warning('Please complete your profile before requesting a visit.');
+      return;
+    }
+
+    if (user.userType != 'farmer') {
+      AppSnackbar.error('Only farmers can request field visits.');
       return;
     }
 

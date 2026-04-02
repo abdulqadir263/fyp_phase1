@@ -82,10 +82,10 @@ class AuthProvider extends GetxService {
 
   /// Routes to Home or Role Selection based on profile completion status.
   void _routeAfterAuth(UserModel user) {
-    if (_isProfileComplete(user)) {
-      Get.offAllNamed(AppRoutes.HOME);
+    if (user.isProfileComplete == false) {
+      Get.offAllNamed(AppRoutes.PROFILE_COMPLETION);
     } else {
-      Get.offAllNamed(AppRoutes.ROLE_SELECTION);
+      Get.offAllNamed(AppRoutes.HOME);
     }
   }
 
@@ -107,8 +107,6 @@ class AuthProvider extends GetxService {
       case 'company':
         return (user.companyName?.isNotEmpty ?? false) &&
                (user.businessType?.isNotEmpty ?? false);
-      case 'guest':
-        return true;
       default:
         return false;
     }

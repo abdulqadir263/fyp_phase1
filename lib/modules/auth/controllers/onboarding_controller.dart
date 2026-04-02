@@ -116,10 +116,9 @@ class OnboardingController extends GetxController {
     Get.toNamed(AppRoutes.PROFILE_COMPLETION);
   }
 
-  /// "Continue as Guest" on Role Selection — skip onboarding, go straight to Home.
-  /// The user is already authenticated (email or anonymous) at this point.
   void continueAsGuest() {
-    Get.offAllNamed(AppRoutes.HOME);
+    _authProvider.signInAnonymously();
+    Get.offAllNamed(AppRoutes.PROFILE_COMPLETION);
   }
 
   void goBackToRoleSelection() => Get.back();

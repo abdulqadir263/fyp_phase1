@@ -151,7 +151,7 @@ class CommentController extends GetxController {
     final text = commentController.text.trim();
     if (text.isEmpty) return false;
 
-    if (currentUserId == null || currentUserId == 'guest_user') {
+    if (currentUserId == null || currentUserId!.isEmpty) {
       AppSnackbar.info('Please login to comment');
       return false;
     }

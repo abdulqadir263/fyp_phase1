@@ -120,7 +120,7 @@ class PostController extends GetxController {
 
   /// Load user's bookmarked posts (only IDs for quick checking)
   Future<void> _loadBookmarks() async {
-    if (currentUserId == null || currentUserId == 'guest_user') return;
+    if (currentUserId == null || currentUserId!.isEmpty) return;
 
     try {
       final bookmarked =
@@ -135,7 +135,7 @@ class PostController extends GetxController {
 
   /// Fetch bookmarked posts with full details for bookmarks view
   Future<void> fetchBookmarkedPosts() async {
-    if (currentUserId == null || currentUserId == 'guest_user') return;
+    if (currentUserId == null || currentUserId!.isEmpty) return;
     if (isLoadingBookmarks.value) return;
 
     try {
@@ -328,7 +328,7 @@ class PostController extends GetxController {
 
   /// Toggle bookmark for a post (uses subcollection)
   Future<void> toggleBookmark(String postId) async {
-    if (currentUserId == null || currentUserId == 'guest_user') {
+    if (currentUserId == null || currentUserId!.isEmpty) {
       AppSnackbar.info('Please login to bookmark posts');
       return;
     }
@@ -505,7 +505,7 @@ class PostController extends GetxController {
 
   /// Report a post with a reason — shows dialog and sends to Firestore
   Future<void> reportPost(String postId) async {
-    if (currentUserId == null || currentUserId == 'guest_user') {
+    if (currentUserId == null || currentUserId!.isEmpty) {
       AppSnackbar.info('Please login to report posts');
       return;
     }

@@ -257,19 +257,22 @@ class PostCard extends StatelessWidget {
         onTap: () => _openFullScreenViewer(0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Always show the first image
-                CachedNetworkImage(
-                  imageUrl: post.imageUrls[0],
-                  fit: BoxFit.cover,
-                  memCacheHeight: 400,
-                  memCacheWidth: 700,
-                  fadeInDuration: const Duration(milliseconds: 200),
-                  fadeOutDuration: const Duration(milliseconds: 200),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 300),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Always show the first image
+                  CachedNetworkImage(
+                    imageUrl: post.imageUrls[0],
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    memCacheHeight: 400,
+                    memCacheWidth: 700,
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    fadeOutDuration: const Duration(milliseconds: 200),
                   placeholder: (_, __) => Container(
                     color: Colors.grey[200],
                     child: const Center(
@@ -305,6 +308,7 @@ class PostCard extends StatelessWidget {
                   ),
               ],
             ),
+          ),
           ),
         ),
       ),

@@ -234,8 +234,19 @@ class CreatePostController extends GetxController {
     if (isCreatingPost.value) return;
     
     if (!validateForm()) return;
-    if (currentUserId == null || currentUserId == 'guest_user') {
+    final user = _authProvider.currentUser.value;
+    if (user == null || user.uid.isEmpty) {
       AppSnackbar.info('Please login to create posts');
+      return;
+    }
+
+    if (!user.isProfileComplete) {
+      AppSnackbar.warning('Please complete your profile first to create a post.');
+      return;
+    }
+
+    if (user.userType == 'farmer' && (user.cropsGrown == null || user.cropsGrown!.isEmpty)) {
+      AppSnackbar.warning('Please add crops to your profile before posting.');
       return;
     }
 

@@ -185,12 +185,13 @@ class CreatePostView extends GetView<CreatePostController> {
           ],
         ),
         const SizedBox(height: 8),
-        Obx(() => Wrap(
-              spacing: 12,
-              runSpacing: 12,
+        Obx(() => Column(
               children: [
                 ...controller.selectedImages.asMap().entries.map((entry) {
-                  return _buildImageThumbnail(entry.value, entry.key);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildImageThumbnail(entry.value, entry.key),
+                  );
                 }),
                 if (controller.selectedImages.length < 2)
                   _buildAddImageButton(),
@@ -205,19 +206,25 @@ class CreatePostView extends GetView<CreatePostController> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.file(image,
-              width: 100, height: 100, fit: BoxFit.cover),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: Image.file(
+              image,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
         Positioned(
-          top: 4,
-          right: 4,
+          top: 8,
+          right: 8,
           child: GestureDetector(
             onTap: () => controller.removeImage(index),
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(6),
               decoration: const BoxDecoration(
                   color: Colors.red, shape: BoxShape.circle),
-              child: const Icon(Icons.close, color: Colors.white, size: 16),
+              child: const Icon(Icons.close, color: Colors.white, size: 20),
             ),
           ),
         ),
@@ -229,7 +236,7 @@ class CreatePostView extends GetView<CreatePostController> {
     return GestureDetector(
       onTap: _showImagePickerOptions,
       child: Container(
-        width: 100,
+        width: double.infinity,
         height: 100,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey[300]!, style: BorderStyle.solid),

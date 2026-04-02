@@ -89,12 +89,27 @@ class ExpertDashboardController extends GetxController {
   }
 
   // ─────────────────────────────────────────────
+  // ROLE VALIDATION
+  // ─────────────────────────────────────────────
+
+  /// Ensure the current user is a valid expert before making changes
+  bool _ensureExpert() {
+    final user = _authProvider.currentUser.value;
+    if (user == null || user.uid.isEmpty || user.userType != 'expert') {
+      AppSnackbar.error('Only authenticated experts can perform this action.');
+      return false;
+    }
+    return true;
+  }
+
+  // ─────────────────────────────────────────────
   // STATUS UPDATES
   // ─────────────────────────────────────────────
 
   /// Accept a pending visit request
   /// Sets status to 'accepted' and confirmedDate to preferredDate
   Future<void> acceptVisit(FieldVisitModel visit) async {
+    if (!_ensureExpert()) return;
     try {
       isUpdating.value = true;
       await _service.updateVisitStatus(
@@ -114,6 +129,7 @@ class ExpertDashboardController extends GetxController {
 
   /// Reject a pending visit request
   Future<void> rejectVisit(FieldVisitModel visit) async {
+    if (!_ensureExpert()) return;
     try {
       isUpdating.value = true;
       await _service.updateVisitStatus(
@@ -132,6 +148,7 @@ class ExpertDashboardController extends GetxController {
 
   /// Complete a visit with expert notes
   Future<void> completeVisit(FieldVisitModel visit) async {
+    if (!_ensureExpert()) return;
     final notes = expertNotesController.text.trim();
     if (notes.isEmpty) {
       AppSnackbar.warning('Please add your notes before completing.');

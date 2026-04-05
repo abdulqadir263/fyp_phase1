@@ -6,36 +6,40 @@ import '../../../app/widgets/custom_text_field.dart';
 import '../../../core/utils/responsive_helper.dart';
 
 class LoginView extends GetView<AuthController> {
+  const LoginView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F8FB),
       body: SafeArea(
-        child: ResponsiveHelper.tabletCenter(
-          child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              // Header Section
-              _buildHeaderSection(),
-
-              const SizedBox(height: 40),
-
-              // Form Section
-              _buildFormSection(),
-
-              const SizedBox(height: 24),
-
-              // Action Buttons
-              _buildActionButtons(),
-
-              const SizedBox(height: 32),
-
-              // Guest Login Section
-              _buildGuestLoginSection(),
-            ],
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFF6FFF8), Color(0xFFF9FAFF)],
+            ),
           ),
-        ),
+          child: ResponsiveHelper.tabletCenter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  child: Column(
+                    children: [
+                      _buildHeaderSection(),
+                      const SizedBox(height: 28),
+                      _buildFormSection(),
+                      const SizedBox(height: 20),
+                      _buildActionButtons(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -46,16 +50,16 @@ class LoginView extends GetView<AuthController> {
       children: [
         // App Icon
         Container(
-          width: 80,
-          height: 80,
+          width: 84,
+          height: 84,
           decoration: BoxDecoration(
             color: Get.theme.primaryColor,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: Get.theme.primaryColor.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 4),
+                color: Get.theme.primaryColor.withValues(alpha: 0.22),
+                blurRadius: 22,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
@@ -83,6 +87,16 @@ class LoginView extends GetView<AuthController> {
           style: Get.textTheme.bodyMedium?.copyWith(
             color: Colors.grey[600],
           ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'welcome_back'.tr,
+          style: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -97,23 +111,24 @@ class LoginView extends GetView<AuthController> {
         key: ValueKey(controller.isLogin.value ? 'login' : 'signup'),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 26,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Form Title
             Text(
               controller.isLogin.value ? 'welcome_back'.tr : 'create_account'.tr,
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
@@ -126,9 +141,10 @@ class LoginView extends GetView<AuthController> {
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
 
             // Name Field (Signup Only)
             if (!controller.isLogin.value)
@@ -211,8 +227,22 @@ class LoginView extends GetView<AuthController> {
   }
 
   Widget _buildActionButtons() {
-    return Column(
-      children: [
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
         // Submit Button
         Obx(() => CustomButton(
           text: controller.isLogin.value ? 'sign_in'.tr : 'create_account'.tr,
@@ -241,10 +271,12 @@ class LoginView extends GetView<AuthController> {
 
         // Toggle Auth Mode
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
+            color: const Color(0xFFF7F9FC),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey[200]!),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -270,51 +302,8 @@ class LoginView extends GetView<AuthController> {
           ),
         ),
       ],
+      ),
     );
   }
 
-  Widget _buildGuestLoginSection() {
-    return Column(
-      children: [
-        // Divider
-        Row(
-          children: [
-            Expanded(child: Divider(color: Colors.grey[300])),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'or'.tr,
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: Colors.grey[300])),
-          ],
-        ),
-
-        const SizedBox(height: 20),
-
-        // Guest Login Button
-        OutlinedButton(
-          onPressed: controller.signInAsGuest,
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: Get.theme.primaryColor),
-            minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: Text(
-            'continue_as_guest'.tr,
-            style: TextStyle(
-              color: Get.theme.primaryColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

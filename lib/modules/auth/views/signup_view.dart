@@ -7,6 +7,8 @@ import '../../../app/widgets/custom_text_field.dart';
 // Ye file optional hai, kyunki main ne combined login/signup view banai hai
 // Agar aap ko alag signup view chahiye to ye use kar sakte hain
 class SignupView extends GetView<AuthController> {
+  const SignupView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,7 +92,7 @@ class SignupView extends GetView<AuthController> {
 
                 // Login link
                 TextButton(
-                  onPressed: () => Get.back(), // Login screen par wapas jayein
+                  onPressed: controller.closeCurrentScreen,
                   child: Text('already_have_account_login'.tr),
                 ),
               ],

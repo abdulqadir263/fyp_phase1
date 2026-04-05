@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../modules/auth/views/forgot_password_view.dart';
 import '../../modules/auth/views/login_view.dart';
+import '../../modules/auth/views/welcome_view.dart';
 import '../../modules/auth/views/role_selection_view.dart';
 import '../../modules/auth/views/profile_completion_view.dart';
 import '../../modules/home/views/home_view.dart';
@@ -49,6 +50,10 @@ import 'app_routes.dart';
 class AppPages {
   static final routes = [
     // Auth Pages
+    GetPage(
+      name: AppRoutes.WELCOME,
+      page: () => const WelcomeView(),
+    ),
     GetPage(
       name: AppRoutes.LOGIN,
       page: () => LoginView(),

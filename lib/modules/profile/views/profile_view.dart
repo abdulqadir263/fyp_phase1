@@ -8,6 +8,8 @@ import '../../../core/localization/language_controller.dart';
 
 // Profile screen ka UI
 class ProfileView extends GetView<ProfileController> {
+  const ProfileView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,41 +37,97 @@ class ProfileView extends GetView<ProfileController> {
 
       body: SafeArea(
         top: false,
-        child: ResponsiveHelper.tabletCenter(
-          child: Obx(() {
-        if (controller.user.value == null) {
-          return Center(child: Text('user_data_not_found'.tr));
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Profile Picture Section
-              _buildProfilePictureSection(),
-
-              SizedBox(height: 24),
-
-              // User Information Form
-              _buildUserInformationForm(),
-
-              SizedBox(height: 24),
-
-              // ========== LANGUAGE TOGGLE SECTION ==========
-              _buildLanguageToggle(),
-
-              SizedBox(height: 32),
-              if (controller.isEditing.value) _buildUserTypeSection(),
-
-              SizedBox(height: 32),
-
-              // Action Buttons
-              _buildActionButtons(),
-            ],
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFF6FFF8), Color(0xFFF9FAFF)],
+            ),
           ),
-        );
-      }),
+          child: ResponsiveHelper.tabletCenter(
+            child: Obx(() {
+              if (controller.user.value == null) {
+                return Center(child: Text('user_data_not_found'.tr));
+              }
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Column(
+                      children: [
+                        _buildProfileHeaderCard(),
+                        const SizedBox(height: 20),
+                        _buildSectionCard(child: _buildUserInformationForm()),
+                        const SizedBox(height: 20),
+                        _buildLanguageToggle(),
+                        if (controller.isEditing.value) ...[
+                          const SizedBox(height: 20),
+                          _buildUserTypeSection(),
+                        ],
+                        const SizedBox(height: 24),
+                        _buildActionButtons(),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildProfileHeaderCard() {
+    return _buildSectionCard(
+      child: Column(
+        children: [
+          _buildProfilePictureSection(),
+          const SizedBox(height: 14),
+          Obx(() => Text(
+                controller.nameController.text.isNotEmpty
+                    ? controller.nameController.text
+                    : 'full_name'.tr,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+                textAlign: TextAlign.center,
+              )),
+          const SizedBox(height: 4),
+          Obx(() => Text(
+                controller.userType.value.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[500],
+                  letterSpacing: 0.5,
+                ),
+              )),
+        ],
       ),
     );
   }
@@ -85,12 +143,12 @@ class ProfileView extends GetView<ProfileController> {
             final hasImage = controller.profileImageUrl.value.isNotEmpty;
             return CircleAvatar(
               radius: 60,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: const Color(0xFFE9EDF4),
               backgroundImage: hasImage
                   ? NetworkImage(controller.profileImageUrl.value) as ImageProvider
                   : null,
               child: !hasImage
-                  ? Icon(Icons.person, size: 60, color: Colors.white)
+                  ? Icon(Icons.person, size: 58, color: Colors.grey[500])
                   : null,
             );
           }),
@@ -102,7 +160,7 @@ class ProfileView extends GetView<ProfileController> {
               return Positioned(
                 bottom: 0, right: 0,
                 child: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Theme.of(Get.context!).primaryColor,
                     shape: BoxShape.circle,
@@ -123,7 +181,7 @@ class ProfileView extends GetView<ProfileController> {
                 child: InkWell(
                   onTap: controller.pickAndUploadImage,  // renamed
                   child: Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(Get.context!).primaryColor,
                       shape: BoxShape.circle,
@@ -144,7 +202,25 @@ class ProfileView extends GetView<ProfileController> {
   // User information form
   Widget _buildUserInformationForm() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'my_profile'.tr,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Update your details to keep account information accurate.',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 18),
         // Name Field
         CustomTextField(
           controller: controller.nameController,
@@ -152,7 +228,7 @@ class ProfileView extends GetView<ProfileController> {
           prefixIcon: Icons.person,
           enabled: controller.isEditing.value,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Email Field
         CustomTextField(
@@ -161,7 +237,7 @@ class ProfileView extends GetView<ProfileController> {
           prefixIcon: Icons.email,
           enabled: false, // Email change nahi ho sakta
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Phone Field
         CustomTextField(
@@ -171,7 +247,7 @@ class ProfileView extends GetView<ProfileController> {
           enabled: controller.isEditing.value,
           keyboardType: TextInputType.phone,
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Location Field (farmers only)
         if (controller.userType.value == 'farmer') ...[
@@ -181,7 +257,7 @@ class ProfileView extends GetView<ProfileController> {
             prefixIcon: Icons.location_on,
             enabled: controller.isEditing.value,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Farm Size Field
           CustomTextField(
@@ -191,7 +267,7 @@ class ProfileView extends GetView<ProfileController> {
             enabled: controller.isEditing.value,
             keyboardType: TextInputType.number,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
         ],
 
         // Specialization Field (experts only)
@@ -202,7 +278,7 @@ class ProfileView extends GetView<ProfileController> {
             prefixIcon: Icons.workspace_premium,
             enabled: controller.isEditing.value,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
         ],
 
         // Company Name Field (companies only)
@@ -213,7 +289,7 @@ class ProfileView extends GetView<ProfileController> {
             prefixIcon: Icons.business,
             enabled: controller.isEditing.value,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
         ],
       ],
     );
@@ -221,50 +297,57 @@ class ProfileView extends GetView<ProfileController> {
 
   // User type section
   Widget _buildUserTypeSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'user_type'.tr,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Obx(() => DropdownButtonFormField<String>(
-              value: controller.userType.value,  // renamed from selectedUserType
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-              onChanged: controller.changeUserType,  // renamed from onUserTypeChanged
-              items: [
-                DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
-                DropdownMenuItem(value: 'expert', child: Text('agricultural_expert'.tr)),
-                DropdownMenuItem(value: 'company', child: Text('company'.tr)),
-              ],
-            )),
-          ],
-        ),
+    return _buildSectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'user_type'.tr,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Obx(() => DropdownButtonFormField<String>(
+                initialValue: controller.userType.value,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFF9FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                ),
+                onChanged: controller.changeUserType,
+                items: [
+                  DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
+                  DropdownMenuItem(value: 'expert', child: Text('agricultural_expert'.tr)),
+                  DropdownMenuItem(value: 'company', child: Text('company'.tr)),
+                ],
+              )),
+        ],
       ),
     );
   }
 
   // Action buttons
   Widget _buildActionButtons() {
-    return Column(
-      children: [
+    return _buildSectionCard(
+      child: Column(
+        children: [
         // "Skip" button — only shown when profile is incomplete
         if (!controller.isEditing.value && controller.isProfileIncomplete) ...[
           OutlinedButton(
             onPressed: controller.skipProfileSetup,  // renamed from createProfileLater
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey),
-              minimumSize: Size(double.infinity, 50),
+              side: BorderSide(color: Colors.grey[400]!),
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text('create_profile_later'.tr),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
         ],
 
         // Cancel Button (sirf edit mode mein dikhega)
@@ -275,36 +358,37 @@ class ProfileView extends GetView<ProfileController> {
             color: Colors.grey,
           ),
 
-        if (controller.isEditing.value) SizedBox(height: 12),
+        if (controller.isEditing.value) const SizedBox(height: 12),
 
         // Delete Account Button
         OutlinedButton(
           onPressed: controller.deleteAccount,
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: Colors.red),
-            minimumSize: Size(double.infinity, 50),
+            side: const BorderSide(color: Colors.red),
+            minimumSize: const Size(double.infinity, 50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: Colors.red.withValues(alpha: 0.03),
           ),
           child: Text('delete_account'.tr, style: TextStyle(color: Colors.red)),
         ),
       ],
+      ),
     );
   }
 
   /// Language toggle section — allows switching between English and Urdu
   Widget _buildLanguageToggle() {
     final langController = Get.find<LanguageController>();
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'language'.tr,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Obx(() => Row(
+    return _buildSectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'language'.tr,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Obx(() => Row(
                   children: [
                     const Icon(Icons.language, color: Colors.grey),
                     const SizedBox(width: 12),
@@ -327,15 +411,14 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                   ],
                 )),
-            const SizedBox(height: 4),
-            Obx(() => Text(
+          const SizedBox(height: 4),
+          Obx(() => Text(
                   langController.isUrdu
                       ? 'Switch to English'
                       : 'اردو میں تبدیل کریں',
                   style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                 )),
-          ],
-        ),
+        ],
       ),
     );
   }

@@ -15,6 +15,7 @@ import 'app/data/services/weather_service.dart';
 import 'app/data/providers/auth_provider.dart';
 import 'app/services/gemini_service.dart';
 import 'app/services/groq_service.dart';
+import 'modules/auth/controllers/auth_controller.dart';
 import 'modules/community/services/community_service.dart';
 import 'modules/appointments/services/appointment_service.dart';
 import 'modules/marketplace/services/marketplace_service.dart';
@@ -49,6 +50,7 @@ void main() async {
   Get.put(GeminiService(), permanent: true);
   Get.put(GroqService(), permanent: true);
   Get.put(AuthProvider(), permanent: true);
+  Get.put(AuthController(), permanent: true);
   Get.put(CommunityService(), permanent: true);
   Get.put(AppointmentService(), permanent: true);
   Get.put(MarketplaceService(), permanent: true);
@@ -85,7 +87,7 @@ class FarmAssistApp extends StatelessWidget {
       locale: savedLocale,
       fallbackLocale: const Locale('en'),
 
-      initialRoute: AppRoutes.LOGIN,
+      initialRoute: AppRoutes.WELCOME,
       getPages: AppPages.routes,
       
       // Optimized transitions for smoother navigation

@@ -14,8 +14,10 @@ class ProfileCompletionView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F8FB),
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(_getAppBarTitle()),
         centerTitle: true,
         leading: IconButton(
@@ -24,39 +26,43 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         ),
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ========== HEADER ==========
-                  _buildHeader(),
-
-                  const SizedBox(height: 24),
-
-                  // ========== DYNAMIC FORM BASED ON ROLE ==========
-                  _buildDynamicForm(),
-
-                  const SizedBox(height: 32),
-
-                  // ========== SAVE BUTTON ==========
-                  _buildSaveButton(),
-
-                  const SizedBox(height: 20),
-                ],
-              ),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFF6FFF8), Color(0xFFF9FAFF)],
             ),
-
-            // Loading overlay — only this part is reactive
-            Obx(() => controller.isLoading.value
-                ? Container(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    child: const Center(child: CircularProgressIndicator()),
-                  )
-                : const SizedBox.shrink()),
-          ],
+          ),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 20),
+                        _buildDynamicForm(),
+                        const SizedBox(height: 20),
+                        _buildActionCard(),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Obx(() => controller.isLoading.value
+                  ? Container(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : const SizedBox.shrink()),
+            ],
+          ),
         ),
       ),
     );
@@ -105,41 +111,113 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         message = 'complete_your_profile'.tr;
     }
 
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          child: Icon(icon, size: 28, color: color),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                message,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'fields_required'.tr,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
-              ),
-            ],
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 30, color: color),
           ),
-        ),
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'fields_required'.tr,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: _buildSaveButton(),
+    );
+  }
+
+  Widget _buildSectionCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  InputDecoration _dropdownDecoration(IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppConstants.primaryGreen, width: 1.6),
+      ),
+      filled: true,
+      fillColor: const Color(0xFFF9FAFC),
     );
   }
 
@@ -148,16 +226,21 @@ class ProfileCompletionView extends GetView<OnboardingController> {
   /// screen and does not change. Wrapping in Obx caused nested-Obx issues
   /// with the crops grid Obx inside _buildFarmerForm().
   Widget _buildDynamicForm() {
+    final Widget content;
     switch (controller.selectedRole.value) {
       case 'farmer':
-        return _buildFarmerForm();
+        content = _buildFarmerForm();
+        break;
       case 'expert':
-        return _buildExpertForm();
+        content = _buildExpertForm();
+        break;
       case 'company':
-        return _buildCompanyForm();
+        content = _buildCompanyForm();
+        break;
       default:
-        return const SizedBox();
+        content = const SizedBox();
     }
+    return _buildSectionCard(child: content);
   }
 
   // ========== FARMER FORM ==========
@@ -398,14 +481,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           initialValue: controller.selectedSpecialization.value.isEmpty
               ? null
               : controller.selectedSpecialization.value,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.workspace_premium),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            filled: true,
-            fillColor: Colors.grey[50],
-          ),
+          decoration: _dropdownDecoration(Icons.workspace_premium),
           hint: Text('select_specialization'.tr),
           items: OnboardingController.expertSpecializations
               .map((spec) => DropdownMenuItem(
@@ -429,7 +505,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: const Color(0xFFF9FAFC),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[300]!),
       ),
@@ -571,14 +647,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           initialValue: controller.selectedBusinessType.value.isEmpty
               ? null
               : controller.selectedBusinessType.value,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.category),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            filled: true,
-            fillColor: Colors.grey[50],
-          ),
+          decoration: _dropdownDecoration(Icons.category),
           hint: Text('select_business_type'.tr),
           items: OnboardingController.businessTypes
               .map((type) => DropdownMenuItem(
@@ -597,32 +666,13 @@ class ProfileCompletionView extends GetView<OnboardingController> {
   }
 
   /// Build save button.
-  /// Anonymous farmers (guest flow) MUST complete their profile \u2014 no skip allowed.
+  /// Anonymous farmers (guest flow) MUST complete their profile — no skip allowed.
   Widget _buildSaveButton() {
-    return Column(
-      children: [
-        Obx(() => CustomButton(
-          text: 'save_continue'.tr,
-          onPressed: controller.saveProfile,
-          isLoading: controller.isLoading.value,
-        )),
-
-        // Skip button \u2014 hidden for anonymous farmers (mandatory onboarding)
-        if (!controller.isAnonymousFarmer) ...[
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: controller.continueAsGuest,
-            child: Text(
-              'skip_for_now'.tr,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
-        ],
-      ],
-    );
+    return Obx(() => CustomButton(
+      text: 'save_continue'.tr,
+      onPressed: controller.saveProfile,
+      isLoading: controller.isLoading.value,
+    ));
   }
 }
-
-
-
 

@@ -12,37 +12,44 @@ class RoleSelectionView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F8FB),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.sizeOf(context).height -
-                  MediaQuery.of(context).padding.top -
-                  MediaQuery.of(context).padding.bottom - 48,
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFF6FFF8), Color(0xFFF9FAFF)],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-
-              // ========== HEADER SECTION ==========
-              _buildHeader(),
-
-              const SizedBox(height: 48),
-
-              // ========== ROLE CARDS ==========
-              _buildRoleCards(),
-
-              const SizedBox(height: 24),
-
-              // ========== GUEST OPTION ==========
-              _buildGuestOption(),
-
-              const SizedBox(height: 20),
-            ],
           ),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.sizeOf(context).height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom - 48,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 28),
+                      _buildRoleCards(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+              Obx(() => controller.isLoading.value
+                  ? Container(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : const SizedBox.shrink()),
+            ],
           ),
         ),
       ),
@@ -51,11 +58,25 @@ class RoleSelectionView extends GetView<OnboardingController> {
 
   /// Build the header with app icon and title
   Widget _buildHeader() {
-    return Column(
-      children: [
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
         // App Icon
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: AppConstants.lightGreen.withValues(alpha: 0.3),
             shape: BoxShape.circle,
@@ -72,7 +93,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
         Text(
           'select_your_role'.tr,
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: AppConstants.darkGreen,
           ),
@@ -84,11 +105,22 @@ class RoleSelectionView extends GetView<OnboardingController> {
           'choose_how_use'.tr,
           style: TextStyle(
             fontSize: 16,
+            fontWeight: FontWeight.w500,
             color: Colors.grey[600],
           ),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 6),
+        Text(
+          'You can update details after profile completion.',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[500],
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
+      ),
     );
   }
 
@@ -122,7 +154,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
         // Company/Seller Card
         _buildRoleCard(
           role: 'company',
-          title: 'company_seller'.tr,
+          title: 'Seller',
           description: 'company_desc'.tr,
           icon: Icons.store,
           color: Colors.orange[700]!,
@@ -144,13 +176,20 @@ class RoleSelectionView extends GetView<OnboardingController> {
 
       return InkWell(
         onTap: () => controller.selectRole(role),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.1) : Colors.grey[50],
-            borderRadius: BorderRadius.circular(16),
+            color: isSelected ? color.withValues(alpha: 0.12) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
             border: Border.all(
               color: isSelected ? color : Colors.grey[300]!,
               width: isSelected ? 2 : 1,
@@ -181,7 +220,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[800],
                       ),
@@ -211,35 +250,6 @@ class RoleSelectionView extends GetView<OnboardingController> {
     });
   }
 
-  /// Build the guest access option at bottom
-  Widget _buildGuestOption() {
-    return Column(
-      children: [
-        const Divider(),
-        const SizedBox(height: 8),
-
-        TextButton(
-          onPressed: controller.continueAsGuest,
-          child: Text(
-            'continue_as_guest'.tr,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-
-        Text(
-          'limited_features'.tr,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[400],
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 

@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import '../../../app/data/models/user_model.dart';
 import '../../../app/data/providers/auth_provider.dart';
 import '../../../app/data/services/firebase_service.dart';
-import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
+import 'auth_controller.dart';
 
 /// OnboardingController — ViewModel for the Role Selection and Profile Completion screens.
 ///
@@ -16,18 +16,19 @@ import '../../../app/utils/app_snackbar.dart';
 class OnboardingController extends GetxController {
   final AuthProvider    _authProvider    = Get.find<AuthProvider>();
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
+  final AuthController  _authController  = Get.find<AuthController>();
 
   // --- Role selection ---
   final RxString selectedRole = ''.obs;
   final RxBool   isLoading    = false.obs;
 
   // --- Common profile fields ---
-  final nameController     = TextEditingController();
-  final phoneController    = TextEditingController();
-  final locationController = TextEditingController();
+  late final TextEditingController nameController;
+  late final TextEditingController phoneController;
+  late final TextEditingController locationController;
 
   // --- Farmer-specific ---
-  final farmSizeController         = TextEditingController();
+  late final TextEditingController farmSizeController;
   final RxList<String> selectedCrops = <String>[].obs;
 
   static const List<String> availableCrops = [
@@ -37,9 +38,9 @@ class OnboardingController extends GetxController {
 
   // --- Expert-specific ---
   final RxString selectedSpecialization       = ''.obs;
-  final yearsExperienceController             = TextEditingController();
-  final certificationsController              = TextEditingController();
-  final bioController                         = TextEditingController();
+  late final TextEditingController yearsExperienceController;
+  late final TextEditingController certificationsController;
+  late final TextEditingController bioController;
   final RxBool isAvailableForConsultation = true.obs;
 
   static const List<String> expertSpecializations = [
@@ -55,12 +56,12 @@ class OnboardingController extends GetxController {
   ];
 
   // --- Company/Seller-specific ---
-  final companyNameController          = TextEditingController();
-  final ownerNameController            = TextEditingController();
+  late final TextEditingController companyNameController;
+  late final TextEditingController ownerNameController;
   final RxString selectedBusinessType  = ''.obs;
-  final yearsInBusinessController      = TextEditingController();
-  final licenseNumberController        = TextEditingController();
-  final businessDescriptionController  = TextEditingController();
+  late final TextEditingController yearsInBusinessController;
+  late final TextEditingController licenseNumberController;
+  late final TextEditingController businessDescriptionController;
 
   static const List<String> businessTypes = [
     'Seeds Supplier',
@@ -89,6 +90,20 @@ class OnboardingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    nameController = TextEditingController();
+    phoneController = TextEditingController();
+    locationController = TextEditingController();
+    farmSizeController = TextEditingController();
+    yearsExperienceController = TextEditingController();
+    certificationsController = TextEditingController();
+    bioController = TextEditingController();
+    companyNameController = TextEditingController();
+    ownerNameController = TextEditingController();
+    yearsInBusinessController = TextEditingController();
+    licenseNumberController = TextEditingController();
+    businessDescriptionController = TextEditingController();
+
     _prefillFromCurrentUser();
   }
 
@@ -110,18 +125,16 @@ class OnboardingController extends GetxController {
   // ROLE SELECTION
   // ─────────────────────────────────────────────────────────────────────────
 
-  /// User tapped a role card — set the role and navigate to profile completion.
-  void selectRole(String role) {
+  /// User tapped a role card.
+  /// Navigation is centralized in AuthController.
+  Future<void> selectRole(String role) async {
+    if (isLoading.value) return;
+
     selectedRole.value = role;
-    Get.toNamed(AppRoutes.PROFILE_COMPLETION);
+    await _authController.handleRoleSelection(role);
   }
 
-  void continueAsGuest() {
-    _authProvider.signInAnonymously();
-    Get.offAllNamed(AppRoutes.PROFILE_COMPLETION);
-  }
-
-  void goBackToRoleSelection() => Get.back();
+  void goBackToRoleSelection() => _authController.openRoleSelection();
 
   // ─────────────────────────────────────────────────────────────────────────
   // CROP SELECTION (Farmers only)
@@ -223,7 +236,6 @@ class OnboardingController extends GetxController {
       final current = _authProvider.currentUser.value;
       if (current == null) {
         AppSnackbar.error('Session expired. Please login again.');
-        Get.offAllNamed(AppRoutes.LOGIN);
         return;
       }
 
@@ -293,7 +305,6 @@ class OnboardingController extends GetxController {
       _authProvider.currentUser.value = updated;
 
       AppSnackbar.success('Profile saved!');
-      Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
       if (kDebugMode) debugPrint('OnboardingController: saveProfile error → $e');
       AppSnackbar.error('Failed to save profile. Please try again.');

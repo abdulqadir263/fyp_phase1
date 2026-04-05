@@ -1,6 +1,7 @@
 // Sare routes ki strings yahan par define karenge
 class AppRoutes {
   // Auth Routes
+  static const WELCOME = '/welcome';
   static const LOGIN = '/login';
   static const SIGNUP = '/signup';
   static const FORGOT_PASSWORD = '/forgot-password';

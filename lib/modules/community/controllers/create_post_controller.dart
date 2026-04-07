@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,28 +19,28 @@ import 'post_controller.dart';
 class CreatePostController extends GetxController {
   /// Auth provider to access current user data
   final AuthProvider _authProvider = Get.find<AuthProvider>();
-  
+
   /// Community service for Firebase operations
   final CommunityService _communityService = Get.find<CommunityService>();
-  
+
   /// Image picker for selecting post images
   final ImagePicker _imagePicker = ImagePicker();
 
   /// Controller for post title input
   final TextEditingController titleController = TextEditingController();
-  
+
   /// Controller for post description input
   final TextEditingController descriptionController = TextEditingController();
-  
+
   /// List of images selected for new post
   final RxList<File> selectedImages = <File>[].obs;
-  
+
   /// Category selected for new post
   final RxString postCategory = 'crops'.obs;
-  
+
   /// Shows loading indicator while creating post
   final RxBool isCreatingPost = false.obs;
-  
+
   /// Flag to track if controller is still active
   bool _isDisposed = false;
 
@@ -59,7 +58,8 @@ class CreatePostController extends GetxController {
   String get currentUserName => _authProvider.currentUser.value?.name ?? 'User';
 
   /// Get current user avatar URL
-  String get currentUserAvatar => _authProvider.currentUser.value?.profileImage ?? '';
+  String get currentUserAvatar =>
+      _authProvider.currentUser.value?.profileImage ?? '';
 
   @override
   void onInit() {
@@ -232,7 +232,7 @@ class CreatePostController extends GetxController {
   Future<void> createPost() async {
     // Prevent double submission
     if (isCreatingPost.value) return;
-    
+
     if (!validateForm()) return;
     final user = _authProvider.currentUser.value;
     if (user == null || user.uid.isEmpty) {
@@ -241,11 +241,14 @@ class CreatePostController extends GetxController {
     }
 
     if (!user.isProfileComplete) {
-      AppSnackbar.warning('Please complete your profile first to create a post.');
+      AppSnackbar.warning(
+        'Please complete your profile first to create a post.',
+      );
       return;
     }
 
-    if (user.userType == 'farmer' && (user.cropsGrown == null || user.cropsGrown!.isEmpty)) {
+    if (user.userType == 'farmer' &&
+        (user.cropsGrown == null || user.cropsGrown!.isEmpty)) {
       AppSnackbar.warning('Please add crops to your profile before posting.');
       return;
     }
@@ -258,24 +261,28 @@ class CreatePostController extends GetxController {
       if (selectedImages.isNotEmpty) {
         final cloudinaryService = Get.find<CloudinaryService>();
         final uploadFutures = selectedImages.map(
-          (image) => cloudinaryService.uploadImage(image, folder: 'post_images').catchError((e) {
-            debugPrint('Error uploading image: $e');
-            return null;
-          }),
+          (image) => cloudinaryService
+              .uploadImage(image, folder: 'post_images')
+              .catchError((e) {
+                debugPrint('Error uploading image: $e');
+                return null;
+              }),
         );
         final results = await Future.wait(uploadFutures);
         imageUrls = results.whereType<String>().toList();
-        
+
         // Warn user if some images failed to upload
         final failedCount = selectedImages.length - imageUrls.length;
         if (failedCount > 0 && imageUrls.isNotEmpty) {
           AppSnackbar.info('$failedCount image(s) failed to upload');
         } else if (failedCount > 0 && imageUrls.isEmpty) {
           // All images failed, but continue with post creation without images
-          debugPrint('All image uploads failed, continuing with text-only post');
+          debugPrint(
+            'All image uploads failed, continuing with text-only post',
+          );
         }
       }
-      
+
       if (_isDisposed) return;
 
       // Create post model
@@ -293,16 +300,16 @@ class CreatePostController extends GetxController {
 
       // Save to Firestore
       final postId = await _communityService.createPost(post);
-      
+
       if (_isDisposed) return;
 
       if (postId != null) {
         AppSnackbar.success('Post created successfully');
         clearForm();
-        
+
         // Navigate back to community screen first
         Get.back();
-        
+
         // Refresh posts list after navigation completes
         // Using Future.microtask to ensure navigation finishes first
         Future.microtask(() {

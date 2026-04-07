@@ -22,9 +22,7 @@ class CropResultScreen extends GetView<CropRecommendationController> {
       body: Obx(() {
         final recommendation = controller.currentRecommendation.value;
         if (recommendation == null) {
-          return const Center(
-            child: Text('No recommendation data available.'),
-          );
+          return const Center(child: Text('No recommendation data available.'));
         }
         return _buildContent(context, recommendation);
       }),
@@ -32,66 +30,68 @@ class CropResultScreen extends GetView<CropRecommendationController> {
   }
 
   Widget _buildContent(
-      BuildContext context, RecommendationModel recommendation) {
+    BuildContext context,
+    RecommendationModel recommendation,
+  ) {
     final results = recommendation.results;
 
     return SafeArea(
       top: false,
       child: ResponsiveHelper.tabletCenter(
         child: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Success Header
-        _buildSuccessHeader(context),
-        const SizedBox(height: 20),
+          padding: const EdgeInsets.all(16),
+          children: [
+            // Success Header
+            _buildSuccessHeader(context),
+            const SizedBox(height: 20),
 
-        // Input Summary Card
-        _buildInputSummary(context, recommendation.input),
-        const SizedBox(height: 20),
+            // Input Summary Card
+            _buildInputSummary(context, recommendation.input),
+            const SizedBox(height: 20),
 
-        // Results Header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            'Top Recommendations',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Crop Result Cards
-        ...List.generate(results.length, (index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _buildCropCard(context, results[index], index),
-          );
-        }),
-
-        const SizedBox(height: 12),
-
-        // New Recommendation Button
-        OutlinedButton.icon(
-          onPressed: () {
-            controller.clearForm();
-            Get.back();
-          },
-          icon: const Icon(Icons.refresh_rounded),
-          label: Text('new_recommendation'.tr),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primaryGreen,
-            side: const BorderSide(color: AppColors.primaryGreen),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            // Results Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'Top Recommendations',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
+            const SizedBox(height: 12),
+
+            // Crop Result Cards
+            ...List.generate(results.length, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildCropCard(context, results[index], index),
+              );
+            }),
+
+            const SizedBox(height: 12),
+
+            // New Recommendation Button
+            OutlinedButton.icon(
+              onPressed: () {
+                controller.clearForm();
+                Get.back();
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text('new_recommendation'.tr),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryGreen,
+                side: const BorderSide(color: AppColors.primaryGreen),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
-        const SizedBox(height: 16),
-      ],
       ),
-    ),
     );
   }
 
@@ -132,16 +132,16 @@ class CropResultScreen extends GetView<CropRecommendationController> {
                 Text(
                   'Analysis Complete!',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryGreen,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryGreen,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Based on your soil and climate data, here are the best crops for you.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -157,15 +157,13 @@ class CropResultScreen extends GetView<CropRecommendationController> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-        childrenPadding:
-            const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-        leading:
-            const Icon(Icons.tune_rounded, color: AppColors.primaryGreen),
+        childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+        leading: const Icon(Icons.tune_rounded, color: AppColors.primaryGreen),
         title: Text(
           'Your Input Parameters',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         children: [
           _inputRow('Nitrogen (N)', '${input.n}'),
@@ -187,20 +185,17 @@ class CropResultScreen extends GetView<CropRecommendationController> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-          Text(value,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildCropCard(BuildContext context, CropResult result, int rank) {
-    final colors = [
-      AppColors.primaryGreen,
-      AppColors.info,
-      AppColors.warning,
-    ];
+    final colors = [AppColors.primaryGreen, AppColors.info, AppColors.warning];
     final medals = ['🥇', '🥈', '🥉'];
     final color = colors[rank.clamp(0, 2)];
     final medal = medals[rank.clamp(0, 2)];
@@ -238,18 +233,18 @@ class CropResultScreen extends GetView<CropRecommendationController> {
                       const SizedBox(height: 2),
                       Text(
                         _capitalize(result.cropName),
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
                 // Percentage Badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -282,10 +277,7 @@ class CropResultScreen extends GetView<CropRecommendationController> {
             // Suitability label
             Text(
               'Suitability: ${percentage.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -298,7 +290,3 @@ class CropResultScreen extends GetView<CropRecommendationController> {
     return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 }
-
-
-
-

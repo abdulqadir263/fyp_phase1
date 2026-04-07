@@ -98,15 +98,16 @@ class PostCard extends StatelessWidget {
                 Text(
                   post.userName,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 14),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
                     Text(
                       _formatTimeAgo(post.createdAt),
-                      style:
-                          TextStyle(color: Colors.grey[500], fontSize: 12),
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
                     if (post.updatedAt != null) ...[
                       const SizedBox(width: 6),
@@ -158,37 +159,45 @@ class PostCard extends StatelessWidget {
       if (onEdit != null)
         const PopupMenuItem(
           value: 'edit',
-          child: Row(children: [
-            Icon(Icons.edit_outlined, size: 20),
-            SizedBox(width: 12),
-            Text('Edit'),
-          ]),
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, size: 20),
+              SizedBox(width: 12),
+              Text('Edit'),
+            ],
+          ),
         ),
       const PopupMenuItem(
         value: 'share',
-        child: Row(children: [
-          Icon(Icons.share_outlined, size: 20),
-          SizedBox(width: 12),
-          Text('Share'),
-        ]),
+        child: Row(
+          children: [
+            Icon(Icons.share_outlined, size: 20),
+            SizedBox(width: 12),
+            Text('Share'),
+          ],
+        ),
       ),
       if (onReport != null)
         const PopupMenuItem(
           value: 'report',
-          child: Row(children: [
-            Icon(Icons.flag_outlined, color: Colors.orange, size: 20),
-            SizedBox(width: 12),
-            Text('Report Post', style: TextStyle(color: Colors.orange)),
-          ]),
+          child: Row(
+            children: [
+              Icon(Icons.flag_outlined, color: Colors.orange, size: 20),
+              SizedBox(width: 12),
+              Text('Report Post', style: TextStyle(color: Colors.orange)),
+            ],
+          ),
         ),
       if (onDelete != null)
         const PopupMenuItem(
           value: 'delete',
-          child: Row(children: [
-            Icon(Icons.delete_outline, color: Colors.red, size: 20),
-            SizedBox(width: 12),
-            Text('Delete', style: TextStyle(color: Colors.red)),
-          ]),
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, color: Colors.red, size: 20),
+              SizedBox(width: 12),
+              Text('Delete', style: TextStyle(color: Colors.red)),
+            ],
+          ),
         ),
     ];
   }
@@ -273,42 +282,44 @@ class PostCard extends StatelessWidget {
                     memCacheWidth: 700,
                     fadeInDuration: const Duration(milliseconds: 200),
                     fadeOutDuration: const Duration(milliseconds: 200),
-                  placeholder: (_, __) => Container(
-                    color: Colors.grey[200],
-                    child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2)),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    color: Colors.grey[200],
-                    child:
-                        const Icon(Icons.broken_image, color: Colors.grey),
-                  ),
-                ),
-                // "+N" badge if there are more images
-                if (post.imageUrls.length > 1)
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
+                    placeholder: (_, __) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      child: Text(
-                        '+${post.imageUrls.length - 1}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                    ),
+                  ),
+                  // "+N" badge if there are more images
+                  if (post.imageUrls.length > 1)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          '+${post.imageUrls.length - 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
           ),
         ),
       ),
@@ -335,13 +346,17 @@ class PostCard extends StatelessWidget {
         children: [
           Icon(Icons.comment_outlined, size: 18, color: Colors.grey[500]),
           const SizedBox(width: 4),
-          Text('${post.commentsCount}',
-              style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+          Text(
+            '${post.commentsCount}',
+            style: TextStyle(color: Colors.grey[500], fontSize: 13),
+          ),
           const SizedBox(width: 16),
           Icon(Icons.bookmark_border, size: 18, color: Colors.grey[500]),
           const SizedBox(width: 4),
-          Text('${post.bookmarksCount}',
-              style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+          Text(
+            '${post.bookmarksCount}',
+            style: TextStyle(color: Colors.grey[500], fontSize: 13),
+          ),
           const Spacer(),
           IconButton(
             icon: Icon(
@@ -454,8 +469,10 @@ class _FullScreenImageViewerState extends State<_FullScreenImageViewer> {
               right: 0,
               child: Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(16),

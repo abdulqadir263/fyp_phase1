@@ -35,79 +35,116 @@ class OrderDetailView extends GetView<OrderController> {
                     Text(
                       'Order #${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length).toUpperCase()}',
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt),
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                      DateFormat(
+                        'dd MMM yyyy, hh:mm a',
+                      ).format(order.createdAt),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
 
                     const SizedBox(height: 24),
 
                     // ── Status Tracker (live) ──
-                    Text('order_status'.tr,
-                        style:
-                            TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(
+                      'order_status'.tr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     _StatusTracker(currentStatus: order.status),
 
                     const SizedBox(height: 24),
 
                     // ── Items ──
-                    Text('items'.tr,
-                        style:
-                            TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(
+                      'items'.tr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    ...order.items.map((item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(item['name'] ?? '',
-                                        style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600)),
-                                    Text(
-                                        'Qty: ${item['quantity']}  ×  Rs. ${(item['price'] as num).toStringAsFixed(0)}',
-                                        style: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.grey.shade600)),
-                                  ],
-                                ),
+                    ...order.items.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['name'] ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Qty: ${item['quantity']}  ×  Rs. ${(item['price'] as num).toStringAsFixed(0)}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Rs. ${((item['price'] as num) * (item['quantity'] as num)).toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            Text(
+                              'Rs. ${((item['price'] as num) * (item['quantity'] as num)).toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
                               ),
-                            ],
-                          ),
-                        )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                     const Divider(height: 20),
 
                     // ── Price breakdown ──
-                    _priceRow('Subtotal',
-                        'Rs. ${order.subtotal.toStringAsFixed(0)}'),
-                    _priceRow('Delivery Fee',
-                        'Rs. ${order.deliveryFee.toStringAsFixed(0)}'),
+                    _priceRow(
+                      'Subtotal',
+                      'Rs. ${order.subtotal.toStringAsFixed(0)}',
+                    ),
+                    _priceRow(
+                      'Delivery Fee',
+                      'Rs. ${order.deliveryFee.toStringAsFixed(0)}',
+                    ),
                     const Divider(height: 16),
-                    _priceRow('Total',
-                        'Rs. ${order.totalAmount.toStringAsFixed(0)}',
-                        bold: true),
+                    _priceRow(
+                      'Total',
+                      'Rs. ${order.totalAmount.toStringAsFixed(0)}',
+                      bold: true,
+                    ),
 
                     const SizedBox(height: 20),
 
                     // ── Delivery info ──
-                    Text('delivery_details'.tr,
-                        style:
-                            TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(
+                      'delivery_details'.tr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    _infoTile(Icons.location_on_outlined, order.deliveryAddress),
+                    _infoTile(
+                      Icons.location_on_outlined,
+                      order.deliveryAddress,
+                    ),
                     const SizedBox(height: 4),
                     _infoTile(Icons.phone_outlined, order.phone),
                     const SizedBox(height: 10),
@@ -123,12 +160,19 @@ class OrderDetailView extends GetView<OrderController> {
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.payments_outlined,
-                              color: Colors.orange, size: 22),
+                          Icon(
+                            Icons.payments_outlined,
+                            color: Colors.orange,
+                            size: 22,
+                          ),
                           SizedBox(width: 10),
-                          Text('Cash on Delivery',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600)),
+                          Text(
+                            'Cash on Delivery',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -148,15 +192,21 @@ class OrderDetailView extends GetView<OrderController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                  color: bold ? AppColors.primaryGreen : null)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              color: bold ? AppColors.primaryGreen : null,
+            ),
+          ),
         ],
       ),
     );
@@ -169,8 +219,10 @@ class OrderDetailView extends GetView<OrderController> {
         Icon(icon, size: 18, color: Colors.grey.shade600),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(text,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+          child: Text(
+            text,
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+          ),
         ),
       ],
     );
@@ -201,11 +253,14 @@ class _StatusTracker extends StatelessWidget {
           children: [
             Icon(Icons.cancel, color: Colors.red.shade700, size: 28),
             const SizedBox(width: 12),
-            Text('Order Cancelled',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red.shade700)),
+            Text(
+              'Order Cancelled',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.red.shade700,
+              ),
+            ),
           ],
         ),
       );
@@ -231,8 +286,9 @@ class _StatusTracker extends StatelessWidget {
                   height: 28,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color:
-                        isCompleted ? AppColors.primaryGreen : Colors.grey.shade300,
+                    color: isCompleted
+                        ? AppColors.primaryGreen
+                        : Colors.grey.shade300,
                     border: isCurrent
                         ? Border.all(color: AppColors.primaryGreen, width: 3)
                         : null,
@@ -263,8 +319,9 @@ class _StatusTracker extends StatelessWidget {
                     _stepLabel(steps[i]),
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight:
-                          isCurrent ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isCurrent
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       color: isCompleted
                           ? Colors.black87
                           : Colors.grey.shade500,
@@ -274,7 +331,9 @@ class _StatusTracker extends StatelessWidget {
                     Text(
                       _stepHint(steps[i]),
                       style: TextStyle(
-                          fontSize: 12, color: Colors.grey.shade600),
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   SizedBox(height: isLast ? 0 : 18),
                 ],

@@ -9,6 +9,7 @@ class AppRoutes {
   // ========== NEW ONBOARDING ROUTES ==========
   /// Role selection screen after signup
   static const ROLE_SELECTION = '/role-selection';
+
   /// Profile completion screen based on selected role
   static const PROFILE_COMPLETION = '/profile-completion';
 

@@ -14,26 +14,27 @@ import '../../../../app/utils/app_snackbar.dart';
 ///
 /// Supports viewing and editing profiles for Farmer, Expert, and Company users.
 class ProfileController extends GetxController {
-  final AuthProvider      _authProvider      = Get.find<AuthProvider>();
-  final FirebaseService   _firebaseService   = Get.find<FirebaseService>();
+  final AuthProvider _authProvider = Get.find<AuthProvider>();
+  final FirebaseService _firebaseService = Get.find<FirebaseService>();
   final CloudinaryService _cloudinaryService = Get.find<CloudinaryService>();
-  final ImagePicker       _picker            = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
 
   // --- Form controllers ---
-  final nameController          = TextEditingController();
-  final emailController         = TextEditingController();
-  final phoneController         = TextEditingController();
-  final locationController      = TextEditingController();
-  final farmSizeController      = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final locationController = TextEditingController();
+  final farmSizeController = TextEditingController();
   final specializationController = TextEditingController();
-  final companyNameController   = TextEditingController();
+  final companyNameController = TextEditingController();
 
   // --- Reactive state ---
-  final RxBool   isLoading        = false.obs;
-  final RxBool   isEditing        = false.obs;
-  final RxString userType         = ''.obs;     // reflects actual user role
-  final RxString profileImageUrl  = ''.obs;     // Cloudinary CDN URL (not a local path)
-  final RxBool   isUploadingImage = false.obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isEditing = false.obs;
+  final RxString userType = ''.obs; // reflects actual user role
+  final RxString profileImageUrl =
+      ''.obs; // Cloudinary CDN URL (not a local path)
+  final RxBool isUploadingImage = false.obs;
 
   /// Shortcut to the current user — shared with the rest of the app.
   Rx<UserModel?> get user => _authProvider.currentUser;
@@ -44,10 +45,14 @@ class ProfileController extends GetxController {
     final u = user.value;
     if (u == null) return false;
     switch (u.userType) {
-      case 'farmer':  return u.location == null || u.location!.isEmpty;
-      case 'expert':  return u.specialization == null || u.specialization!.isEmpty;
-      case 'company': return u.companyName == null || u.companyName!.isEmpty;
-      default:        return false;
+      case 'farmer':
+        return u.location == null || u.location!.isEmpty;
+      case 'expert':
+        return u.specialization == null || u.specialization!.isEmpty;
+      case 'company':
+        return u.companyName == null || u.companyName!.isEmpty;
+      default:
+        return false;
     }
   }
 
@@ -63,15 +68,15 @@ class ProfileController extends GetxController {
     final u = user.value;
     if (u == null) return;
 
-    nameController.text           = u.name;
-    emailController.text          = u.email;
-    phoneController.text          = u.phone;
-    locationController.text       = u.location ?? '';
-    farmSizeController.text       = u.farmSize ?? '';
+    nameController.text = u.name;
+    emailController.text = u.email;
+    phoneController.text = u.phone;
+    locationController.text = u.location ?? '';
+    farmSizeController.text = u.farmSize ?? '';
     specializationController.text = u.specialization ?? '';
-    companyNameController.text    = u.companyName ?? '';
-    userType.value                = u.userType;
-    profileImageUrl.value         = u.profileImage ?? '';
+    companyNameController.text = u.companyName ?? '';
+    userType.value = u.userType;
+    profileImageUrl.value = u.profileImage ?? '';
   }
 
   /// Toggle between view and edit modes.
@@ -86,7 +91,9 @@ class ProfileController extends GetxController {
   /// Open the gallery, upload the chosen image to Cloudinary, and update the URL.
   Future<void> pickAndUploadImage() async {
     try {
-      final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+      final XFile? picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+      );
       if (picked == null) return; // user cancelled
 
       isUploadingImage.value = true;
@@ -141,14 +148,24 @@ class ProfileController extends GetxController {
 
       // Build updated user — copyWith keeps every field not explicitly overridden
       final updated = current.copyWith(
-        name:          nameController.text.trim(),
-        phone:         phoneController.text.trim(),
-        location:      locationController.text.trim().isEmpty ? null : locationController.text.trim(),
-        farmSize:      farmSizeController.text.trim().isEmpty ? null : farmSizeController.text.trim(),
-        specialization: specializationController.text.trim().isEmpty ? null : specializationController.text.trim(),
-        companyName:   companyNameController.text.trim().isEmpty ? null : companyNameController.text.trim(),
-        profileImage:  profileImageUrl.value.isEmpty ? null : profileImageUrl.value,
-        updatedAt:     DateTime.now(),
+        name: nameController.text.trim(),
+        phone: phoneController.text.trim(),
+        location: locationController.text.trim().isEmpty
+            ? null
+            : locationController.text.trim(),
+        farmSize: farmSizeController.text.trim().isEmpty
+            ? null
+            : farmSizeController.text.trim(),
+        specialization: specializationController.text.trim().isEmpty
+            ? null
+            : specializationController.text.trim(),
+        companyName: companyNameController.text.trim().isEmpty
+            ? null
+            : companyNameController.text.trim(),
+        profileImage: profileImageUrl.value.isEmpty
+            ? null
+            : profileImageUrl.value,
+        updatedAt: DateTime.now(),
       );
 
       // Persist to Firestore
@@ -174,7 +191,8 @@ class ProfileController extends GetxController {
   void skipProfileSetup() {
     Get.defaultDialog(
       title: 'Skip for Now',
-      middleText: 'You can complete your profile later from the profile section.',
+      middleText:
+          'You can complete your profile later from the profile section.',
       textConfirm: 'Continue',
       textCancel: 'Cancel',
       confirmTextColor: Colors.white,

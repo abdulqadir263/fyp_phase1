@@ -10,58 +10,60 @@ class CustomBottomNavBar extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: BottomNavigationBar(
-          currentIndex: controller.currentIndex.value,
-          onTap: _handleNavTap,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppConstants.primaryGreen,
-          unselectedItemColor: Colors.grey,
-          selectedFontSize: 12,
-          unselectedFontSize: 11,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.wb_sunny_outlined),
-              activeIcon: Icon(Icons.wb_sunny),
-              label: 'Weather',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people_outline),
-              activeIcon: Icon(Icons.people),
-              label: 'Community',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_outlined),
-              activeIcon: Icon(Icons.shopping_cart),
-              label: 'Market',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
           ],
         ),
+        child: SafeArea(
+          child: BottomNavigationBar(
+            currentIndex: controller.currentIndex.value,
+            onTap: _handleNavTap,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: AppConstants.primaryGreen,
+            unselectedItemColor: Colors.grey,
+            selectedFontSize: 12,
+            unselectedFontSize: 11,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.wb_sunny_outlined),
+                activeIcon: Icon(Icons.wb_sunny),
+                label: 'Weather',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.people_outline),
+                activeIcon: Icon(Icons.people),
+                label: 'Community',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_cart_outlined),
+                activeIcon: Icon(Icons.shopping_cart),
+                label: 'Market',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 
   void _handleNavTap(int index) {

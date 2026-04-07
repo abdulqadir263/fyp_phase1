@@ -29,8 +29,7 @@ void main() {
     test('should generate correct Google Maps URL', () {
       const lat = 31.5204;
       const lng = 74.3587;
-      final url =
-          'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+      final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
       expect(url, contains('31.5204'));
       expect(url, contains('74.3587'));
       expect(url, startsWith('https://www.google.com/maps'));
@@ -227,14 +226,18 @@ void main() {
     test('rejected visits cannot be modified', () {
       const status = 'rejected';
       final isTerminal =
-          status == 'rejected' || status == 'completed' || status == 'cancelled';
+          status == 'rejected' ||
+          status == 'completed' ||
+          status == 'cancelled';
       expect(isTerminal, true);
     });
 
     test('completed visits cannot be modified', () {
       const status = 'completed';
       final isTerminal =
-          status == 'rejected' || status == 'completed' || status == 'cancelled';
+          status == 'rejected' ||
+          status == 'completed' ||
+          status == 'cancelled';
       expect(isTerminal, true);
     });
   });
@@ -274,7 +277,8 @@ void main() {
     });
 
     test('should accept valid notes', () {
-      const notes = 'Inspected the wheat field. Found rust disease. '
+      const notes =
+          'Inspected the wheat field. Found rust disease. '
           'Recommended fungicide application.';
       expect(notes.trim().isNotEmpty, true);
     });
@@ -288,4 +292,3 @@ void main() {
     });
   });
 }
-

@@ -211,7 +211,8 @@ class SellerController extends GetxController {
       await _service.updateProduct(p.id, {'isActive': !p.isActive});
       await loadMyProducts();
       AppSnackbar.info(
-          p.isActive ? 'Product hidden from buyers.' : 'Product is now active.');
+        p.isActive ? 'Product hidden from buyers.' : 'Product is now active.',
+      );
     } catch (e) {
       AppSnackbar.error('Failed to update product.');
     }
@@ -284,4 +285,3 @@ class SellerController extends GetxController {
     super.onClose();
   }
 }
-

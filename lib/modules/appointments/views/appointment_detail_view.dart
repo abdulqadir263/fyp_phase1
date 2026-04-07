@@ -24,10 +24,7 @@ class AppointmentDetailView extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('order_details'.tr),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('order_details'.tr), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -128,8 +125,7 @@ class AppointmentDetailView extends StatelessWidget {
             ),
 
             // Expert notes
-            if (visit.expertNotes != null &&
-                visit.expertNotes!.isNotEmpty) ...[
+            if (visit.expertNotes != null && visit.expertNotes!.isNotEmpty) ...[
               const Divider(height: 24),
               const Text(
                 'Expert Notes',
@@ -173,10 +169,7 @@ class AppointmentDetailView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 16),
-          ),
+          Text(value, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
@@ -232,4 +225,3 @@ class AppointmentDetailView extends StatelessWidget {
     );
   }
 }
-

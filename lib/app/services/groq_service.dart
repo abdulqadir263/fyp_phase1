@@ -9,7 +9,8 @@ import '../../core/errors/exceptions.dart';
 /// Strictly scoped to agriculture-only responses.
 /// Replaces GeminiService for the chatbot module.
 class GroqService extends GetxService {
-  static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
+  static const String _baseUrl =
+      'https://api.groq.com/openai/v1/chat/completions';
 
   /// The Groq model to use
   static const String _model = 'llama-3.3-70b-versatile';
@@ -115,10 +116,7 @@ REMEMBER: You are STRICTLY an agriculture bot. If there is ANY doubt whether a q
       _isInitialized = true;
 
       // Seed conversation with system prompt
-      _conversationHistory.add({
-        'role': 'system',
-        'content': _systemPrompt,
-      });
+      _conversationHistory.add({'role': 'system', 'content': _systemPrompt});
 
       debugPrint('GroqService: Initialized successfully');
     } catch (e) {
@@ -130,7 +128,9 @@ REMEMBER: You are STRICTLY an agriculture bot. If there is ANY doubt whether a q
   /// Send a message and get an agriculture-focused response
   Future<String> sendMessage(String message) async {
     if (!_isInitialized) {
-      throw AIServiceException('GroqService is not initialized. Check API key.');
+      throw AIServiceException(
+        'GroqService is not initialized. Check API key.',
+      );
     }
 
     if (message.trim().isEmpty) {
@@ -139,10 +139,7 @@ REMEMBER: You are STRICTLY an agriculture bot. If there is ANY doubt whether a q
 
     try {
       // Add user message to conversation history
-      _conversationHistory.add({
-        'role': 'user',
-        'content': message,
-      });
+      _conversationHistory.add({'role': 'user', 'content': message});
 
       // Keep conversation history manageable (system + last 20 messages)
       if (_conversationHistory.length > 21) {
@@ -199,10 +196,10 @@ REMEMBER: You are STRICTLY an agriculture bot. If there is ANY doubt whether a q
           'AI service authentication failed. Please contact support.',
         );
       } else {
-        debugPrint('GroqService: API error ${response.statusCode} - ${response.body}');
-        throw AIServiceException(
-          'Failed to get response. Please try again.',
+        debugPrint(
+          'GroqService: API error ${response.statusCode} - ${response.body}',
         );
+        throw AIServiceException('Failed to get response. Please try again.');
       }
     } on AIServiceException {
       // Remove the failed user message from history
@@ -226,14 +223,10 @@ REMEMBER: You are STRICTLY an agriculture bot. If there is ANY doubt whether a q
   void startNewChat() {
     _conversationHistory.clear();
     // Re-add system prompt
-    _conversationHistory.add({
-      'role': 'system',
-      'content': _systemPrompt,
-    });
+    _conversationHistory.add({'role': 'system', 'content': _systemPrompt});
     debugPrint('GroqService: New chat session started');
   }
 
   /// Check if service is ready
   bool get isReady => _isInitialized;
 }
-

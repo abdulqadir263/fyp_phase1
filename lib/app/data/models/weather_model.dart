@@ -68,7 +68,9 @@ class WeatherModel {
       'icon': icon,
       'dateTime': Timestamp.fromDate(dateTime),
       'recommendations': recommendations.map((rec) => rec.toMap()).toList(),
-      'agricultureRecommendations': agricultureRecommendations.map((rec) => rec.toMap()).toList(),
+      'agricultureRecommendations': agricultureRecommendations
+          .map((rec) => rec.toMap())
+          .toList(),
     };
   }
 
@@ -119,7 +121,8 @@ class WeatherModel {
       icon: icon ?? this.icon,
       dateTime: dateTime ?? this.dateTime,
       recommendations: recommendations ?? this.recommendations,
-      agricultureRecommendations: agricultureRecommendations ?? this.agricultureRecommendations,
+      agricultureRecommendations:
+          agricultureRecommendations ?? this.agricultureRecommendations,
     );
   }
 }
@@ -256,7 +259,7 @@ class AgricultureRecommendation {
           'Proceed with wheat/rice harvesting',
           'Spread grains for sun drying',
           'Good for hay making and fodder preparation',
-          'Check moisture content before storage'
+          'Check moisture content before storage',
         ],
         riskLevel: 'low',
       ),
@@ -270,7 +273,7 @@ class AgricultureRecommendation {
           'Safe for pesticide application',
           'Low drift risk - efficient spraying',
           'Good absorption conditions',
-          'Ideal for fungicide application if needed'
+          'Ideal for fungicide application if needed',
         ],
         riskLevel: 'low',
       ),
@@ -283,7 +286,7 @@ class AgricultureRecommendation {
         actions: [
           'Continue with standard irrigation',
           'Monitor soil moisture levels',
-          'Adjust based on crop growth stage'
+          'Adjust based on crop growth stage',
         ],
         riskLevel: 'low',
       ),
@@ -296,7 +299,7 @@ class AgricultureRecommendation {
         actions: [
           'Low fungal disease pressure',
           'Reduce fungicide applications',
-          'Focus on other farm operations'
+          'Focus on other farm operations',
         ],
         riskLevel: 'low',
       ),
@@ -310,7 +313,7 @@ class AgricultureRecommendation {
           'Good for land preparation',
           'Ideal for planting operations',
           'Excellent for fieldwork',
-          'Good drying conditions for crops'
+          'Good drying conditions for crops',
         ],
         riskLevel: 'low',
       ),
@@ -323,7 +326,7 @@ class AgricultureRecommendation {
         actions: [
           'Maintain regular care routine',
           'Ensure clean water supply',
-          'Good conditions for outdoor grazing'
+          'Good conditions for outdoor grazing',
         ],
         riskLevel: 'low',
       ),

@@ -27,10 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
       ),
       centerTitle: centerTitle,
       leading: leading,
@@ -44,10 +41,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    AppConstants.primaryGreen,
-                    AppConstants.darkGreen,
-                  ],
+                  colors: [AppConstants.primaryGreen, AppConstants.darkGreen],
                 ),
               ),
             )

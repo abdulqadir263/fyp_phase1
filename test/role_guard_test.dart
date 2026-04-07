@@ -22,18 +22,18 @@ void main() {
   /// (avoids importing the full Flutter app)
   const Map<String, Set<String>> accessMatrix = {
     'farmer': {
-      marketplace, cart, appointments, community,
-      weather, chatbot, profile, cropTracker,
+      marketplace,
+      cart,
+      appointments,
+      community,
+      weather,
+      chatbot,
+      profile,
+      cropTracker,
     },
-    'expert': {
-      appointments, community, chatbot, profile,
-    },
-    'company': {
-      marketplace, sellerPanel, chatbot, profile,
-    },
-    'guest': {
-      weather, chatbot,
-    },
+    'expert': {appointments, community, chatbot, profile},
+    'company': {marketplace, sellerPanel, chatbot, profile},
+    'guest': {weather, chatbot},
   };
 
   /// Check access using the test copy of the matrix
@@ -291,8 +291,7 @@ void main() {
           route == '/marketplace/orders/detail') {
         return marketplace;
       }
-      if (route == '/marketplace/cart' ||
-          route == '/marketplace/checkout') {
+      if (route == '/marketplace/cart' || route == '/marketplace/checkout') {
         return cart;
       }
       if (route == '/marketplace/seller/dashboard' ||
@@ -302,7 +301,9 @@ void main() {
         return sellerPanel;
       }
       if (route.startsWith('/appointments')) return appointments;
-      if (route == '/community' || route.startsWith('/community')) return community;
+      if (route == '/community' || route.startsWith('/community')) {
+        return community;
+      }
       if (route == '/weather') return weather;
       if (route == '/chatbot') return chatbot;
       if (route == '/crop-tracker') return cropTracker;
@@ -378,10 +379,19 @@ void main() {
       return tabs;
     }
 
-    test('farmer sees full nav: home, marketplace, weather, crop_tracker, community', () {
-      final tabs = bottomNavTabsFor('farmer');
-      expect(tabs, ['home', 'marketplace', 'weather', 'crop_tracker', 'community']);
-    });
+    test(
+      'farmer sees full nav: home, marketplace, weather, crop_tracker, community',
+      () {
+        final tabs = bottomNavTabsFor('farmer');
+        expect(tabs, [
+          'home',
+          'marketplace',
+          'weather',
+          'crop_tracker',
+          'community',
+        ]);
+      },
+    );
 
     test('expert sees: home, appointments, community', () {
       final tabs = bottomNavTabsFor('expert');
@@ -503,8 +513,15 @@ void main() {
 
   group('Exhaustive Access Matrix', () {
     final allModules = [
-      marketplace, sellerPanel, cart, appointments,
-      community, weather, chatbot, profile, cropTracker,
+      marketplace,
+      sellerPanel,
+      cart,
+      appointments,
+      community,
+      weather,
+      chatbot,
+      profile,
+      cropTracker,
     ];
     final allRoles = ['farmer', 'expert', 'company', 'guest'];
 
@@ -529,4 +546,3 @@ void main() {
     });
   });
 }
-

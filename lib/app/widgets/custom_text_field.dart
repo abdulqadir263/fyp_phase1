@@ -80,10 +80,7 @@ class CustomTextField extends StatelessWidget {
             ),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 14,
-              ),
+              hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
               prefixIcon: prefixIcon != null
                   ? Icon(
                       prefixIcon,
@@ -94,7 +91,8 @@ class CustomTextField extends StatelessWidget {
               suffixIcon: suffixIcon,
               filled: true,
               fillColor: enabled ? Colors.white : Colors.grey[50],
-              contentPadding: contentPadding ??
+              contentPadding:
+                  contentPadding ??
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               isDense: isDense,
               border: OutlineInputBorder(

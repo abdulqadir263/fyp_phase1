@@ -24,43 +24,54 @@ class SellerProductsView extends GetView<SellerController> {
         },
         backgroundColor: AppColors.primaryGreen,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('add_to_cart'.tr, style: const TextStyle(color: Colors.white, fontSize: 15)),
+        label: Text(
+          'add_to_cart'.tr,
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+        ),
       ),
       body: SafeArea(
         top: false,
         child: ResponsiveHelper.tabletCenter(
           child: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen));
-        }
+            if (controller.isLoading.value) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              );
+            }
 
-        if (controller.myProducts.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.storefront_outlined,
-                    size: 64, color: Colors.grey.shade400),
-                const SizedBox(height: 12),
-                Text('No products yet. Add your first!',
-                    style:
-                        TextStyle(fontSize: 16, color: Colors.grey.shade600)),
-              ],
-            ),
-          );
-        }
+            if (controller.myProducts.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.storefront_outlined,
+                      size: 64,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No products yet. Add your first!',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-        return RefreshIndicator(
-          onRefresh: controller.loadMyProducts,
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-            itemCount: controller.myProducts.length,
-            itemBuilder: (_, i) =>
-                _SellerProductCard(product: controller.myProducts[i]),
-          ),
-        );
-      }),
+            return RefreshIndicator(
+              onRefresh: controller.loadMyProducts,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                itemCount: controller.myProducts.length,
+                itemBuilder: (_, i) =>
+                    _SellerProductCard(product: controller.myProducts[i]),
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -92,12 +103,14 @@ class _SellerProductCard extends StatelessWidget {
                           imageUrl: product.imageUrl,
                           width: 80,
                           height: 80,
-                          fit: BoxFit.cover)
+                          fit: BoxFit.cover,
+                        )
                       : Container(
                           width: 80,
                           height: 80,
                           color: Colors.grey.shade200,
-                          child: const Icon(Icons.inventory, size: 32)),
+                          child: const Icon(Icons.inventory, size: 32),
+                        ),
                 ),
                 const SizedBox(width: 14),
 
@@ -106,34 +119,51 @@ class _SellerProductCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(product.name,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 4),
-                      Text('Rs. ${product.price.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                              fontSize: 17,
-                              color: AppColors.primaryGreen,
-                              fontWeight: FontWeight.w700)),
+                      Text(
+                        'Rs. ${product.price.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text('Stock: ${product.stock}',
-                              style: TextStyle(
-                                  fontSize: 13, color: Colors.grey.shade600)),
+                          Text(
+                            'Stock: ${product.stock}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                           const SizedBox(width: 10),
-                          Text('• ${product.categoryLabel}',
-                              style: TextStyle(
-                                  fontSize: 13, color: Colors.grey.shade600)),
+                          Text(
+                            '• ${product.categoryLabel}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       // Active / Inactive badge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: product.isActive
                               ? Colors.green.shade100
@@ -174,7 +204,8 @@ class _SellerProductCard extends StatelessWidget {
                       foregroundColor: AppColors.primaryGreen,
                       side: const BorderSide(color: AppColors.primaryGreen),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -183,45 +214,53 @@ class _SellerProductCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => ctrl.toggleActive(product),
                     icon: Icon(
-                        product.isActive
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        size: 18),
+                      product.isActive
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      size: 18,
+                    ),
                     label: Text(product.isActive ? 'Hide' : 'Show'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.orange.shade700,
                       side: BorderSide(color: Colors.orange.shade400),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: () {
-                    Get.dialog(AlertDialog(
-                      title: Text('delete_product'.tr),
-                      content: Text('cannot_be_undone'.tr),
-                      actions: [
-                        TextButton(
+                    Get.dialog(
+                      AlertDialog(
+                        title: Text('delete_product'.tr),
+                        content: Text('cannot_be_undone'.tr),
+                        actions: [
+                          TextButton(
                             onPressed: () => Get.back(),
-                            child: Text('cancel'.tr)),
-                        TextButton(
-                          onPressed: () {
-                            Get.back();
-                            ctrl.deleteProduct(product);
-                          },
-                          child: Text('delete'.tr,
-                              style: TextStyle(color: Colors.red)),
-                        ),
-                      ],
-                    ));
+                            child: Text('cancel'.tr),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Get.back();
+                              ctrl.deleteProduct(product);
+                            },
+                            child: Text(
+                              'delete'.tr,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
                     side: const BorderSide(color: Colors.red),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                   child: const Icon(Icons.delete_outline, size: 20),

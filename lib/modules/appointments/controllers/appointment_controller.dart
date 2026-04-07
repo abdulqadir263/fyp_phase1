@@ -218,14 +218,17 @@ class AppointmentController extends GetxController {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          AppSnackbar.warning('Location permission is needed for farm location.');
+          AppSnackbar.warning(
+            'Location permission is needed for farm location.',
+          );
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
         AppSnackbar.warning(
-            'Location permission is permanently denied. Please enable it in settings.');
+          'Location permission is permanently denied. Please enable it in settings.',
+        );
         return;
       }
 
@@ -326,12 +329,16 @@ class AppointmentController extends GetxController {
 
     final user = _authProvider.currentUser.value;
     if (user == null || user.uid.isEmpty) {
-      AppSnackbar.error('You must be logged in with a valid account to request a visit.');
+      AppSnackbar.error(
+        'You must be logged in with a valid account to request a visit.',
+      );
       return;
     }
 
     if (!user.isProfileComplete) {
-      AppSnackbar.warning('Please complete your profile before requesting a visit.');
+      AppSnackbar.warning(
+        'Please complete your profile before requesting a visit.',
+      );
       return;
     }
 
@@ -416,4 +423,3 @@ class AppointmentController extends GetxController {
     super.onClose();
   }
 }
-

@@ -24,9 +24,17 @@ class AppConstants {
 
   // Marketplace
   static const double deliveryFee = 150.0;
-  static const List<String> productCategories = ['seeds', 'fertilizers', 'pesticides'];
+  static const List<String> productCategories = [
+    'seeds',
+    'fertilizers',
+    'pesticides',
+  ];
   static const List<String> orderStatuses = [
-    'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'
+    'pending',
+    'confirmed',
+    'shipped',
+    'delivered',
+    'cancelled',
   ];
 
   // Firebase Storage paths
@@ -60,18 +68,19 @@ class AppConstants {
   static const int defaultPageSize = 20;
 
   // API URLs
-  static const String weatherBaseUrl = 'https://api.openweathermap.org/data/2.5';
+  static const String weatherBaseUrl =
+      'https://api.openweathermap.org/data/2.5';
 
   // Optimized Animation durations for smoother UX
   static const Duration instantAnimation = Duration(milliseconds: 100);
   static const Duration shortAnimation = Duration(milliseconds: 150);
   static const Duration mediumAnimation = Duration(milliseconds: 300);
   static const Duration longAnimation = Duration(milliseconds: 500);
-  
+
   // Snackbar durations - optimized for quick feedback
   static const Duration snackbarDuration = Duration(seconds: 2);
   static const Duration snackbarLongDuration = Duration(seconds: 4);
-  
+
   // Debounce durations for search/filter operations
   static const Duration debounceDelay = Duration(milliseconds: 300);
   static const Duration throttleDelay = Duration(milliseconds: 500);

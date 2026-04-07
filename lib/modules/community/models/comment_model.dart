@@ -39,8 +39,8 @@ class CommentModel {
       parentCommentId: json['parentCommentId'],
       replies: json['replies'] != null
           ? (json['replies'] as List)
-              .map((r) => CommentModel.fromJson(r as Map<String, dynamic>))
-              .toList()
+                .map((r) => CommentModel.fromJson(r as Map<String, dynamic>))
+                .toList()
           : [],
     );
   }

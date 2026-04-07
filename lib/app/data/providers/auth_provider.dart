@@ -30,7 +30,9 @@ class AuthProvider extends GetxService {
 
   /// Called by Firebase whenever auth state changes (login, logout, cold start).
   void _handleAuthStateChange(User? firebaseUser) {
-    if (kDebugMode) debugPrint('AuthProvider: Auth state changed → ${firebaseUser?.uid}');
+    if (kDebugMode) {
+      debugPrint('AuthProvider: Auth state changed → ${firebaseUser?.uid}');
+    }
 
     if (firebaseUser == null) {
       // User signed out — clear state only (routing handled by controller)
@@ -90,10 +92,7 @@ class AuthProvider extends GetxService {
   }
 
   /// Login with email + password.
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     if (kDebugMode) debugPrint('AuthProvider: Signing in → $email');
 
     final credential = await _firebase.signInWithEmail(

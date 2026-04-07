@@ -61,19 +61,22 @@ class CartController extends GetxController {
       final List<CartItemModel> enriched = [];
 
       for (final raw in rawItems) {
-        final product =
-            await _service.fetchProductById(raw['productId'] as String);
+        final product = await _service.fetchProductById(
+          raw['productId'] as String,
+        );
         if (product != null && product.isActive) {
-          enriched.add(CartItemModel(
-            productId: product.id,
-            productName: product.name,
-            sellerName: product.sellerName,
-            sellerId: product.sellerId,
-            price: product.price,
-            imageUrl: product.imageUrl,
-            quantity: raw['quantity'] as int? ?? 1,
-            availableStock: product.stock,
-          ));
+          enriched.add(
+            CartItemModel(
+              productId: product.id,
+              productName: product.name,
+              sellerName: product.sellerName,
+              sellerId: product.sellerId,
+              price: product.price,
+              imageUrl: product.imageUrl,
+              quantity: raw['quantity'] as int? ?? 1,
+              availableStock: product.stock,
+            ),
+          );
         } else {
           // Product deleted / deactivated — remove from cart silently
           await _service.removeCartItem(uid, raw['productId'] as String);
@@ -117,7 +120,9 @@ class CartController extends GetxController {
       if (idx >= 0) {
         newQty = cartItems[idx].quantity + quantity;
         if (newQty > product.stock) {
-          AppSnackbar.warning('Cannot add more. Only ${product.stock} in stock.');
+          AppSnackbar.warning(
+            'Cannot add more. Only ${product.stock} in stock.',
+          );
           return;
         }
       }
@@ -128,16 +133,18 @@ class CartController extends GetxController {
       if (idx >= 0) {
         cartItems[idx] = cartItems[idx].copyWith(quantity: newQty);
       } else {
-        cartItems.add(CartItemModel(
-          productId: product.id,
-          productName: product.name,
-          sellerName: product.sellerName,
-          sellerId: product.sellerId,
-          price: product.price,
-          imageUrl: product.imageUrl,
-          quantity: newQty,
-          availableStock: product.stock,
-        ));
+        cartItems.add(
+          CartItemModel(
+            productId: product.id,
+            productName: product.name,
+            sellerName: product.sellerName,
+            sellerId: product.sellerId,
+            price: product.price,
+            imageUrl: product.imageUrl,
+            quantity: newQty,
+            availableStock: product.stock,
+          ),
+        );
       }
       cartItems.refresh();
       AppSnackbar.success('Added to cart!');
@@ -161,8 +168,7 @@ class CartController extends GetxController {
     }
 
     if (newQty > cartItems[idx].availableStock) {
-      AppSnackbar.warning(
-          'Only ${cartItems[idx].availableStock} available.');
+      AppSnackbar.warning('Only ${cartItems[idx].availableStock} available.');
       return;
     }
 
@@ -241,7 +247,8 @@ class CartController extends GetxController {
         }
         if (fresh.stock < item.quantity) {
           AppSnackbar.error(
-              '${item.productName} only has ${fresh.stock} left in stock.');
+            '${item.productName} only has ${fresh.stock} left in stock.',
+          );
           await loadCart();
           return;
         }
@@ -288,4 +295,3 @@ class CartController extends GetxController {
     super.onClose();
   }
 }
-

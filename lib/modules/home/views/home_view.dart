@@ -24,7 +24,8 @@ class HomeView extends GetView<HomeController> {
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                onPressed: () => Get.snackbar('info'.tr, 'notifications_coming_soon'.tr),
+                onPressed: () =>
+                    Get.snackbar('info'.tr, 'notifications_coming_soon'.tr),
                 tooltip: 'notifications'.tr,
               ),
               Positioned(
@@ -76,8 +77,8 @@ class HomeView extends GetView<HomeController> {
     return FloatingActionButton(
       onPressed: () => controller.navigateToFeature('chatbot'),
       backgroundColor: AppConstants.primaryGreen,
-      child: const Icon(Icons.chat, color: Colors.white),
       tooltip: 'agri_chatbot'.tr,
+      child: const Icon(Icons.chat, color: Colors.white),
     );
   }
 
@@ -122,8 +123,10 @@ class HomeView extends GetView<HomeController> {
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => _buildProfilePlaceholder(isGuest),
-                          errorWidget: (context, url, error) => _buildProfilePlaceholder(isGuest),
+                          placeholder: (context, url) =>
+                              _buildProfilePlaceholder(isGuest),
+                          errorWidget: (context, url, error) =>
+                              _buildProfilePlaceholder(isGuest),
                         ),
                       )
                     : _buildProfilePlaceholder(isGuest),
@@ -132,10 +135,7 @@ class HomeView extends GetView<HomeController> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    AppConstants.primaryGreen,
-                    AppConstants.darkGreen,
-                  ],
+                  colors: [AppConstants.primaryGreen, AppConstants.darkGreen],
                 ),
               ),
             );
@@ -152,19 +152,22 @@ class HomeView extends GetView<HomeController> {
           ),
 
           // Profile tile with guest handling
-          Obx(() => ListTile(
-            leading: const Icon(Icons.person),
-            title:
-            Text(controller.isGuestUser ? 'create_account'.tr : 'profile'.tr),
-            onTap: () {
-              Get.back(); // Drawer close karo
-              if (controller.isGuestUser) {
-                Get.offAllNamed(AppRoutes.LOGIN); // Go to login to sign up
-              } else {
-                controller.goToProfile();
-              }
-            },
-          )),
+          Obx(
+            () => ListTile(
+              leading: const Icon(Icons.person),
+              title: Text(
+                controller.isGuestUser ? 'create_account'.tr : 'profile'.tr,
+              ),
+              onTap: () {
+                Get.back(); // Drawer close karo
+                if (controller.isGuestUser) {
+                  Get.offAllNamed(AppRoutes.LOGIN); // Go to login to sign up
+                } else {
+                  controller.goToProfile();
+                }
+              },
+            ),
+          ),
 
           const Divider(),
           ListTile(
@@ -186,26 +189,28 @@ class HomeView extends GetView<HomeController> {
           const Divider(),
 
           // Logout/Login-As-Guest tile
-          Obx(() => ListTile(
-            leading: Icon(
-              controller.isGuestUser ? Icons.login : Icons.logout,
-              color: controller.isGuestUser ? Colors.green : Colors.red,
-            ),
-            title: Text(
-              controller.isGuestUser ? 'login_signup'.tr : 'logout'.tr,
-              style: TextStyle(
+          Obx(
+            () => ListTile(
+              leading: Icon(
+                controller.isGuestUser ? Icons.login : Icons.logout,
                 color: controller.isGuestUser ? Colors.green : Colors.red,
               ),
+              title: Text(
+                controller.isGuestUser ? 'login_signup'.tr : 'logout'.tr,
+                style: TextStyle(
+                  color: controller.isGuestUser ? Colors.green : Colors.red,
+                ),
+              ),
+              onTap: () {
+                Get.back(); // Drawer close karo
+                if (controller.isGuestUser) {
+                  Get.offAllNamed(AppRoutes.LOGIN);
+                } else {
+                  controller.logout();
+                }
+              },
             ),
-            onTap: () {
-              Get.back(); // Drawer close karo
-              if (controller.isGuestUser) {
-                Get.offAllNamed(AppRoutes.LOGIN);
-              } else {
-                controller.logout();
-              }
-            },
-          )),
+          ),
         ],
       ),
     );
@@ -232,25 +237,39 @@ class HomeView extends GetView<HomeController> {
     switch (tab) {
       case 'home':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.home), label: 'home'.tr);
+          icon: const Icon(Icons.home),
+          label: 'home'.tr,
+        );
       case 'marketplace':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.store), label: 'marketplace'.tr);
+          icon: const Icon(Icons.store),
+          label: 'marketplace'.tr,
+        );
       case 'weather':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.cloud), label: 'weather_forecast'.tr);
+          icon: const Icon(Icons.cloud),
+          label: 'weather_forecast'.tr,
+        );
       case 'crop_tracker':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.agriculture), label: 'crop_tracker'.tr);
+          icon: const Icon(Icons.agriculture),
+          label: 'crop_tracker'.tr,
+        );
       case 'community':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.people), label: 'community'.tr);
+          icon: const Icon(Icons.people),
+          label: 'community'.tr,
+        );
       case 'appointments':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.calendar_today), label: 'appointments'.tr);
+          icon: const Icon(Icons.calendar_today),
+          label: 'appointments'.tr,
+        );
       default:
         return const BottomNavigationBarItem(
-            icon: Icon(Icons.circle), label: '');
+          icon: Icon(Icons.circle),
+          label: '',
+        );
     }
   }
 
@@ -285,19 +304,27 @@ class HomeView extends GetView<HomeController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.calendar_today,
-                    size: isLargeScreen ? 80 : 60, color: Colors.blue),
+                Icon(
+                  Icons.calendar_today,
+                  size: isLargeScreen ? 80 : 60,
+                  color: Colors.blue,
+                ),
                 SizedBox(height: isLargeScreen ? 24 : 16),
-                Text('appointments'.tr,
-                    style: TextStyle(
-                        fontSize: isLargeScreen ? 32 : 24,
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  'appointments'.tr,
+                  style: TextStyle(
+                    fontSize: isLargeScreen ? 32 : 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SizedBox(height: isLargeScreen ? 16 : 12),
                 Text(
                   'coming_soon'.tr,
                   style: TextStyle(
-                        fontSize: isLargeScreen ? 18 : 16,
-                        color: Colors.grey)),
+                    fontSize: isLargeScreen ? 18 : 16,
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
           ),
@@ -321,19 +348,18 @@ class HomeView extends GetView<HomeController> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Welcome Message
-                  Obx(() => Text(
-                    controller.welcomeMessage,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  Obx(
+                    () => Text(
+                      controller.welcomeMessage,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                  )),
+                  ),
 
                   const SizedBox(height: 16),
 
@@ -341,112 +367,128 @@ class HomeView extends GetView<HomeController> {
                   _buildWeatherWidget(isLargeScreen),
 
                   // Guest user banner
-                  Obx(() => controller.isGuestUser
-                      ? Container(
-                          width: double.infinity,
-                          margin: EdgeInsets.symmetric(vertical: isLargeScreen ? 20 : 16),
-                          padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade100,
-                            border: Border.all(color: Colors.orange.shade300),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline, color: Colors.orange.shade800),
-                              SizedBox(width: isLargeScreen ? 12 : 8),
-                              Expanded(
-                                child: Text(
-                                  'browsing_as_guest'.tr,
-                                  style: TextStyle(
-                                    color: Colors.orange.shade800,
-                                    fontSize: isLargeScreen ? 16 : 14,
+                  Obx(
+                    () => controller.isGuestUser
+                        ? Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.symmetric(
+                              vertical: isLargeScreen ? 20 : 16,
+                            ),
+                            padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade100,
+                              border: Border.all(color: Colors.orange.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.orange.shade800,
+                                ),
+                                SizedBox(width: isLargeScreen ? 12 : 8),
+                                Expanded(
+                                  child: Text(
+                                    'browsing_as_guest'.tr,
+                                    style: TextStyle(
+                                      color: Colors.orange.shade800,
+                                      fontSize: isLargeScreen ? 16 : 14,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : const SizedBox.shrink()),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
 
                   // Profile incomplete banner
-                  Obx(() => controller.isProfileIncomplete && !controller.isGuestUser
-                      ? Container(
-                          width: double.infinity,
-                          margin: EdgeInsets.only(bottom: isLargeScreen ? 20 : 16),
-                          padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
-                            border: Border.all(color: Colors.blue.shade300),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline, color: Colors.blue.shade800),
-                              SizedBox(width: isLargeScreen ? 12 : 8),
-                              Expanded(
-                                child: Text(
-                                  'profile_incomplete'.tr,
-                                  style: TextStyle(
-                                    color: Colors.blue.shade800,
-                                    fontSize: isLargeScreen ? 16 : 14,
-                                  ),
-                                ),
-                              ),
-                              if (isLargeScreen) ...[
-                                const SizedBox(width: 12),
-                                ElevatedButton(
-                                  onPressed: () => controller.goToProfile(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue.shade800,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: Text('complete_now'.tr),
-                                ),
-                              ] else ...[
-                                TextButton(
-                                  onPressed: () => controller.goToProfile(),
-                                  child: Text(
-                            'complete_now'.tr,
-                            style: TextStyle(
-                              color: Colors.blue.shade800,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                  Obx(
+                    () =>
+                        controller.isProfileIncomplete &&
+                            !controller.isGuestUser
+                        ? Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(
+                              bottom: isLargeScreen ? 20 : 16,
                             ),
-                          ),
-                        ),
-                      ],
-                    ],
+                            padding: EdgeInsets.all(isLargeScreen ? 16 : 12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade100,
+                              border: Border.all(color: Colors.blue.shade300),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.blue.shade800,
+                                ),
+                                SizedBox(width: isLargeScreen ? 12 : 8),
+                                Expanded(
+                                  child: Text(
+                                    'profile_incomplete'.tr,
+                                    style: TextStyle(
+                                      color: Colors.blue.shade800,
+                                      fontSize: isLargeScreen ? 16 : 14,
+                                    ),
+                                  ),
+                                ),
+                                if (isLargeScreen) ...[
+                                  const SizedBox(width: 12),
+                                  ElevatedButton(
+                                    onPressed: () => controller.goToProfile(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue.shade800,
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: Text('complete_now'.tr),
+                                  ),
+                                ] else ...[
+                                  TextButton(
+                                    onPressed: () => controller.goToProfile(),
+                                    child: Text(
+                                      'complete_now'.tr,
+                                      style: TextStyle(
+                                        color: Colors.blue.shade800,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
-                )
-                    : const SizedBox.shrink()),
 
-                SizedBox(height: isLargeScreen ? 8 : 4),
+                  SizedBox(height: isLargeScreen ? 8 : 4),
 
-                // Quick Actions Section
-                _buildSectionTitle('quick_actions'.tr, context),
-                const SizedBox(height: 12),
+                  // Quick Actions Section
+                  _buildSectionTitle('quick_actions'.tr, context),
+                  const SizedBox(height: 12),
 
-                Text(
-                  'what_to_do_today'.tr,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                    fontSize: isLargeScreen ? 18 : 16,
+                  Text(
+                    'what_to_do_today'.tr,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                      fontSize: isLargeScreen ? 18 : 16,
+                    ),
                   ),
-                ),
-                SizedBox(height: isLargeScreen ? 32 : 24),
+                  SizedBox(height: isLargeScreen ? 32 : 24),
 
-                // Feature Cards Grid
-                _buildResponsiveFeatureGrid(context),
+                  // Feature Cards Grid
+                  _buildResponsiveFeatureGrid(context),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // Farmer Tips Carousel
-                _buildFarmerTipsCarousel(isLargeScreen),
-              ],
+                  // Farmer Tips Carousel
+                  _buildFarmerTipsCarousel(isLargeScreen),
+                ],
+              ),
             ),
           ),
-        ),
         );
       },
     );
@@ -462,15 +504,12 @@ class HomeView extends GetView<HomeController> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.shade400,
-            Colors.blue.shade600,
-          ],
+          colors: [Colors.blue.shade400, Colors.blue.shade600],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -483,14 +522,10 @@ class HomeView extends GetView<HomeController> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.wb_sunny,
-                color: Colors.white,
-                size: 32,
-              ),
+              child: const Icon(Icons.wb_sunny, color: Colors.white, size: 32),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -509,18 +544,14 @@ class HomeView extends GetView<HomeController> {
                   Text(
                     'tap_detailed_forecast'.tr,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.white,
-              size: 20,
-            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
           ],
         ),
       ),
@@ -564,10 +595,10 @@ class HomeView extends GetView<HomeController> {
                 margin: const EdgeInsets.only(right: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: (tip['color'] as Color).withOpacity(0.1),
+                  color: (tip['color'] as Color).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: (tip['color'] as Color).withOpacity(0.3),
+                    color: (tip['color'] as Color).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -712,23 +743,27 @@ class HomeView extends GetView<HomeController> {
     for (final id in allowed) {
       final cfg = allCards[id];
       if (cfg != null) {
-        cards.add(_buildFeatureCard(
-          title: (cfg['title'] as String).tr,
-          icon: cfg['icon'] as IconData,
-          color: cfg['color'] as Color,
-          onTap: () => controller.navigateToFeature(cfg['feature'] as String),
-        ));
+        cards.add(
+          _buildFeatureCard(
+            title: (cfg['title'] as String).tr,
+            icon: cfg['icon'] as IconData,
+            color: cfg['color'] as Color,
+            onTap: () => controller.navigateToFeature(cfg['feature'] as String),
+          ),
+        );
       }
     }
 
     // Always add upcoming features for farmers
     if (RoleGuard.currentUserType == 'farmer') {
-      cards.add(_buildFeatureCard(
-        title: 'disease_detection'.tr,
-        icon: Icons.bug_report,
-        color: Colors.red,
-        onTap: () => controller.navigateToFeature('disease_detection'),
-      ));
+      cards.add(
+        _buildFeatureCard(
+          title: 'disease_detection'.tr,
+          icon: Icons.bug_report,
+          color: Colors.red,
+          onTap: () => controller.navigateToFeature('disease_detection'),
+        ),
+      );
     }
 
     return cards;
@@ -764,14 +799,10 @@ class HomeView extends GetView<HomeController> {
               Container(
                 padding: EdgeInsets.all(cardWidth * 0.08),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  icon,
-                  size: finalIconSize,
-                  color: color,
-                ),
+                child: Icon(icon, size: finalIconSize, color: color),
               ),
 
               // Spacer with dynamic height
@@ -957,8 +988,7 @@ class HomeView extends GetView<HomeController> {
                     color: Colors.grey,
                   ),
                 ),
-                if (isLargeScreen)
-                  SizedBox(height: 24),
+                if (isLargeScreen) SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(

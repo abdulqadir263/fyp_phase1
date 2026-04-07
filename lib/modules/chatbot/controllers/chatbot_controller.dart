@@ -54,14 +54,17 @@ class ChatbotController extends GetxController {
     final text = textController.text.trim();
     characterCount.value = textController.text.length;
     // Update reactive flag for send button state
-    hasValidInput.value = text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
+    hasValidInput.value =
+        text.isNotEmpty && text.length <= AppConstants.maxMessageLength;
   }
 
   /// Add welcome message
   void _addWelcomeMessage() {
     final welcomeMessage = MessageModel(
       id: 'welcome',
-      text: selectedLanguage.value == 'en' ? welcomeMessageEn : welcomeMessageUr,
+      text: selectedLanguage.value == 'en'
+          ? welcomeMessageEn
+          : welcomeMessageUr,
       isUser: false,
       timestamp: DateTime.now(),
       language: selectedLanguage.value,
@@ -86,7 +89,9 @@ class ChatbotController extends GetxController {
       if (snapshot.docs.isNotEmpty) {
         messages.clear();
         messages.addAll(
-          snapshot.docs.map((doc) => MessageModel.fromJson(doc.data())).toList(),
+          snapshot.docs
+              .map((doc) => MessageModel.fromJson(doc.data()))
+              .toList(),
         );
         _scrollToBottom();
       }

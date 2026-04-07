@@ -55,12 +55,14 @@ class ProfileCompletionView extends GetView<OnboardingController> {
                   ),
                 ),
               ),
-              Obx(() => controller.isLoading.value
-                  ? Container(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      child: const Center(child: CircularProgressIndicator()),
-                    )
-                  : const SizedBox.shrink()),
+              Obx(
+                () => controller.isLoading.value
+                    ? Container(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        child: const Center(child: CircularProgressIndicator()),
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         ),
@@ -151,10 +153,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
                 const SizedBox(height: 4),
                 Text(
                   'fields_required'.tr,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -205,16 +204,17 @@ class ProfileCompletionView extends GetView<OnboardingController> {
   InputDecoration _dropdownDecoration(IconData icon) {
     return InputDecoration(
       prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey[300]!),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppConstants.primaryGreen, width: 1.6),
+        borderSide: const BorderSide(
+          color: AppConstants.primaryGreen,
+          width: 1.6,
+        ),
       ),
       filled: true,
       fillColor: const Color(0xFFF9FAFC),
@@ -308,10 +308,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         const SizedBox(height: 4),
         Text(
           'select_crops'.tr,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[500],
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey[500]),
         ),
         const SizedBox(height: 12),
 
@@ -334,55 +331,62 @@ class ProfileCompletionView extends GetView<OnboardingController> {
                   crossAxisSpacing: r.scale(12),
                   mainAxisSpacing: r.scale(12),
                 ),
-          itemCount: OnboardingController.availableCrops.length,
-          itemBuilder: (context, index) {
-            final crop = OnboardingController.availableCrops[index];
-            final isSelected = controller.selectedCrops.contains(crop);
+                itemCount: OnboardingController.availableCrops.length,
+                itemBuilder: (context, index) {
+                  final crop = OnboardingController.availableCrops[index];
+                  final isSelected = controller.selectedCrops.contains(crop);
 
-            return InkWell(
-              onTap: () => controller.toggleCropSelection(crop),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppConstants.primaryGreen.withValues(alpha: 0.1)
-                      : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppConstants.primaryGreen
-                        : Colors.grey[300]!,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isSelected ? Icons.check_box : Icons.check_box_outline_blank,
-                      color: isSelected
-                          ? AppConstants.primaryGreen
-                          : Colors.grey[400],
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        crop,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  return InkWell(
+                    onTap: () => controller.toggleCropSelection(crop),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppConstants.primaryGreen.withValues(alpha: 0.1)
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
                           color: isSelected
-                              ? AppConstants.darkGreen
-                              : Colors.grey[700],
+                              ? AppConstants.primaryGreen
+                              : Colors.grey[300]!,
+                          width: isSelected ? 2 : 1,
                         ),
                       ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected
+                                ? Icons.check_box
+                                : Icons.check_box_outline_blank,
+                            color: isSelected
+                                ? AppConstants.primaryGreen
+                                : Colors.grey[400],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              crop,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                                color: isSelected
+                                    ? AppConstants.darkGreen
+                                    : Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
+                  );
+                },
               );
             },
           );
@@ -484,10 +488,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           decoration: _dropdownDecoration(Icons.workspace_premium),
           hint: Text('select_specialization'.tr),
           items: OnboardingController.expertSpecializations
-              .map((spec) => DropdownMenuItem(
-                    value: spec,
-                    child: Text(spec),
-                  ))
+              .map((spec) => DropdownMenuItem(value: spec, child: Text(spec)))
               .toList(),
           onChanged: (value) {
             if (value != null) {
@@ -526,27 +527,28 @@ class ProfileCompletionView extends GetView<OnboardingController> {
                 ),
                 Text(
                   'let_farmers_book'.tr,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
           ),
-          Obx(() => Switch(
-            value: controller.isAvailableForConsultation.value,
-            onChanged: (value) {
-              controller.isAvailableForConsultation.value = value;
-            },
-            activeTrackColor: AppConstants.primaryGreen.withValues(alpha: 0.5),
-            thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-              if (states.contains(WidgetState.selected)) {
-                return AppConstants.primaryGreen;
-              }
-              return Colors.grey;
-            }),
-          )),
+          Obx(
+            () => Switch(
+              value: controller.isAvailableForConsultation.value,
+              onChanged: (value) {
+                controller.isAvailableForConsultation.value = value;
+              },
+              activeTrackColor: AppConstants.primaryGreen.withValues(
+                alpha: 0.5,
+              ),
+              thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppConstants.primaryGreen;
+                }
+                return Colors.grey;
+              }),
+            ),
+          ),
         ],
       ),
     );
@@ -650,10 +652,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           decoration: _dropdownDecoration(Icons.category),
           hint: Text('select_business_type'.tr),
           items: OnboardingController.businessTypes
-              .map((type) => DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  ))
+              .map((type) => DropdownMenuItem(value: type, child: Text(type)))
               .toList(),
           onChanged: (value) {
             if (value != null) {
@@ -668,11 +667,12 @@ class ProfileCompletionView extends GetView<OnboardingController> {
   /// Build save button.
   /// Anonymous farmers (guest flow) MUST complete their profile — no skip allowed.
   Widget _buildSaveButton() {
-    return Obx(() => CustomButton(
-      text: 'save_continue'.tr,
-      onPressed: controller.saveProfile,
-      isLoading: controller.isLoading.value,
-    ));
+    return Obx(
+      () => CustomButton(
+        text: 'save_continue'.tr,
+        onPressed: controller.saveProfile,
+        isLoading: controller.isLoading.value,
+      ),
+    );
   }
 }
-

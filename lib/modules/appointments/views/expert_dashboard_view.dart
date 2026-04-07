@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
-import '../../../core/utils/responsive_helper.dart';
 import '../controllers/expert_dashboard_controller.dart';
 import '../models/field_visit_model.dart';
 
@@ -27,18 +26,24 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
             unselectedLabelColor: Colors.grey,
             indicatorColor: AppColors.primaryGreen,
             tabs: [
-              Obx(() => Tab(
-                    text: 'New (${controller.pendingVisits.length})',
-                    icon: const Icon(Icons.notification_important_outlined),
-                  )),
-              Obx(() => Tab(
-                    text: 'Upcoming (${controller.upcomingVisits.length})',
-                    icon: const Icon(Icons.calendar_today),
-                  )),
-              Obx(() => Tab(
-                    text: 'Done (${controller.completedVisits.length})',
-                    icon: const Icon(Icons.check_circle_outline),
-                  )),
+              Obx(
+                () => Tab(
+                  text: 'New (${controller.pendingVisits.length})',
+                  icon: const Icon(Icons.notification_important_outlined),
+                ),
+              ),
+              Obx(
+                () => Tab(
+                  text: 'Upcoming (${controller.upcomingVisits.length})',
+                  icon: const Icon(Icons.calendar_today),
+                ),
+              ),
+              Obx(
+                () => Tab(
+                  text: 'Done (${controller.completedVisits.length})',
+                  icon: const Icon(Icons.check_circle_outline),
+                ),
+              ),
             ],
           ),
         ),
@@ -51,34 +56,34 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
 
           return TabBarView(
             children: [
-            // Tab 1: New Requests (pending)
-            _buildVisitList(
-              visits: controller.pendingVisits,
-              emptyMessage: 'No new visit requests.',
-              emptyIcon: Icons.inbox_outlined,
-              showActions: true,
-              actionType: _ActionType.acceptReject,
-            ),
+              // Tab 1: New Requests (pending)
+              _buildVisitList(
+                visits: controller.pendingVisits,
+                emptyMessage: 'No new visit requests.',
+                emptyIcon: Icons.inbox_outlined,
+                showActions: true,
+                actionType: _ActionType.acceptReject,
+              ),
 
-            // Tab 2: Upcoming (accepted/scheduled)
-            _buildVisitList(
-              visits: controller.upcomingVisits,
-              emptyMessage: 'No upcoming visits.',
-              emptyIcon: Icons.event_available,
-              showActions: true,
-              actionType: _ActionType.complete,
-            ),
+              // Tab 2: Upcoming (accepted/scheduled)
+              _buildVisitList(
+                visits: controller.upcomingVisits,
+                emptyMessage: 'No upcoming visits.',
+                emptyIcon: Icons.event_available,
+                showActions: true,
+                actionType: _ActionType.complete,
+              ),
 
-            // Tab 3: Completed
-            _buildVisitList(
-              visits: controller.completedVisits,
-              emptyMessage: 'No completed visits yet.',
-              emptyIcon: Icons.history,
-              showActions: false,
-            ),
-          ],
-        );
-      }),
+              // Tab 3: Completed
+              _buildVisitList(
+                visits: controller.completedVisits,
+                emptyMessage: 'No completed visits yet.',
+                emptyIcon: Icons.history,
+                showActions: false,
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -136,14 +141,9 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
     Get.dialog(
       AlertDialog(
         title: Text('delete'.tr),
-        content: Text(
-          'Reject the visit request from ${visit.farmerName}?',
-        ),
+        content: Text('Reject the visit request from ${visit.farmerName}?'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('cancel'.tr),
-          ),
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
           TextButton(
             onPressed: () {
               Get.back();
@@ -185,10 +185,7 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               Get.back();
@@ -197,8 +194,10 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGreen,
             ),
-            child: const Text('Mark Complete',
-                style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Mark Complete',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -264,7 +263,10 @@ class _ExpertVisitCard extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Crop & Problem
-            _infoChip(Icons.grass, '${visit.cropType} — ${visit.problemCategory}'),
+            _infoChip(
+              Icons.grass,
+              '${visit.cropType} — ${visit.problemCategory}',
+            ),
             const SizedBox(height: 6),
 
             // Description
@@ -303,8 +305,10 @@ class _ExpertVisitCard extends StatelessWidget {
                             width: 70,
                             height: 70,
                             color: Colors.grey.shade200,
-                            child: const Icon(Icons.broken_image,
-                                color: Colors.grey),
+                            child: const Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
                       ),
@@ -334,25 +338,29 @@ class _ExpertVisitCard extends StatelessWidget {
             // Open in Maps button
             OutlinedButton.icon(
               onPressed: onOpenMaps,
-              icon: const Icon(Icons.map, color: AppColors.primaryGreen, size: 18),
+              icon: const Icon(
+                Icons.map,
+                color: AppColors.primaryGreen,
+                size: 18,
+              ),
               label: const Text(
                 'Open in Google Maps',
-                style: TextStyle(
-                    color: AppColors.primaryGreen, fontSize: 13),
+                style: TextStyle(color: AppColors.primaryGreen, fontSize: 13),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.primaryGreen),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
               ),
             ),
 
             // Expert notes (for completed visits)
-            if (visit.expertNotes != null &&
-                visit.expertNotes!.isNotEmpty) ...[
+            if (visit.expertNotes != null && visit.expertNotes!.isNotEmpty) ...[
               const SizedBox(height: 10),
               Container(
                 width: double.infinity,
@@ -403,8 +411,10 @@ class _ExpertVisitCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onAccept,
                 icon: const Icon(Icons.check, color: Colors.white, size: 18),
-                label: const Text('Accept',
-                    style: TextStyle(color: Colors.white)),
+                label: const Text(
+                  'Accept',
+                  style: TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryGreen,
                   shape: RoundedRectangleBorder(
@@ -418,8 +428,10 @@ class _ExpertVisitCard extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onReject,
                 icon: const Icon(Icons.close, color: Colors.red, size: 18),
-                label: const Text('Reject',
-                    style: TextStyle(color: Colors.red)),
+                label: const Text(
+                  'Reject',
+                  style: TextStyle(color: Colors.red),
+                ),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.red),
                   shape: RoundedRectangleBorder(
@@ -437,8 +449,10 @@ class _ExpertVisitCard extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: onComplete,
             icon: const Icon(Icons.done_all, color: Colors.white, size: 18),
-            label: const Text('Mark as Completed',
-                style: TextStyle(color: Colors.white)),
+            label: const Text(
+              'Mark as Completed',
+              style: TextStyle(color: Colors.white),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue.shade700,
               shape: RoundedRectangleBorder(
@@ -472,6 +486,3 @@ class _ExpertVisitCard extends StatelessWidget {
     );
   }
 }
-
-
-

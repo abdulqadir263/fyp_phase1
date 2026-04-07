@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/values/constants.dart';
+import '../../../core/constants/app_constants.dart';
 
 /// UserModel - Updated to support role-based profile fields
 /// Supports: Farmer, Expert, Company (Seller), Guest
@@ -24,20 +24,26 @@ class UserModel {
   // ========== NEW EXPERT FIELDS ==========
   /// Years of professional experience
   final int? yearsOfExperience;
+
   /// Professional certifications
   final String? certifications;
+
   /// Short biography (max 200 chars)
   final String? bio;
+
   /// Whether expert is available for consultation
   final bool? isAvailableForConsultation;
 
   // ========== NEW COMPANY/SELLER FIELDS ==========
   /// Type of agricultural business
   final String? businessType;
+
   /// Years company has been in business
   final int? yearsInBusiness;
+
   /// Business license number (optional)
   final String? licenseNumber;
+
   /// Short business description (max 200 chars)
   final String? businessDescription;
 
@@ -80,8 +86,6 @@ class UserModel {
     this.isAnonymous = false,
   });
 
-
-
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return UserModel(
@@ -89,7 +93,7 @@ class UserModel {
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       phone: data['phone'] ?? '',
-      userType: data['userType'] ?? AppConstants.USER_TYPE_FARMER,
+      userType: data['userType'] ?? AppConstants.userTypeFarmer,
       location: data['location'],
       farmSize: data['farmSize'],
       specialization: data['specialization'],
@@ -122,7 +126,6 @@ class UserModel {
     );
   }
 
-
   Map<String, dynamic> toDocument() {
     return {
       'name': name,
@@ -135,9 +138,7 @@ class UserModel {
       'companyName': companyName,
       'profileImage': profileImage,
       'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': updatedAt != null
-          ? Timestamp.fromDate(updatedAt!)
-          : null,
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
       // New farmer fields
       'cropsGrown': cropsGrown,
       // New expert fields
@@ -199,7 +200,8 @@ class UserModel {
       yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
       certifications: certifications ?? this.certifications,
       bio: bio ?? this.bio,
-      isAvailableForConsultation: isAvailableForConsultation ?? this.isAvailableForConsultation,
+      isAvailableForConsultation:
+          isAvailableForConsultation ?? this.isAvailableForConsultation,
       businessType: businessType ?? this.businessType,
       yearsInBusiness: yearsInBusiness ?? this.yearsInBusiness,
       licenseNumber: licenseNumber ?? this.licenseNumber,

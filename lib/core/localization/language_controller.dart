@@ -52,4 +52,3 @@ class LanguageController extends GetxController {
     return Locale(savedLang);
   }
 }
-

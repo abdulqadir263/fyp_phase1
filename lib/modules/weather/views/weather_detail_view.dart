@@ -14,37 +14,34 @@ class WeatherDetailView extends GetView<WeatherController> {
     final WeatherModel weather = Get.arguments as WeatherModel;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('weather_details'.tr),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('weather_details'.tr), centerTitle: true),
       body: SafeArea(
         top: false,
         child: ResponsiveHelper.tabletCenter(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Weather Header
-            _buildWeatherHeader(weather),
-            const SizedBox(height: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Weather Header
+                _buildWeatherHeader(weather),
+                const SizedBox(height: 24),
 
-            // Current Conditions
-            _buildCurrentConditions(weather),
-            const SizedBox(height: 24),
+                // Current Conditions
+                _buildCurrentConditions(weather),
+                const SizedBox(height: 24),
 
-            // Weather Details
-            _buildWeatherDetailsSection(weather),
-            const SizedBox(height: 24),
+                // Weather Details
+                _buildWeatherDetailsSection(weather),
+                const SizedBox(height: 24),
 
-            // Agriculture Recommendations
-            _buildAgricultureAdvisorySection(weather),
-            const SizedBox(height: 16),
-          ],
+                // Agriculture Recommendations
+                _buildAgricultureAdvisorySection(weather),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
         ),
-      ),
-      ),
       ),
     );
   }
@@ -57,7 +54,7 @@ class WeatherDetailView extends GetView<WeatherController> {
         gradient: LinearGradient(
           colors: [
             Theme.of(Get.context!).primaryColor,
-            Theme.of(Get.context!).primaryColor.withOpacity(0.8),
+            Theme.of(Get.context!).primaryColor.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -67,7 +64,11 @@ class WeatherDetailView extends GetView<WeatherController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.location_on, color: Colors.white.withOpacity(0.9), size: 20),
+              Icon(
+                Icons.location_on,
+                color: Colors.white.withValues(alpha: 0.9),
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 weather.location,
@@ -83,7 +84,7 @@ class WeatherDetailView extends GetView<WeatherController> {
           Text(
             DateFormat('EEEE, MMMM d, yyyy').format(weather.dateTime),
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontSize: 16,
             ),
           ),
@@ -91,7 +92,7 @@ class WeatherDetailView extends GetView<WeatherController> {
           Text(
             'Updated: ${DateFormat('hh:mm a').format(weather.dateTime)}',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -136,10 +137,7 @@ class WeatherDetailView extends GetView<WeatherController> {
                   borderRadius: BorderRadius.circular(35),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  weather.icon,
-                  style: const TextStyle(fontSize: 32),
-                ),
+                child: Text(weather.icon, style: const TextStyle(fontSize: 32)),
               ),
             ],
           ),
@@ -147,7 +145,7 @@ class WeatherDetailView extends GetView<WeatherController> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Get.theme.primaryColor.withOpacity(0.05),
+              color: Get.theme.primaryColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -178,13 +176,29 @@ class WeatherDetailView extends GetView<WeatherController> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildWeatherDetailRow('Temperature', controller.getTemperatureDisplay(weather.temperature), Icons.thermostat),
+          _buildWeatherDetailRow(
+            'Temperature',
+            controller.getTemperatureDisplay(weather.temperature),
+            Icons.thermostat,
+          ),
           const SizedBox(height: 12),
-          _buildWeatherDetailRow('Humidity', '${weather.humidity.toStringAsFixed(0)}%', Icons.water_drop),
+          _buildWeatherDetailRow(
+            'Humidity',
+            '${weather.humidity.toStringAsFixed(0)}%',
+            Icons.water_drop,
+          ),
           const SizedBox(height: 12),
-          _buildWeatherDetailRow('Wind Speed', controller.getWindSpeedDisplay(weather.windSpeed), Icons.air),
+          _buildWeatherDetailRow(
+            'Wind Speed',
+            controller.getWindSpeedDisplay(weather.windSpeed),
+            Icons.air,
+          ),
           const SizedBox(height: 12),
-          _buildWeatherDetailRow('Conditions', toTitleCase(weather.description), Icons.cloud),
+          _buildWeatherDetailRow(
+            'Conditions',
+            toTitleCase(weather.description),
+            Icons.cloud,
+          ),
         ],
       ),
     );
@@ -352,9 +366,21 @@ class WeatherDetailView extends GetView<WeatherController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildSummaryItem('Active Rules', activeRules.toString(), Icons.rule),
-              _buildSummaryItem('High Priority', highPriority.toString(), Icons.priority_high),
-              _buildSummaryItem('Recommended', recommended.toString(), Icons.check_circle),
+              _buildSummaryItem(
+                'Active Rules',
+                activeRules.toString(),
+                Icons.rule,
+              ),
+              _buildSummaryItem(
+                'High Priority',
+                highPriority.toString(),
+                Icons.priority_high,
+              ),
+              _buildSummaryItem(
+                'Recommended',
+                recommended.toString(),
+                Icons.check_circle,
+              ),
             ],
           ),
           if (highRisk > 0) ...[
@@ -408,18 +434,22 @@ class WeatherDetailView extends GetView<WeatherController> {
         ),
         Text(
           label,
-          style: Get.textTheme.bodySmall?.copyWith(
-            color: Colors.blue.shade700,
-          ),
+          style: Get.textTheme.bodySmall?.copyWith(color: Colors.blue.shade700),
         ),
       ],
     );
   }
 
-  Widget _buildDetailedAgricultureItem(AgricultureRecommendation recommendation) {
+  Widget _buildDetailedAgricultureItem(
+    AgricultureRecommendation recommendation,
+  ) {
     final isRecommended = recommendation.isRecommended;
-    final color = isRecommended ? Colors.green.shade800 : Colors.orange.shade800;
-    final bgColor = isRecommended ? Colors.green.shade50 : Colors.orange.shade50;
+    final color = isRecommended
+        ? Colors.green.shade800
+        : Colors.orange.shade800;
+    final bgColor = isRecommended
+        ? Colors.green.shade50
+        : Colors.orange.shade50;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -427,7 +457,7 @@ class WeatherDetailView extends GetView<WeatherController> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,7 +470,9 @@ class WeatherDetailView extends GetView<WeatherController> {
                 child: Row(
                   children: [
                     Text(
-                      controller.getAgricultureCategoryIcon(recommendation.category),
+                      controller.getAgricultureCategoryIcon(
+                        recommendation.category,
+                      ),
                       style: const TextStyle(fontSize: 24),
                     ),
                     const SizedBox(width: 12),
@@ -460,13 +492,15 @@ class WeatherDetailView extends GetView<WeatherController> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   children: [
                     Text(
-                      controller.getAgriculturePriorityIcon(recommendation.priority),
+                      controller.getAgriculturePriorityIcon(
+                        recommendation.priority,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -488,9 +522,7 @@ class WeatherDetailView extends GetView<WeatherController> {
           // Description
           Text(
             recommendation.description,
-            style: Get.textTheme.bodyMedium?.copyWith(
-              height: 1.5,
-            ),
+            style: Get.textTheme.bodyMedium?.copyWith(height: 1.5),
           ),
 
           const SizedBox(height: 12),
@@ -506,10 +538,7 @@ class WeatherDetailView extends GetView<WeatherController> {
               ),
               Text(
                 recommendation.riskLevel.toUpperCase(),
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: color, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 4),
               Text(controller.getRiskLevelColor(recommendation.riskLevel)),
@@ -533,18 +562,12 @@ class WeatherDetailView extends GetView<WeatherController> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.arrow_right,
-                      size: 16,
-                      color: color,
-                    ),
+                    Icon(Icons.arrow_right, size: 16, color: color),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         action,
-                        style: Get.textTheme.bodyMedium?.copyWith(
-                          height: 1.4,
-                        ),
+                        style: Get.textTheme.bodyMedium?.copyWith(height: 1.4),
                       ),
                     ),
                   ],
@@ -559,7 +582,7 @@ class WeatherDetailView extends GetView<WeatherController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -576,10 +599,16 @@ class WeatherDetailView extends GetView<WeatherController> {
     );
   }
 
-  Widget _buildDetailedRecommendationItem(WeatherRecommendation recommendation) {
+  Widget _buildDetailedRecommendationItem(
+    WeatherRecommendation recommendation,
+  ) {
     final isRecommended = recommendation.isRecommended;
-    final color = isRecommended ? Colors.green.shade800 : Colors.orange.shade800;
-    final bgColor = isRecommended ? Colors.green.shade50 : Colors.orange.shade50;
+    final color = isRecommended
+        ? Colors.green.shade800
+        : Colors.orange.shade800;
+    final bgColor = isRecommended
+        ? Colors.green.shade50
+        : Colors.orange.shade50;
     final icon = isRecommended ? Icons.check_circle : Icons.info;
 
     return Container(
@@ -588,7 +617,7 @@ class WeatherDetailView extends GetView<WeatherController> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,15 +639,16 @@ class WeatherDetailView extends GetView<WeatherController> {
                 const SizedBox(height: 8),
                 Text(
                   controller.getRecommendationText(recommendation),
-                  style: Get.textTheme.bodyMedium?.copyWith(
-                    height: 1.5,
-                  ),
+                  style: Get.textTheme.bodyMedium?.copyWith(height: 1.5),
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -655,9 +685,12 @@ class WeatherDetailView extends GetView<WeatherController> {
 
   String toTitleCase(String text) {
     if (text.isEmpty) return "";
-    return text.split(' ').map((word) {
-      if (word.isEmpty) return "";
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    return text
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return "";
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 }

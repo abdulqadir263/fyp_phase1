@@ -12,10 +12,7 @@ class SignupView extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('create_account'.tr),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('create_account'.tr), centerTitle: true),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -82,11 +79,13 @@ class SignupView extends GetView<AuthController> {
                 const SizedBox(height: 30),
 
                 // Submit Button
-                Obx(() => CustomButton(
-                  text: 'sign_up'.tr,
-                  onPressed: controller.submit,
-                  isLoading: controller.isLoading.value,
-                )),
+                Obx(
+                  () => CustomButton(
+                    text: 'sign_up'.tr,
+                    onPressed: controller.submit,
+                    isLoading: controller.isLoading.value,
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 

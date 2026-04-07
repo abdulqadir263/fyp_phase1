@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import '../../../core/values/constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../models/user_model.dart';
 
 // Firebase interaction layer — all auth and Firestore calls live here.
@@ -66,7 +66,7 @@ class FirebaseService extends GetxService {
   Future<void> saveUserData(UserModel user) async {
     try {
       await _firestore
-          .collection(AppConstants.USERS_COLLECTION)
+          .collection(AppConstants.usersCollection)
           .doc(user.uid)
           .set(user.toDocument(), SetOptions(merge: true));
     } catch (e) {
@@ -77,8 +77,10 @@ class FirebaseService extends GetxService {
   // User ka data get karna by UID
   Future<UserModel?> getUserData(String uid) async {
     try {
-      DocumentSnapshot doc =
-      await _firestore.collection(AppConstants.USERS_COLLECTION).doc(uid).get();
+      DocumentSnapshot doc = await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(uid)
+          .get();
       if (doc.exists) {
         return UserModel.fromDocument(doc);
       }
@@ -108,7 +110,7 @@ class FirebaseService extends GetxService {
 
   // Add this method to the FirebaseService class
 
-// Send password reset email
+  // Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -116,5 +118,4 @@ class FirebaseService extends GetxService {
       throw _getErrorMessage(e);
     }
   }
-
 }

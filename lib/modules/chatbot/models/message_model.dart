@@ -26,7 +26,8 @@ class MessageModel {
       isUser: json['isUser'] as bool? ?? false,
       timestamp: json['timestamp'] is Timestamp
           ? (json['timestamp'] as Timestamp).toDate()
-          : DateTime.tryParse(json['timestamp']?.toString() ?? '') ?? DateTime.now(),
+          : DateTime.tryParse(json['timestamp']?.toString() ?? '') ??
+                DateTime.now(),
       imageUrl: json['imageUrl'] as String?,
       language: json['language'] as String? ?? 'en',
     );

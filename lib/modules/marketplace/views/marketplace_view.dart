@@ -25,7 +25,8 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
       });
       return const Scaffold(
         body: Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
+        ),
       );
     }
 
@@ -60,9 +61,13 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-                      child: Text('$count',
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 10)),
+                      child: Text(
+                        '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      ),
                     ),
                   ),
               ],
@@ -80,10 +85,13 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
               onChanged: controller.onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'search_products'.tr,
-                prefixIcon:
-                    const Icon(Icons.search, color: AppColors.primaryGreen),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.primaryGreen,
+                ),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.grey.shade400),
@@ -96,19 +104,26 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
           // ── Category chips (Wrap prevents overflow on small screens) ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Obx(() => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _chip('All', controller.selectedCategory.value.isEmpty,
-                        () => controller.setCategory('')),
-                    ...ProductModel.categories.map((cat) => _chip(
-                          '${cat[0].toUpperCase()}${cat.substring(1)}',
-                          controller.selectedCategory.value == cat,
-                          () => controller.setCategory(cat),
-                        )),
-                  ],
-                )),
+            child: Obx(
+              () => Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _chip(
+                    'All',
+                    controller.selectedCategory.value.isEmpty,
+                    () => controller.setCategory(''),
+                  ),
+                  ...ProductModel.categories.map(
+                    (cat) => _chip(
+                      '${cat[0].toUpperCase()}${cat.substring(1)}',
+                      controller.selectedCategory.value == cat,
+                      () => controller.setCategory(cat),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
 
           // ── Products grid (responsive columns) ──
@@ -117,7 +132,8 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
               if (controller.isLoading.value) {
                 return const Center(
                   child: CircularProgressIndicator(
-                      color: AppColors.primaryGreen),
+                    color: AppColors.primaryGreen,
+                  ),
                 );
               }
 
@@ -126,12 +142,19 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.inventory_2_outlined,
-                          size: 64, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 12),
-                      Text('No products found.',
-                          style: TextStyle(
-                              fontSize: 16, color: Colors.grey.shade600)),
+                      Text(
+                        'No products found.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -144,8 +167,7 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
                     final r = ResponsiveHelper.of(context);
                     return GridView.builder(
                       padding: EdgeInsets.all(r.padding),
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: r.gridCrossAxisCount(minItemWidth: 160),
                         childAspectRatio: r.productGridAspectRatio,
                         crossAxisSpacing: r.scale(12),
@@ -154,10 +176,12 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
                       itemCount: controller.products.length,
                       itemBuilder: (_, i) => _ProductCard(
                         product: controller.products[i],
-                        onTap: () =>
-                            controller.openProductDetail(controller.products[i]),
-                        onAddToCart: () => Get.find<CartController>()
-                            .addToCart(controller.products[i]),
+                        onTap: () => controller.openProductDetail(
+                          controller.products[i],
+                        ),
+                        onAddToCart: () => Get.find<CartController>().addToCart(
+                          controller.products[i],
+                        ),
                       ),
                     );
                   },
@@ -174,12 +198,16 @@ class MarketplaceHomeView extends GetView<MarketplaceController> {
     return GestureDetector(
       onTap: onTap,
       child: Chip(
-        label: Text(label,
-            style: TextStyle(
-                color: selected ? Colors.white : AppColors.primaryGreen,
-                fontWeight: FontWeight.w600)),
-        backgroundColor:
-            selected ? AppColors.primaryGreen : AppColors.lightGreen.withValues(alpha: 0.3),
+        label: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : AppColors.primaryGreen,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: selected
+            ? AppColors.primaryGreen
+            : AppColors.lightGreen.withValues(alpha: 0.3),
         side: BorderSide.none,
         padding: const EdgeInsets.symmetric(horizontal: 4),
       ),
@@ -218,17 +246,22 @@ class _ProductCard extends StatelessWidget {
                       imageUrl: product.imageUrl,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(
-                          color: Colors.grey.shade200,
-                          child: const Center(
-                              child: Icon(Icons.image, color: Colors.grey))),
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: Icon(Icons.image, color: Colors.grey),
+                        ),
+                      ),
                       errorWidget: (_, __, ___) => Container(
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.broken_image)),
+                        color: Colors.grey.shade200,
+                        child: const Icon(Icons.broken_image),
+                      ),
                     )
                   : Container(
                       color: Colors.grey.shade200,
                       child: const Center(
-                          child: Icon(Icons.inventory, size: 40))),
+                        child: Icon(Icons.inventory, size: 40),
+                      ),
+                    ),
             ),
 
             // Info
@@ -238,22 +271,33 @@ class _ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.name,
-                        style: const TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 2),
-                    Text('Rs. ${product.price.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryGreen)),
-                    Text(product.sellerName,
-                        style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade600),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                    Text(
+                      'Rs. ${product.price.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryGreen,
+                      ),
+                    ),
+                    Text(
+                      product.sellerName,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
@@ -264,12 +308,15 @@ class _ProductCard extends StatelessWidget {
                           backgroundColor: AppColors.primaryGreen,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6)),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
                         child: Text(
                           product.stock > 0 ? 'Add to Cart' : 'Out of Stock',
                           style: const TextStyle(
-                              fontSize: 11, color: Colors.white),
+                            fontSize: 11,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),

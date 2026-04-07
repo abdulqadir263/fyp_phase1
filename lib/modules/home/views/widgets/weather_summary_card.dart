@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../controllers/home_controller.dart';
 
 /// Weather summary card widget for home screen
@@ -15,15 +14,12 @@ class WeatherSummaryCard extends GetView<HomeController> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.shade400,
-            Colors.blue.shade600,
-          ],
+          colors: [Colors.blue.shade400, Colors.blue.shade600],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -41,7 +37,7 @@ class WeatherSummaryCard extends GetView<HomeController> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -67,7 +63,7 @@ class WeatherSummaryCard extends GetView<HomeController> {
                       Text(
                         'Tap to view detailed forecast',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 13,
                         ),
                       ),

@@ -49,13 +49,16 @@ class ResponsiveHelper {
   // ─── Scaled values ───
 
   /// Scale a font size proportionally to screen width (clamped).
-  double fontSize(double base) => (base * _scaleFactor).clamp(base * 0.8, base * 1.25);
+  double fontSize(double base) =>
+      (base * _scaleFactor).clamp(base * 0.8, base * 1.25);
 
   /// Scale an icon size proportionally.
-  double iconSize(double base) => (base * _scaleFactor).clamp(base * 0.8, base * 1.3);
+  double iconSize(double base) =>
+      (base * _scaleFactor).clamp(base * 0.8, base * 1.3);
 
   /// Scale a spacing/padding/margin value.
-  double scale(double base) => (base * _scaleFactor).clamp(base * 0.7, base * 1.4);
+  double scale(double base) =>
+      (base * _scaleFactor).clamp(base * 0.7, base * 1.4);
 
   /// Standard page padding (horizontal + vertical).
   double get padding {
@@ -112,7 +115,10 @@ class ResponsiveHelper {
 
   /// Wrap content with tablet-safe centering.
   /// On phones, returns child as-is. On tablets, centers with max width.
-  static Widget tabletCenter({required Widget child, double maxWidth = maxContentWidth}) {
+  static Widget tabletCenter({
+    required Widget child,
+    double maxWidth = maxContentWidth,
+  }) {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 600) {
@@ -147,9 +153,8 @@ class ResponsiveHelper {
 
 /// Device type classification for Android screen sizes.
 enum DeviceType {
-  smallPhone,  // <= 360dp width
-  phone,       // 361-400dp
-  largePhone,  // 401-600dp
-  tablet,      // > 600dp
+  smallPhone, // <= 360dp width
+  phone, // 361-400dp
+  largePhone, // 401-600dp
+  tablet, // > 600dp
 }
-

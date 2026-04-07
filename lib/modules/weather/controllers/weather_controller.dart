@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../app/data/models/weather_model.dart';
 import '../../../app/data/services/weather_service.dart';
@@ -17,26 +18,26 @@ class WeatherController extends GetxController {
     super.onInit();
     fetchWeatherData();
   }
+
   Future<void> fetchWeatherData() async {
     try {
       isLoading.value = true;
 
-      print('Fetching weather data...');
+      debugPrint('Fetching weather data...');
 
       // WeatherService now automatically includes agriculture recommendations
       final weather = await _weatherService.getCurrentWeather();
       currentWeather.value = weather;
 
-      print('Current weather loaded: ${weather?.location}');
+      debugPrint('Current weather loaded: ${weather?.location}');
 
       // WeatherService now automatically includes agriculture recommendations
       final forecastData = await _weatherService.getWeatherForecast();
       forecast.value = forecastData;
 
-      print('Forecast loaded: ${forecastData.length} days');
-
+      debugPrint('Forecast loaded: ${forecastData.length} days');
     } catch (e) {
-      print('Error in fetchWeatherData: $e');
+      debugPrint('Error in fetchWeatherData: $e');
       // Create demo data - WeatherModel.demo already includes demo agriculture recommendations
       _createDemoData();
       Get.snackbar(
@@ -85,72 +86,83 @@ class WeatherController extends GetxController {
       ),
     ];
   }
+
   // Agriculture Rule Engine
-  List<AgricultureRecommendation> getAgricultureRecommendations(WeatherModel weather) {
+  List<AgricultureRecommendation> getAgricultureRecommendations(
+    WeatherModel weather,
+  ) {
     final recommendations = <AgricultureRecommendation>[];
 
     // Rule 1: Harvesting Conditions
     if (_isGoodForHarvesting(weather)) {
-      recommendations.add(AgricultureRecommendation(
-        category: 'harvesting',
-        title: 'Ideal Harvesting Conditions',
-        description: 'Perfect weather for crop harvesting operations',
-        isRecommended: true,
-        priority: 'high',
-        actions: [
-          'Proceed with wheat/rice harvesting',
-          'Spread grains for sun drying',
-          'Good for hay making and fodder preparation',
-          'Check moisture content before storage'
-        ],
-        riskLevel: 'low',
-      ));
+      recommendations.add(
+        AgricultureRecommendation(
+          category: 'harvesting',
+          title: 'Ideal Harvesting Conditions',
+          description: 'Perfect weather for crop harvesting operations',
+          isRecommended: true,
+          priority: 'high',
+          actions: [
+            'Proceed with wheat/rice harvesting',
+            'Spread grains for sun drying',
+            'Good for hay making and fodder preparation',
+            'Check moisture content before storage',
+          ],
+          riskLevel: 'low',
+        ),
+      );
     } else {
-      recommendations.add(AgricultureRecommendation(
-        category: 'harvesting',
-        title: 'Poor Harvesting Conditions',
-        description: 'Weather not suitable for harvesting',
-        isRecommended: false,
-        priority: 'medium',
-        actions: [
-          'Delay harvesting operations',
-          'Monitor weather for improvement',
-          'Prepare harvesting equipment'
-        ],
-        riskLevel: 'medium',
-      ));
+      recommendations.add(
+        AgricultureRecommendation(
+          category: 'harvesting',
+          title: 'Poor Harvesting Conditions',
+          description: 'Weather not suitable for harvesting',
+          isRecommended: false,
+          priority: 'medium',
+          actions: [
+            'Delay harvesting operations',
+            'Monitor weather for improvement',
+            'Prepare harvesting equipment',
+          ],
+          riskLevel: 'medium',
+        ),
+      );
     }
 
     // Rule 2: Spraying Conditions
     if (_isGoodForSpraying(weather)) {
-      recommendations.add(AgricultureRecommendation(
-        category: 'spraying',
-        title: 'Optimal Spraying Conditions',
-        description: 'Safe for pesticide and herbicide application',
-        isRecommended: true,
-        priority: 'high',
-        actions: [
-          'Safe for pesticide application',
-          'Low drift risk - efficient spraying',
-          'Good absorption conditions',
-          'Ideal for fungicide application if needed'
-        ],
-        riskLevel: 'low',
-      ));
+      recommendations.add(
+        AgricultureRecommendation(
+          category: 'spraying',
+          title: 'Optimal Spraying Conditions',
+          description: 'Safe for pesticide and herbicide application',
+          isRecommended: true,
+          priority: 'high',
+          actions: [
+            'Safe for pesticide application',
+            'Low drift risk - efficient spraying',
+            'Good absorption conditions',
+            'Ideal for fungicide application if needed',
+          ],
+          riskLevel: 'low',
+        ),
+      );
     } else {
-      recommendations.add(AgricultureRecommendation(
-        category: 'spraying',
-        title: 'Avoid Spraying',
-        description: 'Weather conditions not suitable for spraying',
-        isRecommended: false,
-        priority: 'medium',
-        actions: [
-          'Delay chemical applications',
-          'High drift risk detected',
-          'Wait for calmer weather conditions'
-        ],
-        riskLevel: 'high',
-      ));
+      recommendations.add(
+        AgricultureRecommendation(
+          category: 'spraying',
+          title: 'Avoid Spraying',
+          description: 'Weather conditions not suitable for spraying',
+          isRecommended: false,
+          priority: 'medium',
+          actions: [
+            'Delay chemical applications',
+            'High drift risk detected',
+            'Wait for calmer weather conditions',
+          ],
+          riskLevel: 'high',
+        ),
+      );
     }
 
     // Rule 3: Irrigation Advice
@@ -197,7 +209,7 @@ class WeatherController extends GetxController {
           'Increase irrigation frequency',
           'Water in early morning or late evening',
           'Monitor soil moisture daily',
-          'Check for signs of water stress in crops'
+          'Check for signs of water stress in crops',
         ],
         riskLevel: 'medium',
       );
@@ -212,7 +224,7 @@ class WeatherController extends GetxController {
           'Reduce irrigation frequency',
           'Avoid overwatering',
           'Monitor for fungal diseases',
-          'Improve field drainage if needed'
+          'Improve field drainage if needed',
         ],
         riskLevel: 'low',
       );
@@ -226,14 +238,16 @@ class WeatherController extends GetxController {
         actions: [
           'Continue with standard irrigation',
           'Monitor soil moisture levels',
-          'Adjust based on crop growth stage'
+          'Adjust based on crop growth stage',
         ],
         riskLevel: 'low',
       );
     }
   }
 
-  AgricultureRecommendation _getDiseaseRiskRecommendation(WeatherModel weather) {
+  AgricultureRecommendation _getDiseaseRiskRecommendation(
+    WeatherModel weather,
+  ) {
     if (weather.humidity > 85 && weather.temperature > 20) {
       return AgricultureRecommendation(
         category: 'disease',
@@ -245,7 +259,7 @@ class WeatherController extends GetxController {
           'Monitor for powdery mildew and rust',
           'Consider preventive fungicide',
           'Improve air circulation in fields',
-          'Avoid overhead irrigation'
+          'Avoid overhead irrigation',
         ],
         riskLevel: 'high',
       );
@@ -259,7 +273,7 @@ class WeatherController extends GetxController {
         actions: [
           'Low fungal disease pressure',
           'Reduce fungicide applications',
-          'Focus on other farm operations'
+          'Focus on other farm operations',
         ],
         riskLevel: 'low',
       );
@@ -273,15 +287,18 @@ class WeatherController extends GetxController {
         actions: [
           'Regular field scouting',
           'Watch for early disease signs',
-          'Prepare fungicides if needed'
+          'Prepare fungicides if needed',
         ],
         riskLevel: 'medium',
       );
     }
   }
 
-  AgricultureRecommendation _getGeneralFarmingRecommendation(WeatherModel weather) {
-    if (weather.description.toLowerCase().contains('clear') && weather.temperature > 25) {
+  AgricultureRecommendation _getGeneralFarmingRecommendation(
+    WeatherModel weather,
+  ) {
+    if (weather.description.toLowerCase().contains('clear') &&
+        weather.temperature > 25) {
       return AgricultureRecommendation(
         category: 'general',
         title: 'Excellent Field Conditions',
@@ -292,7 +309,7 @@ class WeatherController extends GetxController {
           'Good for land preparation',
           'Ideal for planting operations',
           'Excellent for fieldwork',
-          'Good drying conditions for crops'
+          'Good drying conditions for crops',
         ],
         riskLevel: 'low',
       );
@@ -306,7 +323,7 @@ class WeatherController extends GetxController {
         actions: [
           'Plan outdoor work accordingly',
           'Monitor weather changes',
-          'Take appropriate precautions'
+          'Take appropriate precautions',
         ],
         riskLevel: 'medium',
       );
@@ -325,7 +342,7 @@ class WeatherController extends GetxController {
           'Provide ample shade and water',
           'Avoid handling animals during peak heat',
           'Monitor for signs of heat stress',
-          'Adjust feeding schedules to cooler hours'
+          'Adjust feeding schedules to cooler hours',
         ],
         riskLevel: 'high',
       );
@@ -339,7 +356,7 @@ class WeatherController extends GetxController {
         actions: [
           'Maintain regular care routine',
           'Ensure clean water supply',
-          'Good conditions for outdoor grazing'
+          'Good conditions for outdoor grazing',
         ],
         riskLevel: 'low',
       );
@@ -407,7 +424,7 @@ class WeatherController extends GetxController {
     if (isCelsius.value) {
       return '${temperature.toStringAsFixed(1)}°C';
     } else {
-      final fahrenheit = (temperature * 9/5) + 32;
+      final fahrenheit = (temperature * 9 / 5) + 32;
       return '${fahrenheit.toStringAsFixed(1)}°F';
     }
   }

@@ -14,13 +14,13 @@ import 'auth_controller.dart';
 /// 2. Fills role-specific profile fields
 /// 3. Profile saved to Firestore → navigated to Home
 class OnboardingController extends GetxController {
-  final AuthProvider    _authProvider    = Get.find<AuthProvider>();
+  final AuthProvider _authProvider = Get.find<AuthProvider>();
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
-  final AuthController  _authController  = Get.find<AuthController>();
+  final AuthController _authController = Get.find<AuthController>();
 
   // --- Role selection ---
   final RxString selectedRole = ''.obs;
-  final RxBool   isLoading    = false.obs;
+  final RxBool isLoading = false.obs;
 
   // --- Common profile fields ---
   late final TextEditingController nameController;
@@ -32,12 +32,17 @@ class OnboardingController extends GetxController {
   final RxList<String> selectedCrops = <String>[].obs;
 
   static const List<String> availableCrops = [
-    'Wheat', 'Rice', 'Potatoes', 'Maize',
-    'Cotton', 'Sugarcane', 'Canola',
+    'Wheat',
+    'Rice',
+    'Potatoes',
+    'Maize',
+    'Cotton',
+    'Sugarcane',
+    'Canola',
   ];
 
   // --- Expert-specific ---
-  final RxString selectedSpecialization       = ''.obs;
+  final RxString selectedSpecialization = ''.obs;
   late final TextEditingController yearsExperienceController;
   late final TextEditingController certificationsController;
   late final TextEditingController bioController;
@@ -58,7 +63,7 @@ class OnboardingController extends GetxController {
   // --- Company/Seller-specific ---
   late final TextEditingController companyNameController;
   late final TextEditingController ownerNameController;
-  final RxString selectedBusinessType  = ''.obs;
+  final RxString selectedBusinessType = ''.obs;
   late final TextEditingController yearsInBusinessController;
   late final TextEditingController licenseNumberController;
   late final TextEditingController businessDescriptionController;
@@ -112,8 +117,8 @@ class OnboardingController extends GetxController {
     final user = _authProvider.currentUser.value;
     if (user == null) return;
 
-    nameController.text     = user.name;
-    phoneController.text    = user.phone;
+    nameController.text = user.name;
+    phoneController.text = user.phone;
     locationController.text = user.location ?? '';
 
     if (user.userType.isNotEmpty) {
@@ -212,9 +217,12 @@ class OnboardingController extends GetxController {
   /// Dispatches to the correct role validator.
   bool validateProfile() {
     switch (selectedRole.value) {
-      case 'farmer':  return _validateFarmerProfile();
-      case 'expert':  return _validateExpertProfile();
-      case 'company': return _validateCompanyProfile();
+      case 'farmer':
+        return _validateFarmerProfile();
+      case 'expert':
+        return _validateExpertProfile();
+      case 'company':
+        return _validateCompanyProfile();
       default:
         AppSnackbar.error('Please select a role first');
         return false;
@@ -240,8 +248,8 @@ class OnboardingController extends GetxController {
       }
 
       // Pre-trim once — avoids repeating .trim() throughout the switch
-      final name     = nameController.text.trim();
-      final phone    = phoneController.text.trim();
+      final name = nameController.text.trim();
+      final phone = phoneController.text.trim();
       final location = locationController.text.trim();
 
       UserModel updated;
@@ -249,47 +257,62 @@ class OnboardingController extends GetxController {
       switch (selectedRole.value) {
         case 'farmer':
           updated = current.copyWith(
-            name:             name,
-            phone:            phone,
-            userType:         'farmer',
-            location:         location,
-            farmSize:         farmSizeController.text.trim().isEmpty ? null : farmSizeController.text.trim(),
-            cropsGrown:       selectedCrops.toList(),
+            name: name,
+            phone: phone,
+            userType: 'farmer',
+            location: location,
+            farmSize: farmSizeController.text.trim().isEmpty
+                ? null
+                : farmSizeController.text.trim(),
+            cropsGrown: selectedCrops.toList(),
             isProfileComplete: true,
-            updatedAt:        DateTime.now(),
+            updatedAt: DateTime.now(),
           );
           break;
 
         case 'expert':
           updated = current.copyWith(
-            name:             name,
-            phone:            phone,
-            userType:         'expert',
-            location:         location.isEmpty ? null : location,
-            specialization:   selectedSpecialization.value,
-            yearsOfExperience: int.tryParse(yearsExperienceController.text.trim()),
-            certifications:   certificationsController.text.trim().isEmpty ? null : certificationsController.text.trim(),
-            bio:              bioController.text.trim().isEmpty ? null : bioController.text.trim(),
+            name: name,
+            phone: phone,
+            userType: 'expert',
+            location: location.isEmpty ? null : location,
+            specialization: selectedSpecialization.value,
+            yearsOfExperience: int.tryParse(
+              yearsExperienceController.text.trim(),
+            ),
+            certifications: certificationsController.text.trim().isEmpty
+                ? null
+                : certificationsController.text.trim(),
+            bio: bioController.text.trim().isEmpty
+                ? null
+                : bioController.text.trim(),
             isAvailableForConsultation: isAvailableForConsultation.value,
             isProfileComplete: true,
-            updatedAt:        DateTime.now(),
+            updatedAt: DateTime.now(),
           );
           break;
 
         case 'company':
           final ownerName = ownerNameController.text.trim();
           updated = current.copyWith(
-            name:                ownerName.isEmpty ? name : ownerName,
-            phone:               phone,
-            userType:            'company',
-            location:            location.isEmpty ? null : location,
-            companyName:         companyNameController.text.trim(),
-            businessType:        selectedBusinessType.value,
-            yearsInBusiness:     int.tryParse(yearsInBusinessController.text.trim()),
-            licenseNumber:       licenseNumberController.text.trim().isEmpty ? null : licenseNumberController.text.trim(),
-            businessDescription: businessDescriptionController.text.trim().isEmpty ? null : businessDescriptionController.text.trim(),
-            isProfileComplete:   true,
-            updatedAt:           DateTime.now(),
+            name: ownerName.isEmpty ? name : ownerName,
+            phone: phone,
+            userType: 'company',
+            location: location.isEmpty ? null : location,
+            companyName: companyNameController.text.trim(),
+            businessType: selectedBusinessType.value,
+            yearsInBusiness: int.tryParse(
+              yearsInBusinessController.text.trim(),
+            ),
+            licenseNumber: licenseNumberController.text.trim().isEmpty
+                ? null
+                : licenseNumberController.text.trim(),
+            businessDescription:
+                businessDescriptionController.text.trim().isEmpty
+                ? null
+                : businessDescriptionController.text.trim(),
+            isProfileComplete: true,
+            updatedAt: DateTime.now(),
           );
           break;
 
@@ -306,7 +329,9 @@ class OnboardingController extends GetxController {
 
       AppSnackbar.success('Profile saved!');
     } catch (e) {
-      if (kDebugMode) debugPrint('OnboardingController: saveProfile error → $e');
+      if (kDebugMode) {
+        debugPrint('OnboardingController: saveProfile error → $e');
+      }
       AppSnackbar.error('Failed to save profile. Please try again.');
     } finally {
       isLoading.value = false;

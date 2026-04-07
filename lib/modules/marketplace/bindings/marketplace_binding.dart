@@ -16,7 +16,9 @@ class MarketplaceBinding extends Bindings {
 
     if (!Get.isRegistered<MarketplaceController>()) {
       Get.lazyPut<MarketplaceController>(
-          () => MarketplaceController(), fenix: true);
+        () => MarketplaceController(),
+        fenix: true,
+      );
     }
 
     if (!Get.isRegistered<CartController>()) {
@@ -32,4 +34,3 @@ class MarketplaceBinding extends Bindings {
     }
   }
 }
-

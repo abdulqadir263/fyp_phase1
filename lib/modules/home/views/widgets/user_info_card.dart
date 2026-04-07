@@ -25,15 +25,12 @@ class UserInfoCard extends GetView<HomeController> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF4CAF50),
-              Color(0xFF2E7D32),
-            ],
+            colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppConstants.primaryGreen.withOpacity(0.3),
+              color: AppConstants.primaryGreen.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -60,8 +57,10 @@ class UserInfoCard extends GetView<HomeController> {
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => _buildProfilePlaceholder(isGuest),
-                              errorWidget: (context, url, error) => _buildProfilePlaceholder(isGuest),
+                              placeholder: (context, url) =>
+                                  _buildProfilePlaceholder(isGuest),
+                              errorWidget: (context, url, error) =>
+                                  _buildProfilePlaceholder(isGuest),
                             ),
                           )
                         : _buildProfilePlaceholder(isGuest),
@@ -108,7 +107,7 @@ class UserInfoCard extends GetView<HomeController> {
                   Text(
                     userEmail,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 13,
                     ),
                     maxLines: 1,
@@ -120,14 +119,14 @@ class UserInfoCard extends GetView<HomeController> {
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           size: 12,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Member since ${_formatDate(joinDate)}',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 11,
                           ),
                         ),
@@ -143,14 +142,10 @@ class UserInfoCard extends GetView<HomeController> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                    size: 18,
-                  ),
+                  child: const Icon(Icons.edit, color: Colors.white, size: 18),
                 ),
                 onPressed: () => controller.goToProfile(),
                 tooltip: 'Edit Profile',
@@ -171,8 +166,18 @@ class UserInfoCard extends GetView<HomeController> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.year}';
   }

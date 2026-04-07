@@ -71,7 +71,9 @@ void main() {
       ];
 
       final subtotal = items.fold<double>(
-          0.0, (sum, i) => sum + (i['price'] as double) * (i['qty'] as int));
+        0.0,
+        (sum, i) => sum + (i['price'] as double) * (i['qty'] as int),
+      );
       expect(subtotal, 1750.0);
     });
 
@@ -82,9 +84,9 @@ void main() {
     });
 
     test('delivery fee should be 0 when cart is empty', () {
-      final cartEmpty = true;
-      final fee = cartEmpty ? 0.0 : 150.0;
-      expect(fee, 0.0);
+      double getDeliveryFee(bool isEmpty) => isEmpty ? 0.0 : 150.0;
+      expect(getDeliveryFee(true), 0.0);
+      expect(getDeliveryFee(false), 150.0);
     });
 
     test('should prevent adding quantity beyond stock', () {
@@ -115,7 +117,13 @@ void main() {
   // ═══════════════════════════════════════════
 
   group('Order - Status Transitions', () {
-    const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    const statuses = [
+      'pending',
+      'confirmed',
+      'shipped',
+      'delivered',
+      'cancelled',
+    ];
 
     test('should have 5 order statuses', () {
       expect(statuses.length, 5);
@@ -343,4 +351,3 @@ void main() {
     });
   });
 }
-

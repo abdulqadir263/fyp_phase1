@@ -28,9 +28,11 @@ class RoleSelectionView extends GetView<OnboardingController> {
                 padding: const EdgeInsets.all(24.0),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    minHeight: MediaQuery.sizeOf(context).height -
+                    minHeight:
+                        MediaQuery.sizeOf(context).height -
                         MediaQuery.of(context).padding.top -
-                        MediaQuery.of(context).padding.bottom - 48,
+                        MediaQuery.of(context).padding.bottom -
+                        48,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -43,12 +45,14 @@ class RoleSelectionView extends GetView<OnboardingController> {
                   ),
                 ),
               ),
-              Obx(() => controller.isLoading.value
-                  ? Container(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      child: const Center(child: CircularProgressIndicator()),
-                    )
-                  : const SizedBox.shrink()),
+              Obx(
+                () => controller.isLoading.value
+                    ? Container(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        child: const Center(child: CircularProgressIndicator()),
+                      )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         ),
@@ -74,52 +78,49 @@ class RoleSelectionView extends GetView<OnboardingController> {
       ),
       child: Column(
         children: [
-        // App Icon
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: AppConstants.lightGreen.withValues(alpha: 0.3),
-            shape: BoxShape.circle,
+          // App Icon
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppConstants.lightGreen.withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.agriculture,
+              size: 60,
+              color: AppConstants.primaryGreen,
+            ),
           ),
-          child: Icon(
-            Icons.agriculture,
-            size: 60,
-            color: AppConstants.primaryGreen,
-          ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Title
-        Text(
-          'select_your_role'.tr,
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            color: AppConstants.darkGreen,
+          // Title
+          Text(
+            'select_your_role'.tr,
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: AppConstants.darkGreen,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
 
-        // Subtitle
-        Text(
-          'choose_how_use'.tr,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[600],
+          // Subtitle
+          Text(
+            'choose_how_use'.tr,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'You can update details after profile completion.',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[500],
+          const SizedBox(height: 6),
+          Text(
+            'You can update details after profile completion.',
+            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -204,11 +205,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
                   color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  size: 32,
-                  color: color,
-                ),
+                child: Icon(icon, size: 32, color: color),
               ),
               const SizedBox(width: 16),
 
@@ -228,10 +225,7 @@ class RoleSelectionView extends GetView<OnboardingController> {
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -249,8 +243,4 @@ class RoleSelectionView extends GetView<OnboardingController> {
       );
     });
   }
-
 }
-
-
-

@@ -5,7 +5,8 @@ class OrderModel {
   final String id;
   final String buyerId;
   final String buyerName;
-  final List<Map<String, dynamic>> items; // [{productId, name, price, quantity, sellerId}]
+  final List<Map<String, dynamic>>
+  items; // [{productId, name, price, quantity, sellerId}]
   final double subtotal;
   final double deliveryFee;
   final double totalAmount;
@@ -62,8 +63,7 @@ class OrderModel {
     };
   }
 
-  String get statusLabel =>
-      '${status[0].toUpperCase()}${status.substring(1)}';
+  String get statusLabel => '${status[0].toUpperCase()}${status.substring(1)}';
 
   /// All valid order statuses
   static const List<String> statuses = [
@@ -74,4 +74,3 @@ class OrderModel {
     'cancelled',
   ];
 }
-

@@ -50,10 +50,7 @@ import 'app_routes.dart';
 class AppPages {
   static final routes = [
     // Auth Pages
-    GetPage(
-      name: AppRoutes.WELCOME,
-      page: () => const WelcomeView(),
-    ),
+    GetPage(name: AppRoutes.WELCOME, page: () => const WelcomeView()),
     GetPage(
       name: AppRoutes.LOGIN,
       page: () => LoginView(),

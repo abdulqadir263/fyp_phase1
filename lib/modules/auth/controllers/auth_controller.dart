@@ -28,17 +28,17 @@ class AuthController extends GetxController {
   late final TextEditingController forgotEmailController;
 
   // --- UI state ---
-  final RxBool isLogin                  = true.obs;   // true = login, false = signup
-  final RxBool isLoading                = false.obs;
-  final RxBool isPasswordVisible        = false.obs;
+  final RxBool isLogin = true.obs; // true = login, false = signup
+  final RxBool isLoading = false.obs;
+  final RxBool isPasswordVisible = false.obs;
   final RxBool isConfirmPasswordVisible = false.obs;
 
   // --- Password reset state ---
   // 0 = enter email step, 1 = success/email-sent step
-  final RxInt    resetStep          = 0.obs;
-  final RxString resetEmailSentTo   = ''.obs;   // the address we sent the link to
-  final RxInt    resendCooldown     = 0.obs;    // seconds before resend is allowed
-  final RxString selectedRole       = ''.obs;
+  final RxInt resetStep = 0.obs;
+  final RxString resetEmailSentTo = ''.obs; // the address we sent the link to
+  final RxInt resendCooldown = 0.obs; // seconds before resend is allowed
+  final RxString selectedRole = ''.obs;
 
   Timer? _resendTimer;
   Worker? _authStateWorker;
@@ -82,7 +82,9 @@ class AuthController extends GetxController {
     if (currentRoute == targetRoute) return;
 
     // Do not force unauthenticated users off public auth pages.
-    if (targetRoute == AppRoutes.WELCOME && _isPublicRoute(currentRoute)) return;
+    if (targetRoute == AppRoutes.WELCOME && _isPublicRoute(currentRoute)) {
+      return;
+    }
 
     _isRouting = true;
     Future.microtask(() {
@@ -112,8 +114,8 @@ class AuthController extends GetxController {
       return AppRoutes.WELCOME;
     }
 
-    final bool isAnonymousFarmer = user.isAnonymous ||
-        (user.userType == 'farmer' && user.email.isEmpty);
+    final bool isAnonymousFarmer =
+        user.isAnonymous || (user.userType == 'farmer' && user.email.isEmpty);
 
     // Anonymous farmer flow
     if (isAnonymousFarmer) {
@@ -143,14 +145,17 @@ class AuthController extends GetxController {
     }
   }
 
-  void togglePasswordVisibility()        => isPasswordVisible.value = !isPasswordVisible.value;
-  void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
+  void togglePasswordVisibility() =>
+      isPasswordVisible.value = !isPasswordVisible.value;
+  void toggleConfirmPasswordVisibility() =>
+      isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
 
   // ─────────────────────────────────────────────────────────────────────────
   // VALIDATION
   // ─────────────────────────────────────────────────────────────────────────
 
-  bool _isValidEmail(String email) => email.isNotEmpty && GetUtils.isEmail(email);
+  bool _isValidEmail(String email) =>
+      email.isNotEmpty && GetUtils.isEmail(email);
 
   /// Validates all active form fields.
   /// Shows an error snackbar and returns false on first failure.
@@ -197,7 +202,7 @@ class AuthController extends GetxController {
     try {
       if (isLogin.value) {
         await _authProvider.signIn(
-          email:    emailController.text.trim(),
+          email: emailController.text.trim(),
           password: passwordController.text.trim(),
         );
 
@@ -209,9 +214,9 @@ class AuthController extends GetxController {
         }
       } else {
         await _authProvider.signUp(
-          name:     nameController.text.trim(),
-          email:    emailController.text.trim(),
-          phone:    phoneController.text.trim(),
+          name: nameController.text.trim(),
+          email: emailController.text.trim(),
+          phone: phoneController.text.trim(),
           password: passwordController.text.trim(),
         );
 
@@ -233,7 +238,9 @@ class AuthController extends GetxController {
       await _authProvider.signInAnonymouslyAsFarmer();
     } catch (e) {
       AppSnackbar.error('Could not sign in. Please try again.');
-      if (kDebugMode) debugPrint('AuthController: Anonymous sign-in error → $e');
+      if (kDebugMode) {
+        debugPrint('AuthController: Anonymous sign-in error → $e');
+      }
     } finally {
       isLoading.value = false;
     }

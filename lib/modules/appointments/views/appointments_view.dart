@@ -15,69 +15,69 @@ class ExpertListView extends GetView<AppointmentController> {
     controller.loadExperts();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('find_expert'.tr),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('find_expert'.tr), centerTitle: true),
       body: ResponsiveHelper.tabletCenter(
         child: Obx(() {
-        // Loading state
-        if (controller.isLoadingExperts.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
-          );
-        }
+          // Loading state
+          if (controller.isLoadingExperts.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
+          }
 
-        // Empty state
-        if (controller.experts.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.person_search,
-                      size: 80, color: Colors.grey.shade400),
-                  const SizedBox(height: 16),
-                  Text(
-                    'no_experts_available'.tr,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
+          // Empty state
+          if (controller.experts.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.person_search,
+                      size: 80,
+                      color: Colors.grey.shade400,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: controller.loadExperts,
-                    icon: const Icon(Icons.refresh),
-                    label: Text('try_again'.tr),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    Text(
+                      'no_experts_available'.tr,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: controller.loadExperts,
+                      icon: const Icon(Icons.refresh),
+                      label: Text('try_again'.tr),
+                    ),
+                  ],
+                ),
               ),
+            );
+          }
+
+          // Expert list
+          return RefreshIndicator(
+            onRefresh: controller.loadExperts,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: controller.experts.length,
+              itemBuilder: (context, index) {
+                final expert = controller.experts[index];
+                return _ExpertCard(
+                  expert: expert,
+                  onTap: () {
+                    controller.selectExpert(expert);
+                    Get.toNamed('/appointments/expert-profile');
+                  },
+                );
+              },
             ),
           );
-        }
-
-        // Expert list
-        return RefreshIndicator(
-          onRefresh: controller.loadExperts,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.experts.length,
-            itemBuilder: (context, index) {
-              final expert = controller.experts[index];
-              return _ExpertCard(
-                expert: expert,
-                onTap: () {
-                  controller.selectExpert(expert);
-                  Get.toNamed('/appointments/expert-profile');
-                },
-              );
-            },
-          ),
-        );
-      }),
+        }),
       ),
     );
   }
@@ -135,8 +135,11 @@ class _ExpertCard extends StatelessWidget {
                         expert.specialization!.isNotEmpty)
                       Row(
                         children: [
-                          const Icon(Icons.work_outline,
-                              size: 16, color: AppColors.primaryGreen),
+                          const Icon(
+                            Icons.work_outline,
+                            size: 16,
+                            color: AppColors.primaryGreen,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -153,8 +156,11 @@ class _ExpertCard extends StatelessWidget {
                     if (expert.yearsOfExperience != null)
                       Row(
                         children: [
-                          const Icon(Icons.access_time,
-                              size: 16, color: Colors.grey),
+                          const Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${expert.yearsOfExperience} years experience',
@@ -169,8 +175,11 @@ class _ExpertCard extends StatelessWidget {
                     if (expert.location != null && expert.location!.isNotEmpty)
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 16, color: Colors.grey),
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -198,4 +207,3 @@ class _ExpertCard extends StatelessWidget {
     );
   }
 }
-

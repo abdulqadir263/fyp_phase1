@@ -10,10 +10,7 @@ class FetchPostsResult {
   final List<PostModel> posts;
   final DocumentSnapshot? lastDocument;
 
-  FetchPostsResult({
-    required this.posts,
-    this.lastDocument,
-  });
+  FetchPostsResult({required this.posts, this.lastDocument});
 }
 
 /// Service class for community Firebase operations
@@ -49,13 +46,15 @@ class CommunityService extends GetxService {
   }) async {
     try {
       final trimmedCategory = category?.trim();
-      final hasCategory = trimmedCategory != null &&
+      final hasCategory =
+          trimmedCategory != null &&
           trimmedCategory.isNotEmpty &&
           trimmedCategory != 'all';
 
       debugPrint(
-          '[CommunityService] fetchPosts — category: "$trimmedCategory", '
-          'hasCategory: $hasCategory, hasLastDoc: ${lastDocument != null}');
+        '[CommunityService] fetchPosts — category: "$trimmedCategory", '
+        'hasCategory: $hasCategory, hasLastDoc: ${lastDocument != null}',
+      );
 
       // ── No category filter → straightforward paginated query ──
       if (!hasCategory) {
@@ -70,7 +69,9 @@ class CommunityService extends GetxService {
         final snapshot = await query.get();
         final posts = _parseDocs(snapshot.docs);
 
-        debugPrint('[CommunityService] fetchPosts (all) — ${posts.length} posts');
+        debugPrint(
+          '[CommunityService] fetchPosts (all) — ${posts.length} posts',
+        );
         return FetchPostsResult(
           posts: posts,
           lastDocument: snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
@@ -81,7 +82,7 @@ class CommunityService extends GetxService {
       // Fetch a larger batch ordered by createdAt, then filter client-side.
       // We over-fetch to ensure we get enough matching posts after filtering.
       // The lastDocument cursor still works for the raw (unfiltered) stream.
-      final categoryLower = trimmedCategory!.toLowerCase();
+      final categoryLower = trimmedCategory.toLowerCase();
       final fetchLimit = limit * 5; // over-fetch to compensate for filtering
 
       Query query = _postsCollection
@@ -97,14 +98,14 @@ class CommunityService extends GetxService {
 
       // Client-side category filter (case-insensitive, trimmed)
       final filtered = allPosts
-          .where((p) =>
-              p.category.trim().toLowerCase() == categoryLower)
+          .where((p) => p.category.trim().toLowerCase() == categoryLower)
           .take(limit)
           .toList();
 
       debugPrint(
-          '[CommunityService] fetchPosts (category="$trimmedCategory") '
-          '— fetched ${allPosts.length}, matched ${filtered.length}');
+        '[CommunityService] fetchPosts (category="$trimmedCategory") '
+        '— fetched ${allPosts.length}, matched ${filtered.length}',
+      );
 
       return FetchPostsResult(
         posts: filtered,
@@ -121,10 +122,12 @@ class CommunityService extends GetxService {
   /// Helper — parse Firestore docs into PostModel list
   List<PostModel> _parseDocs(List<QueryDocumentSnapshot> docs) {
     return docs
-        .map((doc) => PostModel.fromJson(
-              doc.data() as Map<String, dynamic>,
-              docId: doc.id,
-            ))
+        .map(
+          (doc) => PostModel.fromJson(
+            doc.data() as Map<String, dynamic>,
+            docId: doc.id,
+          ),
+        )
         .toList();
   }
 
@@ -168,7 +171,10 @@ class CommunityService extends GetxService {
   }
 
   /// Update only specific fields of a post (for edit operations)
-  Future<bool> updatePostFields(String postId, Map<String, dynamic> fields) async {
+  Future<bool> updatePostFields(
+    String postId,
+    Map<String, dynamic> fields,
+  ) async {
     try {
       await _postsCollection.doc(postId).update(fields);
       return true;
@@ -185,7 +191,7 @@ class CommunityService extends GetxService {
       final comments = await _commentsCollection
           .where('postId', isEqualTo: postId)
           .get();
-      
+
       final batch = _firestore.batch();
       for (var doc in comments.docs) {
         batch.delete(doc.reference);
@@ -203,7 +209,7 @@ class CommunityService extends GetxService {
       // Delete the post
       batch.delete(_postsCollection.doc(postId));
       await batch.commit();
-      
+
       return true;
     } catch (e) {
       debugPrint('Error deleting post: $e');
@@ -281,15 +287,17 @@ class CommunityService extends GetxService {
           .get();
 
       final posts = snapshot.docs
-          .map((doc) => PostModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                docId: doc.id,
-              ))
+          .map(
+            (doc) => PostModel.fromJson(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            ),
+          )
           .toList();
-      
+
       // Sort in memory by createdAt descending (acceptable for typical bookmark counts)
       posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      
+
       return posts;
     } catch (e) {
       debugPrint('Error getting bookmarked posts: $e');
@@ -306,10 +314,12 @@ class CommunityService extends GetxService {
           .get();
 
       return snapshot.docs
-          .map((doc) => PostModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                docId: doc.id,
-              ))
+          .map(
+            (doc) => PostModel.fromJson(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            ),
+          )
           .toList();
     } catch (e) {
       debugPrint('Error getting user posts: $e');
@@ -327,16 +337,22 @@ class CommunityService extends GetxService {
 
       // Map and filter to only top-level comments (no parentCommentId)
       final comments = snapshot.docs
-          .map((doc) => CommentModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                docId: doc.id,
-              ))
-          .where((comment) => comment.parentCommentId == null || comment.parentCommentId!.isEmpty)
+          .map(
+            (doc) => CommentModel.fromJson(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            ),
+          )
+          .where(
+            (comment) =>
+                comment.parentCommentId == null ||
+                comment.parentCommentId!.isEmpty,
+          )
           .toList();
-      
+
       // Sort in memory by createdAt ascending (oldest first)
       comments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      
+
       return comments;
     } catch (e) {
       debugPrint('Error fetching comments: $e');
@@ -353,15 +369,17 @@ class CommunityService extends GetxService {
           .get();
 
       final replies = snapshot.docs
-          .map((doc) => CommentModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                docId: doc.id,
-              ))
+          .map(
+            (doc) => CommentModel.fromJson(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            ),
+          )
           .toList();
-      
+
       // Sort in memory by createdAt ascending (oldest first)
       replies.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      
+
       return replies;
     } catch (e) {
       debugPrint('Error fetching replies: $e');
@@ -373,12 +391,12 @@ class CommunityService extends GetxService {
   Future<String?> addComment(CommentModel comment) async {
     try {
       final docRef = await _commentsCollection.add(comment.toJson());
-      
+
       // Update comments count on post
       await _postsCollection.doc(comment.postId).update({
         'commentsCount': FieldValue.increment(1),
       });
-      
+
       return docRef.id;
     } catch (e) {
       debugPrint('Error adding comment: $e');
@@ -390,12 +408,12 @@ class CommunityService extends GetxService {
   Future<bool> deleteComment(String commentId, String postId) async {
     try {
       await _commentsCollection.doc(commentId).delete();
-      
+
       // Update comments count on post
       await _postsCollection.doc(postId).update({
         'commentsCount': FieldValue.increment(-1),
       });
-      
+
       return true;
     } catch (e) {
       debugPrint('Error deleting comment: $e');
@@ -422,10 +440,12 @@ class CommunityService extends GetxService {
       final snapshot = await searchQuery.get();
 
       var posts = snapshot.docs
-          .map((doc) => PostModel.fromJson(
-                doc.data() as Map<String, dynamic>,
-                docId: doc.id,
-              ))
+          .map(
+            (doc) => PostModel.fromJson(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            ),
+          )
           .toList();
 
       // Client-side: also match description (Firestore can't OR-search two fields)

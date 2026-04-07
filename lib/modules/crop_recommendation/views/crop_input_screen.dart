@@ -29,110 +29,108 @@ class CropInputScreen extends GetView<CropRecommendationController> {
           child: Form(
             key: controller.formKey,
             child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Header
-              _buildHeader(context),
-              const SizedBox(height: 20),
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Header
+                _buildHeader(context),
+                const SizedBox(height: 20),
 
-              // Soil Nutrients Card
-              _buildSectionCard(
-                context,
-                title: 'Soil Nutrients',
-                icon: Icons.grass_rounded,
-                children: [
-                  _buildInputField(
-                    controller: controller.nController,
-                    label: 'Nitrogen (N)',
-                    hint: 'e.g. 50',
-                    suffix: 'mg/kg',
-                    icon: Icons.science_rounded,
-                    validator: (v) => controller.validateField(v, 'Nitrogen'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInputField(
-                    controller: controller.pController,
-                    label: 'Phosphorus (P)',
-                    hint: 'e.g. 40',
-                    suffix: 'mg/kg',
-                    icon: Icons.science_rounded,
-                    validator: (v) =>
-                        controller.validateField(v, 'Phosphorus'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInputField(
-                    controller: controller.kController,
-                    label: 'Potassium (K)',
-                    hint: 'e.g. 45',
-                    suffix: 'mg/kg',
-                    icon: Icons.science_rounded,
-                    validator: (v) =>
-                        controller.validateField(v, 'Potassium'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                // Soil Nutrients Card
+                _buildSectionCard(
+                  context,
+                  title: 'Soil Nutrients',
+                  icon: Icons.grass_rounded,
+                  children: [
+                    _buildInputField(
+                      controller: controller.nController,
+                      label: 'Nitrogen (N)',
+                      hint: 'e.g. 50',
+                      suffix: 'mg/kg',
+                      icon: Icons.science_rounded,
+                      validator: (v) => controller.validateField(v, 'Nitrogen'),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInputField(
+                      controller: controller.pController,
+                      label: 'Phosphorus (P)',
+                      hint: 'e.g. 40',
+                      suffix: 'mg/kg',
+                      icon: Icons.science_rounded,
+                      validator: (v) =>
+                          controller.validateField(v, 'Phosphorus'),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInputField(
+                      controller: controller.kController,
+                      label: 'Potassium (K)',
+                      hint: 'e.g. 45',
+                      suffix: 'mg/kg',
+                      icon: Icons.science_rounded,
+                      validator: (v) =>
+                          controller.validateField(v, 'Potassium'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-              // Environmental Conditions Card
-              _buildSectionCard(
-                context,
-                title: 'Environmental Conditions',
-                icon: Icons.wb_sunny_rounded,
-                children: [
-                  _buildInputField(
-                    controller: controller.temperatureController,
-                    label: 'Temperature',
-                    hint: 'e.g. 25',
-                    suffix: '°C',
-                    icon: Icons.thermostat_rounded,
-                    validator: (v) =>
-                        controller.validateField(v, 'Temperature'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInputField(
-                    controller: controller.humidityController,
-                    label: 'Humidity',
-                    hint: 'e.g. 70',
-                    suffix: '%',
-                    icon: Icons.water_drop_rounded,
-                    validator: (v) =>
-                        controller.validateField(v, 'Humidity'),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInputField(
-                    controller: controller.rainfallController,
-                    label: 'Rainfall',
-                    hint: 'e.g. 200',
-                    suffix: 'mm',
-                    icon: Icons.umbrella_rounded,
-                    validator: (v) =>
-                        controller.validateField(v, 'Rainfall'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                // Environmental Conditions Card
+                _buildSectionCard(
+                  context,
+                  title: 'Environmental Conditions',
+                  icon: Icons.wb_sunny_rounded,
+                  children: [
+                    _buildInputField(
+                      controller: controller.temperatureController,
+                      label: 'Temperature',
+                      hint: 'e.g. 25',
+                      suffix: '°C',
+                      icon: Icons.thermostat_rounded,
+                      validator: (v) =>
+                          controller.validateField(v, 'Temperature'),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInputField(
+                      controller: controller.humidityController,
+                      label: 'Humidity',
+                      hint: 'e.g. 70',
+                      suffix: '%',
+                      icon: Icons.water_drop_rounded,
+                      validator: (v) => controller.validateField(v, 'Humidity'),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInputField(
+                      controller: controller.rainfallController,
+                      label: 'Rainfall',
+                      hint: 'e.g. 200',
+                      suffix: 'mm',
+                      icon: Icons.umbrella_rounded,
+                      validator: (v) => controller.validateField(v, 'Rainfall'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-              // Soil pH Card
-              _buildSectionCard(
-                context,
-                title: 'Soil Property',
-                icon: Icons.landslide_rounded,
-                children: [
-                  _buildInputField(
-                    controller: controller.phController,
-                    label: 'pH Level',
-                    hint: 'e.g. 6.5',
-                    suffix: 'pH',
-                    icon: Icons.opacity_rounded,
-                    validator: (v) =>
-                        controller.validateField(v, 'pH Level'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
+                // Soil pH Card
+                _buildSectionCard(
+                  context,
+                  title: 'Soil Property',
+                  icon: Icons.landslide_rounded,
+                  children: [
+                    _buildInputField(
+                      controller: controller.phController,
+                      label: 'pH Level',
+                      hint: 'e.g. 6.5',
+                      suffix: 'pH',
+                      icon: Icons.opacity_rounded,
+                      validator: (v) => controller.validateField(v, 'pH Level'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
-              // Submit Button
-              Obx(() => SizedBox(
+                // Submit Button
+                Obx(
+                  () => SizedBox(
                     height: 52,
                     child: ElevatedButton(
                       onPressed: controller.isLoading.value
@@ -170,11 +168,12 @@ class CropInputScreen extends GetView<CropRecommendationController> {
                               ],
                             ),
                     ),
-                  )),
-              const SizedBox(height: 16),
-            ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -219,16 +218,16 @@ class CropInputScreen extends GetView<CropRecommendationController> {
                 Text(
                   'Smart Crop Advisor',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryGreen,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryGreen,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Enter your soil and climate data to get the best crop recommendations.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -258,9 +257,9 @@ class CropInputScreen extends GetView<CropRecommendationController> {
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -292,13 +291,12 @@ class CropInputScreen extends GetView<CropRecommendationController> {
         hintText: hint,
         suffixText: suffix,
         prefixIcon: Icon(icon, size: 20, color: AppColors.primaryGreen),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     );
   }
 }
-

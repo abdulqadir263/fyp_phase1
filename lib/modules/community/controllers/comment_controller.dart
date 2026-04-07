@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/data/providers/auth_provider.dart';
@@ -16,22 +15,22 @@ import 'post_controller.dart';
 class CommentController extends GetxController {
   /// Auth provider to access current user data
   final AuthProvider _authProvider = Get.find<AuthProvider>();
-  
+
   /// Community service for Firebase operations
   final CommunityService _communityService = Get.find<CommunityService>();
 
   /// List of top-level comments for current post
   final RxList<CommentModel> comments = <CommentModel>[].obs;
-  
+
   /// Controller for comment input
   final TextEditingController commentController = TextEditingController();
-  
+
   /// Shows loading indicator while loading comments
   final RxBool isLoadingComments = false.obs;
-  
+
   /// Shows loading indicator while adding a comment
   final RxBool isAddingComment = false.obs;
-  
+
   /// Flag to track if controller is still active
   bool _isDisposed = false;
 
@@ -60,7 +59,8 @@ class CommentController extends GetxController {
   String get currentUserName => _authProvider.currentUser.value?.name ?? 'User';
 
   /// Get current user avatar URL
-  String get currentUserAvatar => _authProvider.currentUser.value?.profileImage ?? '';
+  String get currentUserAvatar =>
+      _authProvider.currentUser.value?.profileImage ?? '';
 
   @override
   void onClose() {
@@ -80,12 +80,12 @@ class CommentController extends GetxController {
   /// Load top-level comments for a post
   Future<void> loadComments(String postId) async {
     if (isLoadingComments.value || postId.isEmpty) return;
-    
+
     try {
       isLoadingComments.value = true;
       final loadedComments = await _communityService.fetchComments(postId);
       if (_isDisposed) return;
-      
+
       comments.assignAll(loadedComments);
     } catch (e) {
       debugPrint('Error loading comments: $e');
@@ -157,7 +157,7 @@ class CommentController extends GetxController {
     }
 
     if (postId.isEmpty) return false;
-    
+
     // Prevent double submission
     if (isAddingComment.value) return false;
 
@@ -166,7 +166,7 @@ class CommentController extends GetxController {
 
     try {
       isAddingComment.value = true;
-      
+
       final comment = CommentModel(
         id: '',
         postId: postId,
@@ -180,7 +180,7 @@ class CommentController extends GetxController {
 
       final commentId = await _communityService.addComment(comment);
       if (_isDisposed) return false;
-      
+
       if (commentId != null) {
         commentController.clear();
 
@@ -227,7 +227,7 @@ class CommentController extends GetxController {
     try {
       final success = await _communityService.deleteComment(commentId, postId);
       if (_isDisposed) return false;
-      
+
       if (success) {
         // Remove from top-level comments
         comments.removeWhere((c) => c.id == commentId);

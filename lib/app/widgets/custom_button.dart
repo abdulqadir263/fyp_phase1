@@ -25,22 +25,14 @@ class CustomButton extends StatelessWidget {
         backgroundColor: color ?? AppConstants.primaryGreen,
         foregroundColor: Colors.white,
         minimumSize: const Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 2,
       ),
       child: isLoading
-          ? const SpinKitThreeBounce(
-              color: Colors.white,
-              size: 20,
-            )
+          ? const SpinKitThreeBounce(color: Colors.white, size: 20)
           : Text(
               text,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
     );
   }

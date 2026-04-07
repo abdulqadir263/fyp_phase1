@@ -29,8 +29,11 @@ class MarketplaceController extends GetxController {
   void onInit() {
     super.onInit();
     // Debounced search
-    debounce(searchQuery, (_) => loadProducts(),
-        time: const Duration(milliseconds: 400));
+    debounce(
+      searchQuery,
+      (_) => loadProducts(),
+      time: const Duration(milliseconds: 400),
+    );
     loadProducts();
   }
 
@@ -81,4 +84,3 @@ class MarketplaceController extends GetxController {
     super.onClose();
   }
 }
-

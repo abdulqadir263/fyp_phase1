@@ -27,10 +27,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
 
     _animations = _controllers.map((controller) {
       return Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeInOutCubic,
-        ),
+        CurvedAnimation(parent: controller, curve: Curves.easeInOutCubic),
       );
     }).toList();
 
@@ -65,10 +62,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
         builder: (context, value, child) {
           return Transform.translate(
             offset: Offset(0, 16 * (1 - value)),
-            child: Opacity(
-              opacity: value,
-              child: child,
-            ),
+            child: Opacity(opacity: value, child: child),
           );
         },
         child: Container(
@@ -84,7 +78,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -104,14 +98,14 @@ class _TypingIndicatorState extends State<TypingIndicator>
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: AppConstants.primaryGreen.withOpacity(
-                            0.4 + 0.6 * _animations[index].value,
+                          color: AppConstants.primaryGreen.withValues(
+                            alpha: 0.4 + 0.6 * _animations[index].value,
                           ),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppConstants.primaryGreen.withOpacity(
-                                0.2 * _animations[index].value,
+                              color: AppConstants.primaryGreen.withValues(
+                                alpha: 0.2 * _animations[index].value,
                               ),
                               blurRadius: 4,
                               offset: const Offset(0, 2),

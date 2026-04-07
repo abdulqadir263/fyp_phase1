@@ -17,79 +17,78 @@ class FarmerVisitsView extends GetView<AppointmentController> {
     controller.loadFarmerVisits();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('appointments'.tr),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('appointments'.tr), centerTitle: true),
 
       // FAB to request a new visit
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Get.toNamed('/appointments'),
         backgroundColor: AppColors.primaryGreen,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Request',
-            style: TextStyle(color: Colors.white)),
+        label: const Text('New Request', style: TextStyle(color: Colors.white)),
       ),
 
       body: ResponsiveHelper.tabletCenter(
         child: Obx(() {
-        // Loading state
-        if (controller.isLoadingVisits.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
-          );
-        }
+          // Loading state
+          if (controller.isLoadingVisits.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
+          }
 
-        // Empty state
-        if (controller.farmerVisits.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.event_note,
-                      size: 80, color: Colors.grey.shade400),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No visit requests yet.',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
+          // Empty state
+          if (controller.farmerVisits.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.event_note,
+                      size: 80,
+                      color: Colors.grey.shade400,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Request an expert to visit your farm!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
+                    const SizedBox(height: 16),
+                    Text(
+                      'No visit requests yet.',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      'Request an expert to visit your farm!',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            );
+          }
+
+          // Visits list
+          return RefreshIndicator(
+            onRefresh: controller.loadFarmerVisits,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: controller.farmerVisits.length,
+              itemBuilder: (context, index) {
+                final visit = controller.farmerVisits[index];
+                return _VisitCard(
+                  visit: visit,
+                  onCancel: visit.status == 'pending'
+                      ? () => _showCancelDialog(context, visit)
+                      : null,
+                );
+              },
             ),
           );
-        }
-
-        // Visits list
-        return RefreshIndicator(
-          onRefresh: controller.loadFarmerVisits,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.farmerVisits.length,
-            itemBuilder: (context, index) {
-              final visit = controller.farmerVisits[index];
-              return _VisitCard(
-                visit: visit,
-                onCancel: visit.status == 'pending'
-                    ? () => _showCancelDialog(context, visit)
-                    : null,
-              );
-            },
-          ),
-        );
-      }),
+        }),
       ),
     );
   }
@@ -162,7 +161,10 @@ class _VisitCard extends StatelessWidget {
             const SizedBox(height: 10),
 
             // Crop + Problem
-            _buildInfoRow(Icons.grass, '${visit.cropType} — ${visit.problemCategory}'),
+            _buildInfoRow(
+              Icons.grass,
+              '${visit.cropType} — ${visit.problemCategory}',
+            ),
             const SizedBox(height: 6),
 
             // Preferred date
@@ -186,8 +188,7 @@ class _VisitCard extends StatelessWidget {
             _buildInfoRow(Icons.location_on_outlined, visit.fullAddress),
 
             // Expert notes (if completed)
-            if (visit.expertNotes != null &&
-                visit.expertNotes!.isNotEmpty) ...[
+            if (visit.expertNotes != null && visit.expertNotes!.isNotEmpty) ...[
               const SizedBox(height: 10),
               Container(
                 width: double.infinity,
@@ -320,4 +321,3 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
-

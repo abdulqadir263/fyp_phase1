@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../core/utils/role_guard.dart';
-import '../../../core/utils/responsive_helper.dart';
 import '../controllers/cart_controller.dart';
 import '../models/cart_item_model.dart';
 
@@ -21,7 +20,8 @@ class CartView extends GetView<CartController> {
       });
       return const Scaffold(
         body: Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
+        ),
       );
     }
 
@@ -30,7 +30,8 @@ class CartView extends GetView<CartController> {
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGreen));
+            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          );
         }
 
         if (controller.cartItems.isEmpty) {
@@ -38,19 +39,26 @@ class CartView extends GetView<CartController> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.shopping_cart_outlined,
-                    size: 80, color: Colors.grey.shade400),
+                Icon(
+                  Icons.shopping_cart_outlined,
+                  size: 80,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(height: 12),
-                Text('your_cart_empty'.tr,
-                    style:
-                        TextStyle(fontSize: 18, color: Colors.grey.shade600)),
+                Text(
+                  'your_cart_empty'.tr,
+                  style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => Get.back(),
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen),
-                  child: Text('browse_products'.tr,
-                      style: TextStyle(color: Colors.white)),
+                    backgroundColor: AppColors.primaryGreen,
+                  ),
+                  child: Text(
+                    'browse_products'.tr,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -76,25 +84,34 @@ class CartView extends GetView<CartController> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.grey.shade300,
-                      blurRadius: 8,
-                      offset: const Offset(0, -2)),
+                    color: Colors.grey.shade300,
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
                 ],
               ),
               child: Column(
                 children: [
-                  _summaryRow('subtotal'.tr,
-                      'Rs. ${controller.subtotal.toStringAsFixed(0)}'),
+                  _summaryRow(
+                    'subtotal'.tr,
+                    'Rs. ${controller.subtotal.toStringAsFixed(0)}',
+                  ),
                   const SizedBox(height: 4),
-                  _summaryRow('delivery_fee'.tr,
-                      'Rs. ${controller.deliveryFee.toStringAsFixed(0)}'),
+                  _summaryRow(
+                    'delivery_fee'.tr,
+                    'Rs. ${controller.deliveryFee.toStringAsFixed(0)}',
+                  ),
                   const Divider(height: 16),
-                  _summaryRow('total'.tr,
-                      'Rs. ${controller.totalAmount.toStringAsFixed(0)}',
-                      bold: true),
+                  _summaryRow(
+                    'total'.tr,
+                    'Rs. ${controller.totalAmount.toStringAsFixed(0)}',
+                    bold: true,
+                  ),
                   const SizedBox(height: 8),
-                  Text('💵 ${'cod_message'.tr}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    '💵 ${'cod_message'.tr}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -104,10 +121,16 @@ class CartView extends GetView<CartController> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGreen,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: Text('proceed_to_checkout'.tr,
-                          style: const TextStyle(fontSize: 17, color: Colors.white)),
+                      child: Text(
+                        'proceed_to_checkout'.tr,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -123,15 +146,21 @@ class CartView extends GetView<CartController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
-        Text(value,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                color: bold ? AppColors.primaryGreen : null)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            color: bold ? AppColors.primaryGreen : null,
+          ),
+        ),
       ],
     );
   }
@@ -160,12 +189,14 @@ class _CartItemCard extends StatelessWidget {
                       imageUrl: item.imageUrl,
                       width: 70,
                       height: 70,
-                      fit: BoxFit.cover)
+                      fit: BoxFit.cover,
+                    )
                   : Container(
                       width: 70,
                       height: 70,
                       color: Colors.grey.shade200,
-                      child: const Icon(Icons.inventory)),
+                      child: const Icon(Icons.inventory),
+                    ),
             ),
             const SizedBox(width: 12),
 
@@ -174,30 +205,51 @@ class _CartItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.productName,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  Text(
+                    item.productName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 2),
-                  Text('Rs. ${item.price.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                          color: AppColors.primaryGreen,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    'Rs. ${item.price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   // Quantity controls
                   Row(
                     children: [
-                      _smallBtn(Icons.remove, () =>
-                          ctrl.updateQuantity(item.productId, item.quantity - 1)),
+                      _smallBtn(
+                        Icons.remove,
+                        () => ctrl.updateQuantity(
+                          item.productId,
+                          item.quantity - 1,
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text('${item.quantity}',
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          '${item.quantity}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                      _smallBtn(Icons.add, () =>
-                          ctrl.updateQuantity(item.productId, item.quantity + 1)),
+                      _smallBtn(
+                        Icons.add,
+                        () => ctrl.updateQuantity(
+                          item.productId,
+                          item.quantity + 1,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -216,8 +268,10 @@ class _CartItemCard extends StatelessWidget {
                   constraints: const BoxConstraints(),
                 ),
                 const SizedBox(height: 12),
-                Text('Rs. ${item.totalPrice.toStringAsFixed(0)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Rs. ${item.totalPrice.toStringAsFixed(0)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ],
@@ -241,4 +295,3 @@ class _CartItemCard extends StatelessWidget {
     );
   }
 }
-

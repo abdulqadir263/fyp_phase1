@@ -6,4 +6,3 @@
 //
 // See the field visit module documentation for the full flow.
 export 'request_visit_view.dart';
-

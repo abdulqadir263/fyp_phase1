@@ -17,27 +17,26 @@ class ProfileView extends GetView<ProfileController> {
       appBar: AppBar(
         title: Text(
           'my_profile'.tr,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           // Edit/Save button
-          Obx(() => IconButton(
-            icon: Icon(
-              controller.isEditing.value ? Icons.save : Icons.edit,
+          Obx(
+            () => IconButton(
+              icon: Icon(controller.isEditing.value ? Icons.save : Icons.edit),
+              onPressed: controller.isEditing.value
+                  ? controller.updateProfile
+                  : controller.toggleEditMode,
+              tooltip: controller.isEditing.value ? 'save'.tr : 'edit'.tr,
             ),
-            onPressed: controller.isEditing.value ? controller.updateProfile : controller.toggleEditMode,
-            tooltip: controller.isEditing.value ? 'save'.tr : 'edit'.tr,
-          )),
+          ),
         ],
       ),
 
       body: SafeArea(
         top: false,
-        child: Container(
+        child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -106,27 +105,31 @@ class ProfileView extends GetView<ProfileController> {
         children: [
           _buildProfilePictureSection(),
           const SizedBox(height: 14),
-          Obx(() => Text(
-                controller.nameController.text.isNotEmpty
-                    ? controller.nameController.text
-                    : 'full_name'.tr,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-                textAlign: TextAlign.center,
-              )),
+          Obx(
+            () => Text(
+              controller.nameController.text.isNotEmpty
+                  ? controller.nameController.text
+                  : 'full_name'.tr,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
           const SizedBox(height: 4),
-          Obx(() => Text(
-                controller.userType.value.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[500],
-                  letterSpacing: 0.5,
-                ),
-              )),
+          Obx(
+            () => Text(
+              controller.userType.value.toUpperCase(),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[500],
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -145,7 +148,8 @@ class ProfileView extends GetView<ProfileController> {
               radius: 60,
               backgroundColor: const Color(0xFFE9EDF4),
               backgroundImage: hasImage
-                  ? NetworkImage(controller.profileImageUrl.value) as ImageProvider
+                  ? NetworkImage(controller.profileImageUrl.value)
+                        as ImageProvider
                   : null,
               child: !hasImage
                   ? Icon(Icons.person, size: 58, color: Colors.grey[500])
@@ -156,9 +160,10 @@ class ProfileView extends GetView<ProfileController> {
           // Loading indicator for image upload
           Obx(() {
             // Show camera icon only in edit mode, spinner while uploading
-            if (controller.isUploadingImage.value)
+            if (controller.isUploadingImage.value) {
               return Positioned(
-                bottom: 0, right: 0,
+                bottom: 0,
+                right: 0,
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -166,27 +171,36 @@ class ProfileView extends GetView<ProfileController> {
                     shape: BoxShape.circle,
                   ),
                   child: SizedBox(
-                    width: 20, height: 20,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2,
+                      color: Colors.white,
+                      strokeWidth: 2,
                     ),
                   ),
                 ),
               );
+            }
 
             // Camera Icon (edit mode only)
-            if (controller.isEditing.value && !controller.isUploadingImage.value) {
+            if (controller.isEditing.value &&
+                !controller.isUploadingImage.value) {
               return Positioned(
-                bottom: 0, right: 0,
+                bottom: 0,
+                right: 0,
                 child: InkWell(
-                  onTap: controller.pickAndUploadImage,  // renamed
+                  onTap: controller.pickAndUploadImage, // renamed
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(Get.context!).primaryColor,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               );
@@ -215,10 +229,7 @@ class ProfileView extends GetView<ProfileController> {
         const SizedBox(height: 4),
         Text(
           'Update your details to keep account information accurate.',
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 13,
-          ),
+          style: TextStyle(color: Colors.grey[600], fontSize: 13),
         ),
         const SizedBox(height: 18),
         // Name Field
@@ -306,26 +317,31 @@ class ProfileView extends GetView<ProfileController> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Obx(() => DropdownButtonFormField<String>(
-                initialValue: controller.userType.value,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFFF9FAFC),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
+          Obx(
+            () => DropdownButtonFormField<String>(
+              initialValue: controller.userType.value,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFFF9FAFC),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                onChanged: controller.changeUserType,
-                items: [
-                  DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
-                  DropdownMenuItem(value: 'expert', child: Text('agricultural_expert'.tr)),
-                  DropdownMenuItem(value: 'company', child: Text('company'.tr)),
-                ],
-              )),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+              ),
+              onChanged: controller.changeUserType,
+              items: [
+                DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
+                DropdownMenuItem(
+                  value: 'expert',
+                  child: Text('agricultural_expert'.tr),
+                ),
+                DropdownMenuItem(value: 'company', child: Text('company'.tr)),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -336,42 +352,51 @@ class ProfileView extends GetView<ProfileController> {
     return _buildSectionCard(
       child: Column(
         children: [
-        // "Skip" button — only shown when profile is incomplete
-        if (!controller.isEditing.value && controller.isProfileIncomplete) ...[
-          OutlinedButton(
-            onPressed: controller.skipProfileSetup,  // renamed from createProfileLater
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey[400]!),
-              minimumSize: const Size(double.infinity, 50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          // "Skip" button — only shown when profile is incomplete
+          if (!controller.isEditing.value &&
+              controller.isProfileIncomplete) ...[
+            OutlinedButton(
+              onPressed: controller
+                  .skipProfileSetup, // renamed from createProfileLater
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.grey[400]!),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text('create_profile_later'.tr),
             ),
-            child: Text('create_profile_later'.tr),
+            const SizedBox(height: 12),
+          ],
+
+          // Cancel Button (sirf edit mode mein dikhega)
+          if (controller.isEditing.value)
+            CustomButton(
+              text: 'cancel'.tr,
+              onPressed: controller.toggleEditMode,
+              color: Colors.grey,
+            ),
+
+          if (controller.isEditing.value) const SizedBox(height: 12),
+
+          // Delete Account Button
+          OutlinedButton(
+            onPressed: controller.deleteAccount,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.red),
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              backgroundColor: Colors.red.withValues(alpha: 0.03),
+            ),
+            child: Text(
+              'delete_account'.tr,
+              style: TextStyle(color: Colors.red),
+            ),
           ),
-          const SizedBox(height: 12),
         ],
-
-        // Cancel Button (sirf edit mode mein dikhega)
-        if (controller.isEditing.value)
-          CustomButton(
-            text: 'cancel'.tr,
-            onPressed: controller.toggleEditMode,
-            color: Colors.grey,
-          ),
-
-        if (controller.isEditing.value) const SizedBox(height: 12),
-
-        // Delete Account Button
-        OutlinedButton(
-          onPressed: controller.deleteAccount,
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.red),
-            minimumSize: const Size(double.infinity, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            backgroundColor: Colors.red.withValues(alpha: 0.03),
-          ),
-          child: Text('delete_account'.tr, style: TextStyle(color: Colors.red)),
-        ),
-      ],
       ),
     );
   }
@@ -388,39 +413,44 @@ class ProfileView extends GetView<ProfileController> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          Obx(() => Row(
-                  children: [
-                    const Icon(Icons.language, color: Colors.grey),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        langController.isUrdu ? 'اردو' : 'English',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    Switch(
-                      value: langController.isUrdu,
-                      onChanged: (_) => langController.toggleLanguage(),
-                      activeTrackColor: const Color(0xFF4CAF50).withValues(alpha: 0.5),
-                      thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return const Color(0xFF4CAF50);
-                        }
-                        return Colors.grey;
-                      }),
-                    ),
-                  ],
-                )),
+          Obx(
+            () => Row(
+              children: [
+                const Icon(Icons.language, color: Colors.grey),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    langController.isUrdu ? 'اردو' : 'English',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                Switch(
+                  value: langController.isUrdu,
+                  onChanged: (_) => langController.toggleLanguage(),
+                  activeTrackColor: const Color(
+                    0xFF4CAF50,
+                  ).withValues(alpha: 0.5),
+                  thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return const Color(0xFF4CAF50);
+                    }
+                    return Colors.grey;
+                  }),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 4),
-          Obx(() => Text(
-                  langController.isUrdu
-                      ? 'Switch to English'
-                      : 'اردو میں تبدیل کریں',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                )),
+          Obx(
+            () => Text(
+              langController.isUrdu
+                  ? 'Switch to English'
+                  : 'اردو میں تبدیل کریں',
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+            ),
+          ),
         ],
       ),
     );
   }
-
 }

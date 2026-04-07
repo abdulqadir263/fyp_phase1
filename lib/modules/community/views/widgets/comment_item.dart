@@ -39,11 +39,8 @@ class CommentItem extends StatelessWidget {
                       width: 36,
                       height: 36,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Icon(
-                        Icons.person,
-                        color: Colors.grey[500],
-                        size: 20,
-                      ),
+                      errorWidget: (_, __, ___) =>
+                          Icon(Icons.person, color: Colors.grey[500], size: 20),
                     ),
                   )
                 : Icon(Icons.person, color: Colors.grey[500], size: 20),
@@ -67,10 +64,7 @@ class CommentItem extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       _formatTimeAgo(comment.createdAt),
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
                     ),
                   ],
                 ),

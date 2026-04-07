@@ -39,41 +39,43 @@ class _BookmarksViewState extends State<BookmarksView> {
       ),
       body: ResponsiveHelper.tabletCenter(
         child: Obx(() {
-        if (controller.isLoadingBookmarks.value) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: AppConstants.primaryGreen,
+          if (controller.isLoadingBookmarks.value) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.primaryGreen,
+              ),
+            );
+          }
+
+          final bookmarkedPosts = controller.bookmarkedPostsList;
+
+          if (bookmarkedPosts.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return RefreshIndicator(
+            onRefresh: controller.fetchBookmarkedPosts,
+            color: AppConstants.primaryGreen,
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 16),
+              itemCount: bookmarkedPosts.length,
+              itemBuilder: (context, index) {
+                final post = bookmarkedPosts[index];
+                return Obx(
+                  () => PostCard(
+                    post: post,
+                    onTap: () => controller.navigateToPostDetail(post),
+                    onBookmark: () => controller.toggleBookmark(post.id),
+                    isBookmarked: controller.isBookmarked(post.id),
+                    onDelete: controller.isPostAuthor(post.userId)
+                        ? () => controller.deletePost(post.id)
+                        : null,
+                  ),
+                );
+              },
             ),
           );
-        }
-
-        final bookmarkedPosts = controller.bookmarkedPostsList;
-
-        if (bookmarkedPosts.isEmpty) {
-          return _buildEmptyState();
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.fetchBookmarkedPosts,
-          color: AppConstants.primaryGreen,
-          child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 16),
-            itemCount: bookmarkedPosts.length,
-            itemBuilder: (context, index) {
-              final post = bookmarkedPosts[index];
-              return Obx(() => PostCard(
-                post: post,
-                onTap: () => controller.navigateToPostDetail(post),
-                onBookmark: () => controller.toggleBookmark(post.id),
-                isBookmarked: controller.isBookmarked(post.id),
-                onDelete: controller.isPostAuthor(post.userId)
-                    ? () => controller.deletePost(post.id)
-                    : null,
-              ));
-            },
-          ),
-        );
-      }),
+        }),
       ),
     );
   }
@@ -85,11 +87,7 @@ class _BookmarksViewState extends State<BookmarksView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.bookmark_border,
-              size: 80,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.bookmark_border, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No bookmarks yet',
@@ -103,10 +101,7 @@ class _BookmarksViewState extends State<BookmarksView> {
             Text(
               'Save posts you want to read later by tapping the bookmark icon',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(

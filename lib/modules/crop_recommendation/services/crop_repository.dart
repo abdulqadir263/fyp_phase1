@@ -44,8 +44,7 @@ class CropRepository {
           .get();
 
       return snapshot.docs
-          .map((doc) =>
-              RecommendationModel.fromJson(doc.data(), docId: doc.id))
+          .map((doc) => RecommendationModel.fromJson(doc.data(), docId: doc.id))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch history: $e');
@@ -67,4 +66,3 @@ class CropRepository {
     }
   }
 }
-

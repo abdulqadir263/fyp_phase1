@@ -20,7 +20,8 @@ class OrderHistoryView extends GetView<OrderController> {
           child: Obx(() {
             if (controller.isLoading.value) {
               return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryGreen));
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              );
             }
 
             if (controller.orders.isEmpty) {
@@ -28,16 +29,27 @@ class OrderHistoryView extends GetView<OrderController> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.receipt_long_outlined,
-                        size: 72, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.receipt_long_outlined,
+                      size: 72,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 14),
-                    Text('No orders yet.',
-                        style:
-                            TextStyle(fontSize: 17, color: Colors.grey.shade600)),
+                    Text(
+                      'No orders yet.',
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    Text('Your order history will appear here.',
-                        style:
-                            TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                    Text(
+                      'Your order history will appear here.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -86,7 +98,9 @@ class _OrderHistoryCard extends StatelessWidget {
                     child: Text(
                       'Order #${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length).toUpperCase()}',
                       style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.bold),
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -99,13 +113,15 @@ class _OrderHistoryCard extends StatelessWidget {
               // Date
               Row(
                 children: [
-                  Icon(Icons.calendar_today,
-                      size: 14, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt),
-                    style:
-                        TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -125,20 +141,27 @@ class _OrderHistoryCard extends StatelessWidget {
                   Text(
                     'Rs. ${order.totalAmount.toStringAsFixed(0)}',
                     style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryGreen),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryGreen,
+                    ),
                   ),
                   Row(
                     children: [
-                      Text('View Details',
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.primaryGreen,
-                              fontWeight: FontWeight.w600)),
+                      Text(
+                        'View Details',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.primaryGreen,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_ios,
-                          size: 14, color: AppColors.primaryGreen),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: AppColors.primaryGreen,
+                      ),
                     ],
                   ),
                 ],
@@ -187,8 +210,10 @@ class _StatusBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Text(
         '${status[0].toUpperCase()}${status.substring(1)}',
         style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: fg),

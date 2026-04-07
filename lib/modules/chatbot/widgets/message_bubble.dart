@@ -11,11 +11,7 @@ class MessageBubble extends StatelessWidget {
   final MessageModel message;
   final VoidCallback? onLongPress;
 
-  const MessageBubble({
-    super.key,
-    required this.message,
-    this.onLongPress,
-  });
+  const MessageBubble({super.key, required this.message, this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +47,15 @@ class MessageBubble extends StatelessWidget {
             bottom: 4,
           ),
           child: Column(
-            crossAxisAlignment:
-                message.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: message.isUser
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   gradient: message.isUser
                       ? LinearGradient(
@@ -82,8 +82,8 @@ class MessageBubble extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: message.isUser
-                          ? AppConstants.primaryGreen.withOpacity(0.2)
-                          : Colors.black.withOpacity(0.06),
+                          ? AppConstants.primaryGreen.withValues(alpha: 0.2)
+                          : Colors.black.withValues(alpha: 0.06),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -93,7 +93,8 @@ class MessageBubble extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Show image if available
-                    if (message.imageUrl != null && message.imageUrl!.isNotEmpty)
+                    if (message.imageUrl != null &&
+                        message.imageUrl!.isNotEmpty)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: CachedNetworkImage(
@@ -107,9 +108,7 @@ class MessageBubble extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
@@ -122,7 +121,8 @@ class MessageBubble extends StatelessWidget {
                           ),
                         ),
                       ),
-                    if (message.imageUrl != null && message.imageUrl!.isNotEmpty)
+                    if (message.imageUrl != null &&
+                        message.imageUrl!.isNotEmpty)
                       const SizedBox(height: 10),
                     // Message text with improved typography
                     SelectableText(

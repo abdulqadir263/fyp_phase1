@@ -92,16 +92,17 @@ class RecommendationModel {
   });
 
   /// Create from Firestore document.
-  factory RecommendationModel.fromJson(Map<String, dynamic> json,
-      {String? docId}) {
+  factory RecommendationModel.fromJson(
+    Map<String, dynamic> json, {
+    String? docId,
+  }) {
     return RecommendationModel(
       id: docId ?? json['id'] ?? '',
       userId: json['userId'] ?? '',
-      input: CropInput.fromJson(
-          Map<String, dynamic>.from(json['input'] ?? {})),
-      results: (json['results'] as List<dynamic>?)
-              ?.map((e) =>
-                  CropResult.fromJson(Map<String, dynamic>.from(e)))
+      input: CropInput.fromJson(Map<String, dynamic>.from(json['input'] ?? {})),
+      results:
+          (json['results'] as List<dynamic>?)
+              ?.map((e) => CropResult.fromJson(Map<String, dynamic>.from(e)))
               .toList() ??
           [],
       createdAt: json['createdAt'] is Timestamp
@@ -121,11 +122,9 @@ class RecommendationModel {
   }
 
   /// Top crop name for display in history list.
-  String get topCropName =>
-      results.isNotEmpty ? results.first.cropName : 'N/A';
+  String get topCropName => results.isNotEmpty ? results.first.cropName : 'N/A';
 
   /// Top suitability percentage for display.
   double get topSuitability =>
       results.isNotEmpty ? results.first.suitabilityPercentage : 0.0;
 }
-

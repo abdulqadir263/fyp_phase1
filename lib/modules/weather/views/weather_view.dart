@@ -26,7 +26,8 @@ class WeatherView extends GetView<WeatherController> {
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.currentWeather.value == null) {
+        if (controller.isLoading.value &&
+            controller.currentWeather.value == null) {
           return _buildLoadingState();
         }
 
@@ -62,10 +63,7 @@ class WeatherView extends GetView<WeatherController> {
           children: [
             const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
-              'failed_load_weather'.tr,
-              style: Get.textTheme.titleMedium,
-            ),
+            Text('failed_load_weather'.tr, style: Get.textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               'check_internet'.tr,
@@ -128,11 +126,13 @@ class WeatherView extends GetView<WeatherController> {
             children: [
               const Icon(Icons.language),
               const SizedBox(width: 8),
-              Obx(() => Text(
+              Obx(
+                () => Text(
                   controller.selectedLanguage.value == 'en'
                       ? 'Switch to اردو'
-                      : 'انگریزی میں تبدیل کریں'
-              )),
+                      : 'انگریزی میں تبدیل کریں',
+                ),
+              ),
             ],
           ),
         ),
@@ -142,11 +142,13 @@ class WeatherView extends GetView<WeatherController> {
             children: [
               const Icon(Icons.thermostat),
               const SizedBox(width: 8),
-              Obx(() => Text(
+              Obx(
+                () => Text(
                   controller.isCelsius.value
                       ? 'Use Fahrenheit (°F)'
-                      : 'Use Celsius (°C)'
-              )),
+                      : 'Use Celsius (°C)',
+                ),
+              ),
             ],
           ),
         ),
@@ -211,10 +213,7 @@ class WeatherView extends GetView<WeatherController> {
                   borderRadius: BorderRadius.circular(40),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  weather.icon,
-                  style: const TextStyle(fontSize: 40),
-                ),
+                child: Text(weather.icon, style: const TextStyle(fontSize: 40)),
               ),
             ],
           ),
@@ -241,22 +240,29 @@ class WeatherView extends GetView<WeatherController> {
     );
   }
 
-  Widget _buildWeatherDetail({required IconData icon, required String label, required String value}) {
+  Widget _buildWeatherDetail({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Get.theme.primaryColor.withOpacity(0.1),
+            color: Get.theme.primaryColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, size: 20, color: Get.theme.primaryColor),
         ),
         const SizedBox(height: 8),
-        Text(value, style: Get.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        )),
+        Text(
+          value,
+          style: Get.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
         const SizedBox(height: 2),
         Text(
           label,
@@ -296,7 +302,9 @@ class WeatherView extends GetView<WeatherController> {
           const SizedBox(height: 8),
           Text(
             'AI-powered recommendations based on current weather',
-            style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+            style: Get.textTheme.bodySmall?.copyWith(
+              color: Colors.grey.shade600,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -306,7 +314,9 @@ class WeatherView extends GetView<WeatherController> {
 
           // Detailed Recommendations
           Column(
-            children: agricultureRecs.map((rec) => _buildAgricultureRecommendationItem(rec)).toList(),
+            children: agricultureRecs
+                .map((rec) => _buildAgricultureRecommendationItem(rec))
+                .toList(),
           ),
 
           const SizedBox(height: 12),
@@ -338,11 +348,15 @@ class WeatherView extends GetView<WeatherController> {
           const SizedBox(height: 12),
           Text(
             'Based on current weather conditions',
-            style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+            style: Get.textTheme.bodySmall?.copyWith(
+              color: Colors.grey.shade600,
+            ),
           ),
           const SizedBox(height: 16),
           Column(
-            children: weather.recommendations.map((rec) => _buildRecommendationItem(rec)).toList(),
+            children: weather.recommendations
+                .map((rec) => _buildRecommendationItem(rec))
+                .toList(),
           ),
         ],
       ),
@@ -350,8 +364,9 @@ class WeatherView extends GetView<WeatherController> {
   }
 
   Widget _buildRiskOverview(List<AgricultureRecommendation> recommendations) {
-    final highRiskCount = recommendations.where((rec) => rec.riskLevel == 'high').length;
-    final mediumRiskCount = recommendations.where((rec) => rec.riskLevel == 'medium').length;
+    final highRiskCount = recommendations
+        .where((rec) => rec.riskLevel == 'high')
+        .length;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -359,7 +374,9 @@ class WeatherView extends GetView<WeatherController> {
         color: highRiskCount > 0 ? Colors.orange.shade50 : Colors.green.shade50,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: highRiskCount > 0 ? Colors.orange.shade200 : Colors.green.shade200,
+          color: highRiskCount > 0
+              ? Colors.orange.shade200
+              : Colors.green.shade200,
         ),
       ),
       child: Row(
@@ -374,10 +391,14 @@ class WeatherView extends GetView<WeatherController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  highRiskCount > 0 ? 'Attention Required' : 'Favorable Conditions',
+                  highRiskCount > 0
+                      ? 'Attention Required'
+                      : 'Favorable Conditions',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: highRiskCount > 0 ? Colors.orange.shade800 : Colors.green.shade800,
+                    color: highRiskCount > 0
+                        ? Colors.orange.shade800
+                        : Colors.green.shade800,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -386,7 +407,9 @@ class WeatherView extends GetView<WeatherController> {
                       ? '$highRiskCount high-risk condition${highRiskCount > 1 ? 's' : ''} detected'
                       : 'Good conditions for farming activities',
                   style: Get.textTheme.bodySmall?.copyWith(
-                    color: highRiskCount > 0 ? Colors.orange.shade700 : Colors.green.shade700,
+                    color: highRiskCount > 0
+                        ? Colors.orange.shade700
+                        : Colors.green.shade700,
                   ),
                 ),
               ],
@@ -398,9 +421,15 @@ class WeatherView extends GetView<WeatherController> {
   }
 
   Widget _buildAgricultureRecommendationItem(AgricultureRecommendation rec) {
-    final color = rec.isRecommended ? Colors.green.shade800 : Colors.orange.shade800;
-    final bgColor = rec.isRecommended ? Colors.green.shade50 : Colors.orange.shade50;
-    final borderColor = rec.isRecommended ? Colors.green.shade200 : Colors.orange.shade200;
+    final color = rec.isRecommended
+        ? Colors.green.shade800
+        : Colors.orange.shade800;
+    final bgColor = rec.isRecommended
+        ? Colors.green.shade50
+        : Colors.orange.shade50;
+    final borderColor = rec.isRecommended
+        ? Colors.green.shade200
+        : Colors.orange.shade200;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -434,14 +463,12 @@ class WeatherView extends GetView<WeatherController> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
                   children: [
-                    Text(
-                      controller.getAgriculturePriorityIcon(rec.priority),
-                    ),
+                    Text(controller.getAgriculturePriorityIcon(rec.priority)),
                     const SizedBox(width: 4),
                     Text(
                       rec.priority.toUpperCase(),
@@ -462,9 +489,7 @@ class WeatherView extends GetView<WeatherController> {
           // Description
           Text(
             rec.description,
-            style: Get.textTheme.bodyMedium?.copyWith(
-              height: 1.4,
-            ),
+            style: Get.textTheme.bodyMedium?.copyWith(height: 1.4),
           ),
 
           const SizedBox(height: 8),
@@ -553,8 +578,12 @@ class WeatherView extends GetView<WeatherController> {
 
   Widget _buildRecommendationItem(WeatherRecommendation recommendation) {
     final isRecommended = recommendation.isRecommended;
-    final color = isRecommended ? Colors.green.shade800 : Colors.orange.shade800;
-    final bgColor = isRecommended ? Colors.green.shade50 : Colors.orange.shade50;
+    final color = isRecommended
+        ? Colors.green.shade800
+        : Colors.orange.shade800;
+    final bgColor = isRecommended
+        ? Colors.green.shade50
+        : Colors.orange.shade50;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -562,17 +591,14 @@ class WeatherView extends GetView<WeatherController> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Icon(
               _getCategoryIcon(recommendation.category),
               color: Colors.white,
@@ -664,7 +690,9 @@ class WeatherView extends GetView<WeatherController> {
             const SizedBox(height: 12),
             Text(
               'Weather outlook for the coming days',
-              style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              style: Get.textTheme.bodySmall?.copyWith(
+                color: Colors.grey.shade600,
+              ),
             ),
             const SizedBox(height: 16),
             ListView.builder(
@@ -689,9 +717,13 @@ class WeatherView extends GetView<WeatherController> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isToday ? Get.theme.primaryColor.withOpacity(0.05) : Colors.transparent,
+        color: isToday
+            ? Get.theme.primaryColor.withValues(alpha: 0.05)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
-        border: isToday ? Border.all(color: Get.theme.primaryColor.withOpacity(0.2)) : null,
+        border: isToday
+            ? Border.all(color: Get.theme.primaryColor.withValues(alpha: 0.2))
+            : null,
       ),
       child: Row(
         children: [
@@ -701,7 +733,9 @@ class WeatherView extends GetView<WeatherController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isToday ? 'Today' : DateFormat('EEE').format(weather.dateTime),
+                  isToday
+                      ? 'Today'
+                      : DateFormat('EEE').format(weather.dateTime),
                   style: Get.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -722,10 +756,7 @@ class WeatherView extends GetView<WeatherController> {
             flex: 1,
             child: Container(
               alignment: Alignment.center,
-              child: Text(
-                weather.icon,
-                style: const TextStyle(fontSize: 24),
-              ),
+              child: Text(weather.icon, style: const TextStyle(fontSize: 24)),
             ),
           ),
           Expanded(
@@ -781,9 +812,12 @@ class WeatherView extends GetView<WeatherController> {
 
   String toTitleCase(String text) {
     if (text.isEmpty) return "";
-    return text.split(' ').map((word) {
-      if (word.isEmpty) return "";
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    return text
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return "";
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 }

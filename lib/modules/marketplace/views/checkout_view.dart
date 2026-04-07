@@ -19,7 +19,8 @@ class CheckoutView extends GetView<CartController> {
       });
       return const Scaffold(
         body: Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
+        ),
       );
     }
 
@@ -28,159 +29,193 @@ class CheckoutView extends GetView<CartController> {
       body: SafeArea(
         child: ResponsiveHelper.tabletCenter(
           child: Obx(() {
-        return Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Order summary
-                  Text('order_details'.tr,
-                      style: const
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  ...controller.cartItems.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                                child: Text(
-                                    '${item.productName} x ${item.quantity}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis)),
-                            Text(
-                                'Rs. ${item.totalPrice.toStringAsFixed(0)}'),
-                          ],
+            return Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Order summary
+                      Text(
+                        'order_details'.tr,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                      )),
-                  const Divider(height: 16),
-                  _row('subtotal'.tr,
-                      'Rs. ${controller.subtotal.toStringAsFixed(0)}'),
-                  _row('delivery_fee'.tr,
-                      'Rs. ${controller.deliveryFee.toStringAsFixed(0)}'),
-                  const Divider(height: 16),
-                  _row('total'.tr,
-                      'Rs. ${controller.totalAmount.toStringAsFixed(0)}',
-                      bold: true),
-
-                  const SizedBox(height: 24),
-
-                  // Delivery address
-                  Text('delivery_details'.tr,
-                      style: const
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: controller.addressController,
-                    maxLines: 2,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      hintText: 'Village, Street, City, District',
-                      prefixIcon: const Icon(Icons.location_on_outlined,
-                          color: AppColors.primaryGreen),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Phone
-                  Text('phone_number'.tr,
-                      style: const
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: controller.phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      hintText: '03xx-xxxxxxx',
-                      prefixIcon: const Icon(Icons.phone_outlined,
-                          color: AppColors.primaryGreen),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // COD notice
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange.shade200),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.payments_outlined,
-                            color: Colors.orange, size: 28),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Cash on Delivery\nPay when product is delivered.',
-                            style: TextStyle(fontSize: 14, height: 1.4),
+                      ),
+                      const SizedBox(height: 8),
+                      ...controller.cartItems.map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${item.productName} x ${item.quantity}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text('Rs. ${item.totalPrice.toStringAsFixed(0)}'),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Place Order button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: controller.isPlacingOrder.value
-                          ? null
-                          : controller.placeOrder,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGreen,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text('place_order'.tr,
-                          style: TextStyle(fontSize: 17, color: Colors.white)),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-
-            // Loading overlay
-            if (controller.isPlacingOrder.value)
-              Container(
-                color: Colors.black26,
-                child: const Center(
-                  child: Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(
-                              color: AppColors.primaryGreen),
-                          SizedBox(height: 16),
-                          Text('Placing your order...'),
-                        ],
+                      const Divider(height: 16),
+                      _row(
+                        'subtotal'.tr,
+                        'Rs. ${controller.subtotal.toStringAsFixed(0)}',
                       ),
-                    ),
+                      _row(
+                        'delivery_fee'.tr,
+                        'Rs. ${controller.deliveryFee.toStringAsFixed(0)}',
+                      ),
+                      const Divider(height: 16),
+                      _row(
+                        'total'.tr,
+                        'Rs. ${controller.totalAmount.toStringAsFixed(0)}',
+                        bold: true,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Delivery address
+                      Text(
+                        'delivery_details'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: controller.addressController,
+                        maxLines: 2,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: InputDecoration(
+                          hintText: 'Village, Street, City, District',
+                          prefixIcon: const Icon(
+                            Icons.location_on_outlined,
+                            color: AppColors.primaryGreen,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Phone
+                      Text(
+                        'phone_number'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: controller.phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          hintText: '03xx-xxxxxxx',
+                          prefixIcon: const Icon(
+                            Icons.phone_outlined,
+                            color: AppColors.primaryGreen,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // COD notice
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.payments_outlined,
+                              color: Colors.orange,
+                              size: 28,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Cash on Delivery\nPay when product is delivered.',
+                                style: TextStyle(fontSize: 14, height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Place Order button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: controller.isPlacingOrder.value
+                              ? null
+                              : controller.placeOrder,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'place_order'.tr,
+                            style: TextStyle(fontSize: 17, color: Colors.white),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+                    ],
                   ),
                 ),
-              ),
-          ],
-        );
-      }),
+
+                // Loading overlay
+                if (controller.isPlacingOrder.value)
+                  Container(
+                    color: Colors.black26,
+                    child: const Center(
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                color: AppColors.primaryGreen,
+                              ),
+                              SizedBox(height: 16),
+                              Text('Placing your order...'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ),
       ),
-    ),
     );
   }
 
@@ -190,18 +225,23 @@ class CheckoutView extends GetView<CartController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                  color: bold ? AppColors.primaryGreen : null)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              color: bold ? AppColors.primaryGreen : null,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-

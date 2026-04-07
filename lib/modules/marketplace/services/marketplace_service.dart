@@ -25,8 +25,7 @@ class MarketplaceService extends GetxService {
     String? searchQuery,
   }) async {
     try {
-      Query query = _products
-          .where('isActive', isEqualTo: true);
+      Query query = _products.where('isActive', isEqualTo: true);
 
       if (category != null && category.isNotEmpty) {
         query = query.where('category', isEqualTo: category);
@@ -40,17 +39,23 @@ class MarketplaceService extends GetxService {
       // Client-side search (Firestore has no full-text search)
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         final q = searchQuery.trim().toLowerCase();
-        list = list.where((p) =>
-            p.name.toLowerCase().contains(q) ||
-            p.description.toLowerCase().contains(q)).toList();
+        list = list
+            .where(
+              (p) =>
+                  p.name.toLowerCase().contains(q) ||
+                  p.description.toLowerCase().contains(q),
+            )
+            .toList();
       }
 
       debugPrint('[MarketplaceService] fetchProducts: ${list.length} results');
       return list;
     } on FirebaseException catch (e) {
       if (e.code == 'failed-precondition') {
-        debugPrint('⚠️ Missing Firestore index for products query. '
-            'Deploy indexes: firebase deploy --only firestore:indexes');
+        debugPrint(
+          '⚠️ Missing Firestore index for products query. '
+          'Deploy indexes: firebase deploy --only firestore:indexes',
+        );
         return [];
       }
       rethrow;
@@ -120,10 +125,9 @@ class MarketplaceService extends GetxService {
 
   /// Set / update a cart item
   Future<void> setCartItem(String uid, String productId, int quantity) async {
-    await _cartRef(uid).doc(productId).set({
-      'productId': productId,
-      'quantity': quantity,
-    });
+    await _cartRef(
+      uid,
+    ).doc(productId).set({'productId': productId, 'quantity': quantity});
   }
 
   /// Remove a single cart item
@@ -180,9 +184,7 @@ class MarketplaceService extends GetxService {
   /// Fetch ALL orders (seller filters client-side by their sellerId in items)
   Future<List<OrderModel>> fetchAllOrders() async {
     try {
-      final snap = await _orders
-          .orderBy('createdAt', descending: true)
-          .get();
+      final snap = await _orders.orderBy('createdAt', descending: true).get();
       return snap.docs.map((d) => OrderModel.fromDocument(d)).toList();
     } catch (e) {
       debugPrint('[MarketplaceService] fetchAllOrders error: $e');
@@ -207,4 +209,3 @@ class MarketplaceService extends GetxService {
     await batch.commit();
   }
 }
-

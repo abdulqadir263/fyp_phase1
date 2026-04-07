@@ -35,7 +35,8 @@ class HomeController extends GetxController {
       case 'farmer':
         return userData.location == null || userData.location!.isEmpty;
       case 'expert':
-        return userData.specialization == null || userData.specialization!.isEmpty;
+        return userData.specialization == null ||
+            userData.specialization!.isEmpty;
       case 'company':
         return userData.companyName == null || userData.companyName!.isEmpty;
       default:
@@ -46,7 +47,9 @@ class HomeController extends GetxController {
   /// Get user's profile image URL
   /// Returns empty string if no profile image is set
   String get profileImageUrl {
-    if (user.value == null || user.value!.profileImage == null || user.value!.profileImage!.isEmpty) {
+    if (user.value == null ||
+        user.value!.profileImage == null ||
+        user.value!.profileImage!.isEmpty) {
       return '';
     }
     return user.value!.profileImage!;
@@ -107,9 +110,7 @@ class HomeController extends GetxController {
       textCancel: 'no'.tr,
       onCancel: () => Get.back(),
       confirm: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: Get.theme.primaryColor,
-        ),
+        style: TextButton.styleFrom(backgroundColor: Get.theme.primaryColor),
         onPressed: () {
           Get.back();
           _authProvider.signOut();
@@ -150,17 +151,12 @@ class HomeController extends GetxController {
         middleText: 'signup_to_use'.tr,
         textCancel: 'cancel'.tr,
         confirm: TextButton(
-          style: TextButton.styleFrom(
-            backgroundColor: Get.theme.primaryColor,
-          ),
+          style: TextButton.styleFrom(backgroundColor: Get.theme.primaryColor),
           onPressed: () {
             Get.back();
             Get.offAllNamed(AppRoutes.LOGIN);
           },
-          child: Text(
-            'sign_up'.tr,
-            style: TextStyle(color: Colors.white),
-          ),
+          child: Text('sign_up'.tr, style: TextStyle(color: Colors.white)),
         ),
       );
     } else {

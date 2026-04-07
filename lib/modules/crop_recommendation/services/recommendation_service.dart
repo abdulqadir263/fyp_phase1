@@ -16,7 +16,8 @@ class RecommendationService {
   static const double _weightPH = 1.5;
   static const double _weightRainfall = 1.3;
 
-  static const double _totalWeight = _weightN +
+  static const double _totalWeight =
+      _weightN +
       _weightP +
       _weightK +
       _weightTemperature +
@@ -33,7 +34,11 @@ class RecommendationService {
   ///
   /// Result is clamped to [0, 1].
   double _parameterScore(
-      double userValue, double minVal, double maxVal, double meanVal) {
+    double userValue,
+    double minVal,
+    double maxVal,
+    double meanVal,
+  ) {
     if (userValue < minVal || userValue > maxVal) return 0.0;
     final range = maxVal - minVal;
     if (range <= 0) return 0.0;
@@ -47,16 +52,28 @@ class RecommendationService {
       _parameterScore(input.n, crop.minN, crop.maxN, crop.meanN) * _weightN,
       _parameterScore(input.p, crop.minP, crop.maxP, crop.meanP) * _weightP,
       _parameterScore(input.k, crop.minK, crop.maxK, crop.meanK) * _weightK,
-      _parameterScore(input.temperature, crop.minTemperature,
-              crop.maxTemperature, crop.meanTemperature) *
+      _parameterScore(
+            input.temperature,
+            crop.minTemperature,
+            crop.maxTemperature,
+            crop.meanTemperature,
+          ) *
           _weightTemperature,
-      _parameterScore(input.humidity, crop.minHumidity, crop.maxHumidity,
-              crop.meanHumidity) *
+      _parameterScore(
+            input.humidity,
+            crop.minHumidity,
+            crop.maxHumidity,
+            crop.meanHumidity,
+          ) *
           _weightHumidity,
       _parameterScore(input.ph, crop.minPH, crop.maxPH, crop.meanPH) *
           _weightPH,
-      _parameterScore(input.rainfall, crop.minRainfall, crop.maxRainfall,
-              crop.meanRainfall) *
+      _parameterScore(
+            input.rainfall,
+            crop.minRainfall,
+            crop.maxRainfall,
+            crop.meanRainfall,
+          ) *
           _weightRainfall,
     ];
 
@@ -87,7 +104,9 @@ class RecommendationService {
     final scoredCrops = <MapEntry<String, double>>[];
     for (final crop in crops) {
       final score = _computeCropScore(crop, input);
-      scoredCrops.add(MapEntry(crop.name.isNotEmpty ? crop.name : crop.id, score));
+      scoredCrops.add(
+        MapEntry(crop.name.isNotEmpty ? crop.name : crop.id, score),
+      );
     }
 
     // Sort descending by score
@@ -95,8 +114,7 @@ class RecommendationService {
 
     // Take top 3
     final top3 = scoredCrops.take(3).map((entry) {
-      final percentage =
-          double.parse((entry.value * 100).toStringAsFixed(1));
+      final percentage = double.parse((entry.value * 100).toStringAsFixed(1));
       return CropResult(
         cropName: entry.key,
         score: double.parse(entry.value.toStringAsFixed(4)),
@@ -131,5 +149,3 @@ class RecommendationService {
     return _repository.fetchHistory(userId);
   }
 }
-
-

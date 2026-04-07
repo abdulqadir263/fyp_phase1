@@ -141,4 +141,3 @@ class CropRecommendationController extends GetxController {
     super.onClose();
   }
 }
-

@@ -76,10 +76,7 @@ class WelcomeView extends GetView<AuthController> {
                       const SizedBox(height: 6),
                       Text(
                         'Let us start by selecting your role.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[500],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[500]),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 28),
@@ -98,4 +95,3 @@ class WelcomeView extends GetView<AuthController> {
     );
   }
 }
-

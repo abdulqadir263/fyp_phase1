@@ -33,7 +33,7 @@ class ForgotPasswordView extends GetView<AuthController> {
         ),
       ),
       body: SafeArea(
-        child: Container(
+        child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -42,10 +42,12 @@ class ForgotPasswordView extends GetView<AuthController> {
             ),
           ),
           child: ResponsiveHelper.tabletCenter(
-            child: Obx(() => AnimatedSwitcher(
-                  duration: AppConstants.mediumAnimation,
-                  child: _buildCurrentStep(),
-                )),
+            child: Obx(
+              () => AnimatedSwitcher(
+                duration: AppConstants.mediumAnimation,
+                child: _buildCurrentStep(),
+              ),
+            ),
           ),
         ),
       ),
@@ -90,13 +92,15 @@ class ForgotPasswordView extends GetView<AuthController> {
                 const SizedBox(height: 28),
                 _buildEmailFormSection(),
                 const SizedBox(height: 28),
-                Obx(() => CustomButton(
-                      text: 'send_reset_link'.tr,
-                      onPressed: () => controller.sendPasswordResetEmail(
-                        controller.forgotEmailController.text.trim(),
-                      ),
-                      isLoading: controller.isLoading.value,
-                    )),
+                Obx(
+                  () => CustomButton(
+                    text: 'send_reset_link'.tr,
+                    onPressed: () => controller.sendPasswordResetEmail(
+                      controller.forgotEmailController.text.trim(),
+                    ),
+                    isLoading: controller.isLoading.value,
+                  ),
+                ),
               ],
             ),
           ),
@@ -166,11 +170,7 @@ class ForgotPasswordView extends GetView<AuthController> {
             color: AppConstants.primaryGreen.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(18),
           ),
-          child: Icon(
-            icon,
-            size: 30,
-            color: AppConstants.primaryGreen,
-          ),
+          child: Icon(icon, size: 30, color: AppConstants.primaryGreen),
         ),
         const SizedBox(height: 20),
         Text(
@@ -280,7 +280,8 @@ class ForgotPasswordView extends GetView<AuthController> {
 
   Widget _buildResendSection() {
     return Obx(() {
-      final cooldown = controller.resendCooldown.value;  // renamed from resendTimer
+      final cooldown =
+          controller.resendCooldown.value; // renamed from resendTimer
       return Center(
         child: Column(
           children: [
@@ -299,8 +300,9 @@ class ForgotPasswordView extends GetView<AuthController> {
               )
             else
               TextButton(
-                onPressed: () => controller
-                    .sendPasswordResetEmail(controller.resetEmailSentTo.value),
+                onPressed: () => controller.sendPasswordResetEmail(
+                  controller.resetEmailSentTo.value,
+                ),
                 child: Text(
                   'resend_email'.tr,
                   style: TextStyle(

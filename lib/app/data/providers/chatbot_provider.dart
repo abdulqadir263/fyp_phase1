@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../modules/chatbot/models/message_model.dart';
@@ -17,13 +18,16 @@ class ChatbotProvider extends GetxService {
           .doc(message.id)
           .set(message.toJson());
     } catch (e) {
-      print('ChatbotProvider: Error saving message - $e');
+      debugPrint('ChatbotProvider: Error saving message - $e');
       rethrow;
     }
   }
 
   /// Get chat history for a user
-  Future<List<MessageModel>> getChatHistory(String userId, {int limit = 50}) async {
+  Future<List<MessageModel>> getChatHistory(
+    String userId, {
+    int limit = 50,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection(AppConstants.usersCollection)
@@ -37,7 +41,7 @@ class ChatbotProvider extends GetxService {
           .map((doc) => MessageModel.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('ChatbotProvider: Error getting chat history - $e');
+      debugPrint('ChatbotProvider: Error getting chat history - $e');
       return [];
     }
   }
@@ -57,7 +61,7 @@ class ChatbotProvider extends GetxService {
       }
       await batch.commit();
     } catch (e) {
-      print('ChatbotProvider: Error clearing chat history - $e');
+      debugPrint('ChatbotProvider: Error clearing chat history - $e');
       rethrow;
     }
   }
@@ -72,7 +76,7 @@ class ChatbotProvider extends GetxService {
           .doc(messageId)
           .delete();
     } catch (e) {
-      print('ChatbotProvider: Error deleting message - $e');
+      debugPrint('ChatbotProvider: Error deleting message - $e');
       rethrow;
     }
   }

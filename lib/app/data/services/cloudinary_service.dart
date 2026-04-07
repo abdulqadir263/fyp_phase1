@@ -10,10 +10,14 @@ class CloudinaryService extends GetxService {
   final String cloudName = 'dybx88bzo';
   final String apiKey = '928852253344424';
   final String apiSecret = 'tTV8Gr4qXhyPYBZHOU8PbfGq2zA';
-  final String uploadPreset = 'ml_default'; // Create this in your Cloudinary settings
+  final String uploadPreset =
+      'ml_default'; // Create this in your Cloudinary settings
 
   // Image upload karna using HTTP
-  Future<String?> uploadImage(File imageFile, {String folder = 'profile_images'}) async {
+  Future<String?> uploadImage(
+    File imageFile, {
+    String folder = 'profile_images',
+  }) async {
     try {
       // Create a multipart request
       final request = http.MultipartRequest(

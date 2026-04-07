@@ -60,49 +60,52 @@ class _PostDetailViewState extends State<PostDetailView> {
       appBar: _buildAppBar(),
       body: ResponsiveHelper.tabletCenter(
         child: Obx(() {
-        if (postController.isLoading.value &&
-            postController.currentPost.value == null) {
-          return const Center(
-            child:
-                CircularProgressIndicator(color: AppConstants.primaryGreen),
-          );
-        }
+          if (postController.isLoading.value &&
+              postController.currentPost.value == null) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppConstants.primaryGreen,
+              ),
+            );
+          }
 
-        final post = postController.currentPost.value;
-        if (post == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-                const SizedBox(height: 16),
-                Text('Post not found',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-              ],
-            ),
-          );
-        }
+          final post = postController.currentPost.value;
+          if (post == null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Post not found',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  ),
+                ],
+              ),
+            );
+          }
 
-        return Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPostContent(post),
-                    const Divider(height: 1),
-                    _buildCommentsSection(),
-                  ],
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPostContent(post),
+                      const Divider(height: 1),
+                      _buildCommentsSection(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            // Reply indicator bar + comment input
-            _buildReplyIndicator(),
-            _buildCommentInput(),
-          ],
-        );
-      }),
+              // Reply indicator bar + comment input
+              _buildReplyIndicator(),
+              _buildCommentInput(),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -164,11 +167,12 @@ class _PostDetailViewState extends State<PostDetailView> {
                   value: 'report',
                   child: Row(
                     children: [
-                      Icon(Icons.flag_outlined,
-                          color: Colors.orange, size: 20),
+                      Icon(Icons.flag_outlined, color: Colors.orange, size: 20),
                       SizedBox(width: 12),
-                      Text('Report Post',
-                          style: TextStyle(color: Colors.orange)),
+                      Text(
+                        'Report Post',
+                        style: TextStyle(color: Colors.orange),
+                      ),
                     ],
                   ),
                 ),
@@ -177,11 +181,9 @@ class _PostDetailViewState extends State<PostDetailView> {
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_outline,
-                          color: Colors.red, size: 20),
+                      Icon(Icons.delete_outline, color: Colors.red, size: 20),
                       SizedBox(width: 12),
-                      Text('Delete',
-                          style: TextStyle(color: Colors.red)),
+                      Text('Delete', style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
@@ -223,23 +225,33 @@ class _PostDetailViewState extends State<PostDetailView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(post.userName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 15)),
+                    Text(
+                      post.userName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
                     Row(
                       children: [
-                        Text(_formatTimeAgo(post.createdAt),
-                            style: TextStyle(
-                                color: Colors.grey[500], fontSize: 13)),
+                        Text(
+                          _formatTimeAgo(post.createdAt),
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 13,
+                          ),
+                        ),
                         // "Edited" label if post was updated
                         if (post.updatedAt != null) ...[
                           const SizedBox(width: 6),
-                          Text('· Edited',
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 12,
-                                fontStyle: FontStyle.italic,
-                              )),
+                          Text(
+                            '· Edited',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -247,29 +259,31 @@ class _PostDetailViewState extends State<PostDetailView> {
                 ),
               ),
               // Bookmark button
-              Obx(() => IconButton(
-                    icon: Icon(
-                      postController.isBookmarked(post.id)
-                          ? Icons.bookmark
-                          : Icons.bookmark_border,
-                      color: postController.isBookmarked(post.id)
-                          ? AppConstants.primaryGreen
-                          : Colors.grey,
-                    ),
-                    onPressed: () => postController.toggleBookmark(post.id),
-                  )),
+              Obx(
+                () => IconButton(
+                  icon: Icon(
+                    postController.isBookmarked(post.id)
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                    color: postController.isBookmarked(post.id)
+                        ? AppConstants.primaryGreen
+                        : Colors.grey,
+                  ),
+                  onPressed: () => postController.toggleBookmark(post.id),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           // Title
-          Text(post.title,
-              style: const TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            post.title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           // Category chip
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: AppConstants.primaryGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
@@ -277,9 +291,10 @@ class _PostDetailViewState extends State<PostDetailView> {
             child: Text(
               PostModel.getCategoryDisplayName(post.category),
               style: const TextStyle(
-                  color: AppConstants.primaryGreen,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600),
+                color: AppConstants.primaryGreen,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -289,32 +304,35 @@ class _PostDetailViewState extends State<PostDetailView> {
             const SizedBox(height: 16),
           ],
           // Description
-          Text(post.description,
-              style: TextStyle(
-                  fontSize: 15, color: Colors.grey[800], height: 1.6)),
+          Text(
+            post.description,
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey[800],
+              height: 1.6,
+            ),
+          ),
           const SizedBox(height: 16),
           // Stats row
-          Obx(() => Row(
-                children: [
-                  Icon(Icons.comment_outlined,
-                      size: 18, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${postController.currentPost.value?.commentsCount ?? 0} comments',
-                    style:
-                        TextStyle(color: Colors.grey[500], fontSize: 13),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(Icons.bookmark_border,
-                      size: 18, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${post.bookmarksCount} bookmarks',
-                    style:
-                        TextStyle(color: Colors.grey[500], fontSize: 13),
-                  ),
-                ],
-              )),
+          Obx(
+            () => Row(
+              children: [
+                Icon(Icons.comment_outlined, size: 18, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Text(
+                  '${postController.currentPost.value?.commentsCount ?? 0} comments',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                ),
+                const SizedBox(width: 16),
+                Icon(Icons.bookmark_border, size: 18, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Text(
+                  '${post.bookmarksCount} bookmarks',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -329,11 +347,14 @@ class _PostDetailViewState extends State<PostDetailView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Comments',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800])),
+          Text(
+            'Comments',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
           const SizedBox(height: 16),
           Obx(() {
             if (commentController.isLoadingComments.value) {
@@ -341,7 +362,8 @@ class _PostDetailViewState extends State<PostDetailView> {
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: CircularProgressIndicator(
-                      color: AppConstants.primaryGreen),
+                    color: AppConstants.primaryGreen,
+                  ),
                 ),
               );
             }
@@ -352,15 +374,21 @@ class _PostDetailViewState extends State<PostDetailView> {
                   padding: const EdgeInsets.all(32),
                   child: Column(
                     children: [
-                      Icon(Icons.chat_bubble_outline,
-                          size: 48, color: Colors.grey[400]),
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 48,
+                        color: Colors.grey[400],
+                      ),
                       const SizedBox(height: 8),
-                      Text('No comments yet',
-                          style: TextStyle(color: Colors.grey[500])),
+                      Text(
+                        'No comments yet',
+                        style: TextStyle(color: Colors.grey[500]),
+                      ),
                       const SizedBox(height: 4),
-                      Text('Be the first to comment!',
-                          style: TextStyle(
-                              color: Colors.grey[400], fontSize: 12)),
+                      Text(
+                        'Be the first to comment!',
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      ),
                     ],
                   ),
                 ),
@@ -404,12 +432,13 @@ class _PostDetailViewState extends State<PostDetailView> {
         ),
         // Reply thread (collapsible)
         Obx(() {
-          final replies =
-              commentController.repliesMap[comment.id] ?? [];
-          final isExpanded =
-              commentController.expandedReplies.contains(comment.id);
-          final isLoading =
-              commentController.loadingReplies.contains(comment.id);
+          final replies = commentController.repliesMap[comment.id] ?? [];
+          final isExpanded = commentController.expandedReplies.contains(
+            comment.id,
+          );
+          final isLoading = commentController.loadingReplies.contains(
+            comment.id,
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,22 +447,18 @@ class _PostDetailViewState extends State<PostDetailView> {
               Padding(
                 padding: const EdgeInsets.only(left: 48),
                 child: GestureDetector(
-                  onTap: () => commentController
-                      .toggleRepliesVisibility(comment.id),
+                  onTap: () =>
+                      commentController.toggleRepliesVisibility(comment.id),
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: isLoading
                         ? const SizedBox(
                             height: 16,
                             width: 16,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : Text(
-                            isExpanded
-                                ? 'Hide replies'
-                                : 'View replies',
+                            isExpanded ? 'Hide replies' : 'View replies',
                             style: TextStyle(
                               color: AppConstants.primaryGreen,
                               fontSize: 12,
@@ -445,22 +470,21 @@ class _PostDetailViewState extends State<PostDetailView> {
               ),
               // Render replies indented when expanded
               if (isExpanded && replies.isNotEmpty)
-                ...replies.map((reply) => CommentItem(
-                      comment: reply,
-                      onDelete: commentController
-                              .isCommentAuthor(reply.userId)
-                          ? () {
-                              final postId =
-                                  postController.currentPost.value?.id;
-                              if (postId != null) {
-                                commentController.deleteComment(
-                                    reply.id, postId);
-                              }
+                ...replies.map(
+                  (reply) => CommentItem(
+                    comment: reply,
+                    onDelete: commentController.isCommentAuthor(reply.userId)
+                        ? () {
+                            final postId = postController.currentPost.value?.id;
+                            if (postId != null) {
+                              commentController.deleteComment(reply.id, postId);
                             }
-                          : null,
-                      // No nested reply support (one level only)
-                      onReply: null,
-                    )),
+                          }
+                        : null,
+                    // No nested reply support (one level only)
+                    onReply: null,
+                  ),
+                ),
             ],
           );
         }),
@@ -475,17 +499,17 @@ class _PostDetailViewState extends State<PostDetailView> {
         return const SizedBox.shrink();
       }
       return Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         color: Colors.grey[200],
         child: Row(
           children: [
             Text(
               'Replying to ${commentController.replyingToUserName.value}',
               style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 13,
-                  fontStyle: FontStyle.italic),
+                color: Colors.grey[700],
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+              ),
             ),
             const Spacer(),
             GestureDetector(
@@ -500,8 +524,7 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Widget _buildCommentInput() {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -516,65 +539,72 @@ class _PostDetailViewState extends State<PostDetailView> {
         child: Row(
           children: [
             Expanded(
-              child: Obx(() => TextField(
-                    controller: commentController.commentController,
-                    decoration: InputDecoration(
-                      hintText: commentController
-                                  .replyingToCommentId.value !=
-                              null
-                          ? 'Write a reply...'
-                          : 'Write a comment...',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
+              child: Obx(
+                () => TextField(
+                  controller: commentController.commentController,
+                  decoration: InputDecoration(
+                    hintText:
+                        commentController.replyingToCommentId.value != null
+                        ? 'Write a reply...'
+                        : 'Write a comment...',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
                     ),
-                    maxLines: 3,
-                    minLines: 1,
-                  )),
-            ),
-            const SizedBox(width: 8),
-            Obx(() => Material(
-                  color: commentController.isAddingComment.value
-                      ? Colors.grey
-                      : AppConstants.primaryGreen,
-                  borderRadius: BorderRadius.circular(24),
-                  child: InkWell(
-                    onTap: commentController.isAddingComment.value
-                        ? null
-                        : () {
-                            final postId =
-                                postController.currentPost.value?.id;
-                            if (postId != null) {
-                              commentController.addComment(postId);
-                            }
-                          },
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      alignment: Alignment.center,
-                      child: commentController.isAddingComment.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.send_rounded,
-                              color: Colors.white, size: 20),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
                     ),
                   ),
-                )),
+                  maxLines: 3,
+                  minLines: 1,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Obx(
+              () => Material(
+                color: commentController.isAddingComment.value
+                    ? Colors.grey
+                    : AppConstants.primaryGreen,
+                borderRadius: BorderRadius.circular(24),
+                child: InkWell(
+                  onTap: commentController.isAddingComment.value
+                      ? null
+                      : () {
+                          final postId = postController.currentPost.value?.id;
+                          if (postId != null) {
+                            commentController.addComment(postId);
+                          }
+                        },
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    alignment: Alignment.center,
+                    child: commentController.isAddingComment.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.send_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

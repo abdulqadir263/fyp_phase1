@@ -13,7 +13,7 @@ class LoginView extends GetView<AuthController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FB),
       body: SafeArea(
-        child: Container(
+        child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -26,7 +26,10 @@ class LoginView extends GetView<AuthController> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
                   child: Column(
                     children: [
                       _buildHeaderSection(),
@@ -63,11 +66,7 @@ class LoginView extends GetView<AuthController> {
               ),
             ],
           ),
-          child: Icon(
-            Icons.agriculture,
-            size: 40,
-            color: Colors.white,
-          ),
+          child: Icon(Icons.agriculture, size: 40, color: Colors.white),
         ),
         const SizedBox(height: 20),
 
@@ -84,9 +83,7 @@ class LoginView extends GetView<AuthController> {
         // App Subtitle
         Text(
           'app_subtitle'.tr,
-          style: Get.textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: Get.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 6),
@@ -103,127 +100,131 @@ class LoginView extends GetView<AuthController> {
   }
 
   Widget _buildFormSection() {
-    return Obx(() => AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      child: Container(
-        key: ValueKey(controller.isLogin.value ? 'login' : 'signup'),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 26,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Form Title
-            Text(
-              controller.isLogin.value ? 'welcome_back'.tr : 'create_account'.tr,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+    return Obx(
+      () => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        child: Container(
+          key: ValueKey(controller.isLogin.value ? 'login' : 'signup'),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 26,
+                offset: const Offset(0, 12),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              controller.isLogin.value
-                  ? 'sign_in_to_continue'.tr
-                  : 'join_farming_community'.tr,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 22),
-
-            // Name Field (Signup Only)
-            if (!controller.isLogin.value)
-              CustomTextField(
-                controller: controller.nameController,
-                labelText: 'full_name'.tr,
-                hintText: 'enter_full_name'.tr,
-                prefixIcon: Icons.person_outline,
-              ),
-
-            if (!controller.isLogin.value) const SizedBox(height: 16),
-
-            // Email Field
-            CustomTextField(
-              controller: controller.emailController,
-              labelText: 'email_address'.tr,
-              hintText: 'enter_email'.tr,
-              prefixIcon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-
-            // Phone Field (Signup Only)
-            if (!controller.isLogin.value)
-              CustomTextField(
-                controller: controller.phoneController,
-                labelText: 'phone_number'.tr,
-                hintText: 'enter_phone'.tr,
-                prefixIcon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-
-            if (!controller.isLogin.value) const SizedBox(height: 16),
-
-            // Password Field
-            CustomTextField(
-              controller: controller.passwordController,
-              labelText: 'password'.tr,
-              hintText: 'enter_password'.tr,
-              prefixIcon: Icons.lock_outline,
-              obscureText: !controller.isPasswordVisible.value,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  controller.isPasswordVisible.value
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  size: 20,
-                  color: Colors.grey[600],
+            ],
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Form Title
+              Text(
+                controller.isLogin.value
+                    ? 'welcome_back'.tr
+                    : 'create_account'.tr,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
-                onPressed: controller.togglePasswordVisibility,
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 4),
+              Text(
+                controller.isLogin.value
+                    ? 'sign_in_to_continue'.tr
+                    : 'join_farming_community'.tr,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 22),
 
-            // Confirm Password Field (Signup Only)
-            if (!controller.isLogin.value)
+              // Name Field (Signup Only)
+              if (!controller.isLogin.value)
+                CustomTextField(
+                  controller: controller.nameController,
+                  labelText: 'full_name'.tr,
+                  hintText: 'enter_full_name'.tr,
+                  prefixIcon: Icons.person_outline,
+                ),
+
+              if (!controller.isLogin.value) const SizedBox(height: 16),
+
+              // Email Field
               CustomTextField(
-                controller: controller.confirmPasswordController,
-                labelText: 'confirm_password'.tr,
-                hintText: 'reenter_password'.tr,
+                controller: controller.emailController,
+                labelText: 'email_address'.tr,
+                hintText: 'enter_email'.tr,
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+
+              // Phone Field (Signup Only)
+              if (!controller.isLogin.value)
+                CustomTextField(
+                  controller: controller.phoneController,
+                  labelText: 'phone_number'.tr,
+                  hintText: 'enter_phone'.tr,
+                  prefixIcon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                ),
+
+              if (!controller.isLogin.value) const SizedBox(height: 16),
+
+              // Password Field
+              CustomTextField(
+                controller: controller.passwordController,
+                labelText: 'password'.tr,
+                hintText: 'enter_password'.tr,
                 prefixIcon: Icons.lock_outline,
-                obscureText: !controller.isConfirmPasswordVisible.value,
+                obscureText: !controller.isPasswordVisible.value,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    controller.isConfirmPasswordVisible.value
+                    controller.isPasswordVisible.value
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
                     size: 20,
                     color: Colors.grey[600],
                   ),
-                  onPressed: controller.toggleConfirmPasswordVisibility,
+                  onPressed: controller.togglePasswordVisibility,
                 ),
               ),
+              const SizedBox(height: 16),
 
-            // Role selection removed from signup - now handled on separate RoleSelectionView screen
-          ],
+              // Confirm Password Field (Signup Only)
+              if (!controller.isLogin.value)
+                CustomTextField(
+                  controller: controller.confirmPasswordController,
+                  labelText: 'confirm_password'.tr,
+                  hintText: 'reenter_password'.tr,
+                  prefixIcon: Icons.lock_outline,
+                  obscureText: !controller.isConfirmPasswordVisible.value,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.isConfirmPasswordVisible.value
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      size: 20,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: controller.toggleConfirmPasswordVisibility,
+                  ),
+                ),
+
+              // Role selection removed from signup - now handled on separate RoleSelectionView screen
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildActionButtons() {
@@ -243,67 +244,72 @@ class LoginView extends GetView<AuthController> {
       ),
       child: Column(
         children: [
-        // Submit Button
-        Obx(() => CustomButton(
-          text: controller.isLogin.value ? 'sign_in'.tr : 'create_account'.tr,
-          onPressed: controller.submit,
-          isLoading: controller.isLoading.value,
-        )),
-
-        const SizedBox(height: 16),
-
-        // Forgot Password (Login Only)
-        Obx(() => controller.isLogin.value
-            ? GestureDetector(
-          onTap: controller.navigateToForgotPassword,
-          child: Text(
-            'forgot_password'.tr,
-            style: TextStyle(
-              color: Get.theme.primaryColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+          // Submit Button
+          Obx(
+            () => CustomButton(
+              text: controller.isLogin.value
+                  ? 'sign_in'.tr
+                  : 'create_account'.tr,
+              onPressed: controller.submit,
+              isLoading: controller.isLoading.value,
             ),
           ),
-        )
-            : const SizedBox.shrink()),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-        // Toggle Auth Mode
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7F9FC),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey[200]!),
+          // Forgot Password (Login Only)
+          Obx(
+            () => controller.isLogin.value
+                ? GestureDetector(
+                    onTap: controller.navigateToForgotPassword,
+                    child: Text(
+                      'forgot_password'.tr,
+                      style: TextStyle(
+                        color: Get.theme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                controller.isLogin.value
-                    ? 'dont_have_account'.tr
-                    : 'already_have_account'.tr,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: controller.toggleAuthMode,
-                child: Text(
-                  controller.isLogin.value ? 'sign_up'.tr : 'sign_in'.tr,
-                  style: TextStyle(
-                    color: Get.theme.primaryColor,
-                    fontWeight: FontWeight.bold,
+
+          const SizedBox(height: 24),
+
+          // Toggle Auth Mode
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F9FC),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  controller.isLogin.value
+                      ? 'dont_have_account'.tr
+                      : 'already_have_account'.tr,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: controller.toggleAuthMode,
+                  child: Text(
+                    controller.isLogin.value ? 'sign_up'.tr : 'sign_in'.tr,
+                    style: TextStyle(
+                      color: Get.theme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
-
 }

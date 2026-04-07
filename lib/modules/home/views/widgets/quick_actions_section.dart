@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_helper.dart';
 import '../../controllers/home_controller.dart';
 
@@ -28,10 +27,7 @@ class QuickActionsSection extends GetView<HomeController> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'What would you like to do today?',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
         ),
         const SizedBox(height: 16),
@@ -112,7 +108,7 @@ class QuickActionsSection extends GetView<HomeController> {
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       child: InkWell(
         onTap: action.onTap,
         borderRadius: BorderRadius.circular(12),
@@ -121,7 +117,7 @@ class QuickActionsSection extends GetView<HomeController> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: action.color.withOpacity(0.2),
+              color: action.color.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -131,14 +127,10 @@ class QuickActionsSection extends GetView<HomeController> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: action.color.withOpacity(0.1),
+                  color: action.color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  action.icon,
-                  color: action.color,
-                  size: 24,
-                ),
+                child: Icon(action.icon, color: action.color, size: 24),
               ),
               const SizedBox(height: 8),
               Text(

@@ -103,5 +103,3 @@ class CropModel {
     return 0.0;
   }
 }
-
-

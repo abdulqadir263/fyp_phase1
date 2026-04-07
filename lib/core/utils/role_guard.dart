@@ -43,22 +43,9 @@ class RoleGuard {
       cropTracker,
       cropRecommendation,
     },
-    'expert': {
-      appointments,
-      community,
-      chatbot,
-      profile,
-    },
-    'company': {
-      marketplace,
-      sellerPanel,
-      chatbot,
-      profile,
-    },
-    'guest': {
-      weather,
-      chatbot,
-    },
+    'expert': {appointments, community, chatbot, profile},
+    'company': {marketplace, sellerPanel, chatbot, profile},
+    'guest': {weather, chatbot},
   };
 
   // ═══════════════════════════════════════════
@@ -184,7 +171,9 @@ class RoleGuard {
 
     if (currentUserCanAccess(module)) return true;
 
-    debugPrint('[RoleGuard] ❌ $currentUserType blocked from $route (module: $module)');
+    debugPrint(
+      '[RoleGuard] ❌ $currentUserType blocked from $route (module: $module)',
+    );
     AppSnackbar.warning('You do not have access to this feature.');
     Get.offAllNamed(currentDefaultRoute);
     return false;
@@ -206,7 +195,9 @@ class RoleGuard {
     }
     if (allowed.contains(weather)) features.add('weather');
     if (allowed.contains(cropTracker)) features.add('crop_tracker');
-    if (allowed.contains(cropRecommendation)) features.add('crop_recommendation');
+    if (allowed.contains(cropRecommendation)) {
+      features.add('crop_recommendation');
+    }
     if (allowed.contains(community)) features.add('community');
     if (allowed.contains(chatbot)) features.add('chatbot');
 
@@ -237,5 +228,3 @@ class RoleGuard {
     return tabs;
   }
 }
-
-

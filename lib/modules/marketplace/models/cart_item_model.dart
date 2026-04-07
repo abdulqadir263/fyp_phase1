@@ -37,10 +37,7 @@ class CartItemModel {
 
   /// What gets stored in Firestore cart subcollection (minimal)
   Map<String, dynamic> toCartDocument() {
-    return {
-      'productId': productId,
-      'quantity': quantity,
-    };
+    return {'productId': productId, 'quantity': quantity};
   }
 
   /// Full map for local state / order items
@@ -69,4 +66,3 @@ class CartItemModel {
     );
   }
 }
-

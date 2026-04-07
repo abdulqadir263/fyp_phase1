@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -123,8 +122,9 @@ class PostController extends GetxController {
     if (currentUserId == null || currentUserId!.isEmpty) return;
 
     try {
-      final bookmarked =
-          await _communityService.getBookmarkedPosts(currentUserId!);
+      final bookmarked = await _communityService.getBookmarkedPosts(
+        currentUserId!,
+      );
       if (_isDisposed) return;
       bookmarkedPostIds.value = bookmarked.map((p) => p.id).toList();
       bookmarkedPostsList.value = bookmarked;
@@ -140,8 +140,9 @@ class PostController extends GetxController {
 
     try {
       isLoadingBookmarks.value = true;
-      final bookmarked =
-          await _communityService.getBookmarkedPosts(currentUserId!);
+      final bookmarked = await _communityService.getBookmarkedPosts(
+        currentUserId!,
+      );
       if (_isDisposed) return;
       bookmarkedPostsList.value = bookmarked;
       bookmarkedPostIds.value = bookmarked.map((p) => p.id).toList();
@@ -293,17 +294,20 @@ class PostController extends GetxController {
     try {
       final results = await _communityService.searchPosts(
         searchQuery.value,
-        category:
-            selectedCategory.value == 'all' ? null : selectedCategory.value,
+        category: selectedCategory.value == 'all'
+            ? null
+            : selectedCategory.value,
       );
       if (_isDisposed) return;
 
       // Client-side: also match description for broader results
       final lowerQuery = searchQuery.value.toLowerCase();
       final filtered = results
-          .where((p) =>
-              p.title.toLowerCase().contains(lowerQuery) ||
-              p.description.toLowerCase().contains(lowerQuery))
+          .where(
+            (p) =>
+                p.title.toLowerCase().contains(lowerQuery) ||
+                p.description.toLowerCase().contains(lowerQuery),
+          )
           .toList();
 
       searchResults.assignAll(filtered);
@@ -338,8 +342,10 @@ class PostController extends GetxController {
     _bookmarkInProgress.add(postId);
 
     try {
-      final success =
-          await _communityService.toggleBookmark(postId, currentUserId!);
+      final success = await _communityService.toggleBookmark(
+        postId,
+        currentUserId!,
+      );
       if (_isDisposed) return;
 
       if (success) {
@@ -632,8 +638,10 @@ class PostController extends GetxController {
   void updateCommentCount(int delta) {
     if (currentPost.value != null) {
       currentPost.value = currentPost.value!.copyWith(
-        commentsCount:
-            (currentPost.value!.commentsCount + delta).clamp(0, 999999),
+        commentsCount: (currentPost.value!.commentsCount + delta).clamp(
+          0,
+          999999,
+        ),
       );
     }
   }

@@ -17,34 +17,32 @@ class RecommendationHistoryScreen
     controller.loadHistory();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('recommendation_history'.tr),
-      ),
+      appBar: AppBar(title: Text('recommendation_history'.tr)),
       body: ResponsiveHelper.tabletCenter(
         child: Obx(() {
-        if (controller.isHistoryLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primaryGreen),
+          if (controller.isHistoryLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
+          }
+
+          if (controller.history.isEmpty) {
+            return _buildEmptyState(context);
+          }
+
+          return RefreshIndicator(
+            onRefresh: controller.loadHistory,
+            color: AppColors.primaryGreen,
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: controller.history.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                return _buildHistoryCard(context, controller.history[index]);
+              },
+            ),
           );
-        }
-
-        if (controller.history.isEmpty) {
-          return _buildEmptyState(context);
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.loadHistory,
-          color: AppColors.primaryGreen,
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.history.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              return _buildHistoryCard(context, controller.history[index]);
-            },
-          ),
-        );
-      }),
+        }),
       ),
     );
   }
@@ -59,16 +57,16 @@ class RecommendationHistoryScreen
           Text(
             'No History Yet',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Your crop recommendations will appear here.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade400,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade400),
           ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
@@ -90,16 +88,19 @@ class RecommendationHistoryScreen
   }
 
   Widget _buildHistoryCard(
-      BuildContext context, RecommendationModel recommendation) {
-    final dateStr =
-        DateFormat('MMM dd, yyyy • hh:mm a').format(recommendation.createdAt);
+    BuildContext context,
+    RecommendationModel recommendation,
+  ) {
+    final dateStr = DateFormat(
+      'MMM dd, yyyy • hh:mm a',
+    ).format(recommendation.createdAt);
     final topCrop = recommendation.topCropName;
     final topPercent = recommendation.topSuitability;
     final otherCrops = recommendation.results.length > 1
         ? recommendation.results
-            .skip(1)
-            .map((r) => _capitalize(r.cropName))
-            .join(', ')
+              .skip(1)
+              .map((r) => _capitalize(r.cropName))
+              .join(', ')
         : '';
 
     return Card(
@@ -139,9 +140,7 @@ class RecommendationHistoryScreen
                         Expanded(
                           child: Text(
                             _capitalize(topCrop),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
+                            style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -149,9 +148,13 @@ class RecommendationHistoryScreen
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryGreen.withValues(alpha: 0.1),
+                            color: AppColors.primaryGreen.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -181,8 +184,11 @@ class RecommendationHistoryScreen
                     // Date
                     Row(
                       children: [
-                        Icon(Icons.access_time_rounded,
-                            size: 13, color: Colors.grey.shade400),
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 13,
+                          color: Colors.grey.shade400,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           dateStr,
@@ -211,6 +217,3 @@ class RecommendationHistoryScreen
     return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 }
-
-
-

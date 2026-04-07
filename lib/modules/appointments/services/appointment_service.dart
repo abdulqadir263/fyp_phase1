@@ -32,14 +32,18 @@ class AppointmentService extends GetxService {
           .where('isProfileComplete', isEqualTo: true)
           .get();
 
-      debugPrint('[AppointmentService] Primary query returned ${snapshot.docs.length} docs');
+      debugPrint(
+        '[AppointmentService] Primary query returned ${snapshot.docs.length} docs',
+      );
 
       final experts = _parseUserDocs(snapshot.docs);
 
       // If primary query returned zero results, try fallback
       // (experts may exist without isProfileComplete field set)
       if (experts.isEmpty) {
-        debugPrint('[AppointmentService] Primary query empty, trying fallback...');
+        debugPrint(
+          '[AppointmentService] Primary query empty, trying fallback...',
+        );
         return _fetchExpertsFallback();
       }
 
@@ -58,8 +62,10 @@ class AppointmentService extends GetxService {
         // Fallback: query by userType only, filter in memory
         return _fetchExpertsFallback();
       }
-      debugPrint('[AppointmentService] FirebaseException fetching experts: '
-          '${e.code} - ${e.message}');
+      debugPrint(
+        '[AppointmentService] FirebaseException fetching experts: '
+        '${e.code} - ${e.message}',
+      );
       // Even on other Firebase errors, try the simpler fallback
       return _fetchExpertsFallback();
     } catch (e) {
@@ -84,7 +90,9 @@ class AppointmentService extends GetxService {
           .where('userType', isEqualTo: 'expert')
           .get();
 
-      debugPrint('[AppointmentService] Fallback query returned ${snapshot.docs.length} docs');
+      debugPrint(
+        '[AppointmentService] Fallback query returned ${snapshot.docs.length} docs',
+      );
 
       // Parse docs safely, skip invalid ones
       final allExperts = _parseUserDocs(snapshot.docs);
@@ -103,8 +111,10 @@ class AppointmentService extends GetxService {
         return false;
       }).toList();
 
-      debugPrint('[AppointmentService] Fallback found ${experts.length} valid experts '
-          'out of ${allExperts.length} total');
+      debugPrint(
+        '[AppointmentService] Fallback found ${experts.length} valid experts '
+        'out of ${allExperts.length} total',
+      );
       return experts;
     } catch (e) {
       debugPrint('[AppointmentService] Fallback error fetching experts: $e');
@@ -122,8 +132,10 @@ class AppointmentService extends GetxService {
       } catch (e) {
         // Log the bad document and skip it — don't let one bad doc
         // prevent all experts from loading
-        debugPrint('⚠️ [AppointmentService] Failed to parse user doc '
-            '${doc.id}: $e');
+        debugPrint(
+          '⚠️ [AppointmentService] Failed to parse user doc '
+          '${doc.id}: $e',
+        );
       }
     }
     return users;
@@ -177,8 +189,10 @@ class AppointmentService extends GetxService {
         try {
           visits.add(FieldVisitModel.fromDocument(doc));
         } catch (e) {
-          debugPrint('⚠️ [AppointmentService] Failed to parse visit doc '
-              '${doc.id}: $e');
+          debugPrint(
+            '⚠️ [AppointmentService] Failed to parse visit doc '
+            '${doc.id}: $e',
+          );
         }
       }
 
@@ -196,8 +210,10 @@ class AppointmentService extends GetxService {
         // Return empty list — do NOT crash the UI
         return [];
       }
-      debugPrint('[AppointmentService] FirebaseException fetching farmer visits: '
-          '${e.code} - ${e.message}');
+      debugPrint(
+        '[AppointmentService] FirebaseException fetching farmer visits: '
+        '${e.code} - ${e.message}',
+      );
       rethrow;
     } catch (e) {
       debugPrint('[AppointmentService] Error fetching farmer visits: $e');
@@ -214,8 +230,9 @@ class AppointmentService extends GetxService {
   }) async {
     try {
       debugPrint(
-          '[AppointmentService] Fetching visits for expert: $expertId, '
-          'statusFilter: $statusFilter');
+        '[AppointmentService] Fetching visits for expert: $expertId, '
+        'statusFilter: $statusFilter',
+      );
 
       Query query = _visitsCollection.where('expertId', isEqualTo: expertId);
 
@@ -232,8 +249,10 @@ class AppointmentService extends GetxService {
         try {
           visits.add(FieldVisitModel.fromDocument(doc));
         } catch (e) {
-          debugPrint('⚠️ [AppointmentService] Failed to parse visit doc '
-              '${doc.id}: $e');
+          debugPrint(
+            '⚠️ [AppointmentService] Failed to parse visit doc '
+            '${doc.id}: $e',
+          );
         }
       }
 
@@ -251,8 +270,10 @@ class AppointmentService extends GetxService {
         // Return empty list — do NOT crash the UI
         return [];
       }
-      debugPrint('[AppointmentService] FirebaseException fetching expert visits: '
-          '${e.code} - ${e.message}');
+      debugPrint(
+        '[AppointmentService] FirebaseException fetching expert visits: '
+        '${e.code} - ${e.message}',
+      );
       rethrow;
     } catch (e) {
       debugPrint('[AppointmentService] Error fetching expert visits: $e');
@@ -287,12 +308,9 @@ class AppointmentService extends GetxService {
     String? expertNotes,
   }) async {
     try {
-      debugPrint(
-          '[AppointmentService] Updating visit $visitId → $newStatus');
+      debugPrint('[AppointmentService] Updating visit $visitId → $newStatus');
 
-      final Map<String, dynamic> updateData = {
-        'status': newStatus,
-      };
+      final Map<String, dynamic> updateData = {'status': newStatus};
 
       if (confirmedDate != null) {
         updateData['confirmedDate'] = Timestamp.fromDate(confirmedDate);
@@ -332,4 +350,3 @@ class AppointmentService extends GetxService {
     }
   }
 }
-

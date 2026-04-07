@@ -11,11 +11,7 @@ class ImageGrid extends StatelessWidget {
   final List<String> imageUrls;
   final double height;
 
-  const ImageGrid({
-    super.key,
-    required this.imageUrls,
-    this.height = 220,
-  });
+  const ImageGrid({super.key, required this.imageUrls, this.height = 220});
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +76,7 @@ class ImageGrid extends StatelessWidget {
                   memCacheWidth: 440,
                   fadeInDuration: const Duration(milliseconds: 200),
                   fadeOutDuration: const Duration(milliseconds: 200),
-                  placeholder: (_, __) =>
-                      Container(color: Colors.grey[200]),
+                  placeholder: (_, __) => Container(color: Colors.grey[200]),
                   errorWidget: (_, __, ___) => Container(
                     color: Colors.grey[200],
                     child: const Icon(Icons.broken_image, color: Colors.grey),
@@ -109,8 +104,10 @@ class ImageGrid extends StatelessWidget {
                           Container(color: Colors.grey[200]),
                       errorWidget: (_, __, ___) => Container(
                         color: Colors.grey[200],
-                        child: const Icon(Icons.broken_image,
-                            color: Colors.grey),
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                     if (imageUrls.length > 2)
@@ -139,10 +136,7 @@ class ImageGrid extends StatelessWidget {
   /// Opens a full-screen PageView image viewer
   void _openFullScreen(int initialIndex) {
     Get.dialog(
-      _DetailFullScreenViewer(
-        imageUrls: imageUrls,
-        initialIndex: initialIndex,
-      ),
+      _DetailFullScreenViewer(imageUrls: imageUrls, initialIndex: initialIndex),
       barrierColor: Colors.black87,
     );
   }
@@ -201,8 +195,7 @@ class _DetailFullScreenViewerState extends State<_DetailFullScreenViewer> {
                     imageUrl: widget.imageUrls[i],
                     fit: BoxFit.contain,
                     placeholder: (_, __) => const Center(
-                      child:
-                          CircularProgressIndicator(color: Colors.white),
+                      child: CircularProgressIndicator(color: Colors.white),
                     ),
                     errorWidget: (_, __, ___) => const Icon(
                       Icons.broken_image,
@@ -218,8 +211,7 @@ class _DetailFullScreenViewerState extends State<_DetailFullScreenViewer> {
             top: 40,
             right: 16,
             child: IconButton(
-              icon:
-                  const Icon(Icons.close, color: Colors.white, size: 28),
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
               onPressed: () => Get.back(),
             ),
           ),
@@ -231,15 +223,16 @@ class _DetailFullScreenViewerState extends State<_DetailFullScreenViewer> {
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
                     '${_page + 1} / ${widget.imageUrls.length}',
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 14),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
               ),

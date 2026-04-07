@@ -82,16 +82,20 @@ class CommunityView extends GetView<PostController> {
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           prefixIcon: const Icon(Icons.search, size: 22),
           // Show clear button only when search is active
-          suffixIcon: Obx(() => controller.isSearchActive.value
-              ? IconButton(
-                  icon: const Icon(Icons.close, size: 20),
-                  onPressed: controller.clearSearch,
-                )
-              : const SizedBox.shrink()),
+          suffixIcon: Obx(
+            () => controller.isSearchActive.value
+                ? IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: controller.clearSearch,
+                  )
+                : const SizedBox.shrink(),
+          ),
           filled: true,
           fillColor: Colors.white,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(24),
             borderSide: BorderSide.none,
@@ -102,8 +106,10 @@ class CommunityView extends GetView<PostController> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(24),
-            borderSide:
-                const BorderSide(color: AppConstants.primaryGreen, width: 1.5),
+            borderSide: const BorderSide(
+              color: AppConstants.primaryGreen,
+              width: 1.5,
+            ),
           ),
         ),
         onSubmitted: controller.performSearch,
@@ -136,21 +142,23 @@ class CommunityView extends GetView<PostController> {
           itemCount: controller.searchResults.length,
           itemBuilder: (context, index) {
             final post = controller.searchResults[index];
-            return Obx(() => PostCard(
-                  post: post,
-                  onTap: () => controller.navigateToPostDetail(post),
-                  onBookmark: () => controller.toggleBookmark(post.id),
-                  isBookmarked: controller.isBookmarked(post.id),
-                  onDelete: controller.isPostAuthor(post.userId)
-                      ? () => controller.deletePost(post.id)
-                      : null,
-                  onEdit: controller.isPostAuthor(post.userId)
-                      ? () => Get.toNamed('/community/create', arguments: post)
-                      : null,
-                  onReport: !controller.isPostAuthor(post.userId)
-                      ? () => controller.reportPost(post.id)
-                      : null,
-                ));
+            return Obx(
+              () => PostCard(
+                post: post,
+                onTap: () => controller.navigateToPostDetail(post),
+                onBookmark: () => controller.toggleBookmark(post.id),
+                isBookmarked: controller.isBookmarked(post.id),
+                onDelete: controller.isPostAuthor(post.userId)
+                    ? () => controller.deletePost(post.id)
+                    : null,
+                onEdit: controller.isPostAuthor(post.userId)
+                    ? () => Get.toNamed('/community/create', arguments: post)
+                    : null,
+                onReport: !controller.isPostAuthor(post.userId)
+                    ? () => controller.reportPost(post.id)
+                    : null,
+              ),
+            );
           },
         );
       }
@@ -179,35 +187,39 @@ class CommunityView extends GetView<PostController> {
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Center(
-                child: Obx(() => controller.isLoadingMore.value
-                    ? const CircularProgressIndicator(
-                        color: AppConstants.primaryGreen,
-                      )
-                    : const SizedBox.shrink()),
+                child: Obx(
+                  () => controller.isLoadingMore.value
+                      ? const CircularProgressIndicator(
+                          color: AppConstants.primaryGreen,
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ),
             );
           }
 
           // Build individual post card
           final post = controller.posts[index];
-          return Obx(() => PostCard(
-                post: post,
-                onTap: () => controller.navigateToPostDetail(post),
-                onBookmark: () => controller.toggleBookmark(post.id),
-                isBookmarked: controller.isBookmarked(post.id),
-                // Only show delete option for post author
-                onDelete: controller.isPostAuthor(post.userId)
-                    ? () => controller.deletePost(post.id)
-                    : null,
-                // Only show edit option for post author
-                onEdit: controller.isPostAuthor(post.userId)
-                    ? () => Get.toNamed('/community/create', arguments: post)
-                    : null,
-                // Show report option for non-authors
-                onReport: !controller.isPostAuthor(post.userId)
-                    ? () => controller.reportPost(post.id)
-                    : null,
-              ));
+          return Obx(
+            () => PostCard(
+              post: post,
+              onTap: () => controller.navigateToPostDetail(post),
+              onBookmark: () => controller.toggleBookmark(post.id),
+              isBookmarked: controller.isBookmarked(post.id),
+              // Only show delete option for post author
+              onDelete: controller.isPostAuthor(post.userId)
+                  ? () => controller.deletePost(post.id)
+                  : null,
+              // Only show edit option for post author
+              onEdit: controller.isPostAuthor(post.userId)
+                  ? () => Get.toNamed('/community/create', arguments: post)
+                  : null,
+              // Show report option for non-authors
+              onReport: !controller.isPostAuthor(post.userId)
+                  ? () => controller.reportPost(post.id)
+                  : null,
+            ),
+          );
         },
       );
     });
@@ -221,11 +233,7 @@ class CommunityView extends GetView<PostController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.article_outlined,
-              size: 80,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.article_outlined, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No posts yet',
@@ -239,10 +247,7 @@ class CommunityView extends GetView<PostController> {
             Text(
               'Be the first to share something with the community!',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(

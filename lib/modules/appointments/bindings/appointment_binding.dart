@@ -31,4 +31,3 @@ class AppointmentBinding extends Bindings {
     }
   }
 }
-

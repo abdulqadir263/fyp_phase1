@@ -11,4 +11,3 @@ class OnboardingBinding extends Bindings {
     }
   }
 }
-

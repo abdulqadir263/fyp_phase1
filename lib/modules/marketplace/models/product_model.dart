@@ -97,4 +97,3 @@ class ProductModel {
   String get categoryLabel =>
       '${category[0].toUpperCase()}${category.substring(1)}';
 }
-

@@ -69,17 +69,20 @@ const Map<String, String> enUs = {
   // ======================== FORGOT PASSWORD ========================
   'reset_password': 'Reset Password',
   'reset_your_password': 'Reset Your Password',
-  'enter_email_reset': 'Enter your email address and we will send you a link to reset your password.',
+  'enter_email_reset':
+      'Enter your email address and we will send you a link to reset your password.',
   'send_reset_link': 'Send Reset Link',
   'check_your_email': 'Check Your Email',
   'email_sent': 'Email Sent!',
-  'check_inbox_spam': 'Please check your inbox and spam folder for the password reset link. Click the link in the email to reset your password.',
+  'check_inbox_spam':
+      'Please check your inbox and spam folder for the password reset link. Click the link in the email to reset your password.',
   'back_to_login': 'Back to Login',
   'didnt_receive_email': "Didn't receive the email?",
   'resend_in': 'Resend in',
   'seconds': 'seconds',
   'resend_email': 'Resend Email',
-  'same_email_info': 'Make sure you enter the same email address you used when creating your account.',
+  'same_email_info':
+      'Make sure you enter the same email address you used when creating your account.',
 
   // ======================== ROLE SELECTION ========================
   'select_your_role': 'Select Your Role',
@@ -147,8 +150,10 @@ const Map<String, String> enUs = {
   'good_afternoon': 'Good Afternoon',
   'good_evening': 'Good Evening',
   'guest_user': 'Guest User',
-  'browsing_as_guest': 'You are browsing as a guest. Some features may be limited.',
-  'profile_incomplete': 'Your profile is incomplete. Please complete your profile to access all features.',
+  'browsing_as_guest':
+      'You are browsing as a guest. Some features may be limited.',
+  'profile_incomplete':
+      'Your profile is incomplete. Please complete your profile to access all features.',
   'complete_now': 'Complete Now',
   'quick_actions': 'Quick Actions',
   'what_to_do_today': 'What would you like to do today?',
@@ -298,4 +303,3 @@ const Map<String, String> enUs = {
   'browse_posts': 'Browse Posts',
   'choose_from_gallery': 'Choose from Gallery',
 };
-

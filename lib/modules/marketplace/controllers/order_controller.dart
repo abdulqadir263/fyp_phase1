@@ -54,4 +54,3 @@ class OrderController extends GetxController {
     return _service.streamOrder(id);
   }
 }
-

@@ -76,10 +76,11 @@ class ExpertDashboardController extends GetxController {
       completedVisits.assignAll(results[2]);
 
       debugPrint(
-          '[ExpertDashboardController] Loaded: '
-          '${pendingVisits.length} pending, '
-          '${upcomingVisits.length} upcoming, '
-          '${completedVisits.length} completed');
+        '[ExpertDashboardController] Loaded: '
+        '${pendingVisits.length} pending, '
+        '${upcomingVisits.length} upcoming, '
+        '${completedVisits.length} completed',
+      );
     } catch (e) {
       debugPrint('[ExpertDashboardController] Error loading visits: $e');
       AppSnackbar.error('Unable to load visits. Please try again.');
@@ -132,10 +133,7 @@ class ExpertDashboardController extends GetxController {
     if (!_ensureExpert()) return;
     try {
       isUpdating.value = true;
-      await _service.updateVisitStatus(
-        visit.id,
-        newStatus: 'rejected',
-      );
+      await _service.updateVisitStatus(visit.id, newStatus: 'rejected');
       AppSnackbar.success('Visit request rejected.');
       await loadAllVisits();
     } catch (e) {
@@ -204,7 +202,3 @@ class ExpertDashboardController extends GetxController {
     super.onClose();
   }
 }
-
-
-
-

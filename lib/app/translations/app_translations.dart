@@ -6,9 +6,5 @@ import 'ur_pk.dart';
 /// Used by GetMaterialApp's `translations` parameter.
 class AppTranslations extends Translations {
   @override
-  Map<String, Map<String, String>> get keys => {
-        'en': enUs,
-        'ur': urPk,
-      };
+  Map<String, Map<String, String>> get keys => {'en': enUs, 'ur': urPk};
 }
-

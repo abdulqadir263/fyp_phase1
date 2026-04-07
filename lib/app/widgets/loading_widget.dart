@@ -8,12 +8,7 @@ class LoadingWidget extends StatelessWidget {
   final Color? color;
   final String? message;
 
-  const LoadingWidget({
-    super.key,
-    this.size = 50.0,
-    this.color,
-    this.message,
-  });
+  const LoadingWidget({super.key, this.size = 50.0, this.color, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +24,7 @@ class LoadingWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message!,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ],
@@ -46,11 +38,7 @@ class LoadingIndicator extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const LoadingIndicator({
-    super.key,
-    this.size = 30.0,
-    this.color,
-  });
+  const LoadingIndicator({super.key, this.size = 30.0, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +69,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             child: LoadingWidget(message: message),
           ),
       ],
@@ -119,9 +107,10 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
       vsync: this,
     )..repeat();
 
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: -1.0,
+      end: 2.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -143,11 +132,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
             gradient: LinearGradient(
               begin: Alignment(_animation.value - 1, 0),
               end: Alignment(_animation.value, 0),
-              colors: [
-                Colors.grey[300]!,
-                Colors.grey[100]!,
-                Colors.grey[300]!,
-              ],
+              colors: [Colors.grey[300]!, Colors.grey[100]!, Colors.grey[300]!],
             ),
           ),
         );

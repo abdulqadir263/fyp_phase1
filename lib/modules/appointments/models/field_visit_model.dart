@@ -112,7 +112,8 @@ class FieldVisitModel {
       preferredDate: data['preferredDate'] is Timestamp
           ? (data['preferredDate'] as Timestamp).toDate()
           : DateTime.now(),
-      confirmedDate: data['confirmedDate'] != null && data['confirmedDate'] is Timestamp
+      confirmedDate:
+          data['confirmedDate'] != null && data['confirmedDate'] is Timestamp
           ? (data['confirmedDate'] as Timestamp).toDate()
           : null,
       status: data['status'] ?? 'pending',
@@ -219,4 +220,3 @@ class FieldVisitModel {
   String get googleMapsUrl =>
       'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
 }
-

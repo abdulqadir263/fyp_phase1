@@ -124,10 +124,7 @@ void main() {
 
     test('bookmarksCount never goes below zero', () {
       // Even if data is inconsistent (count 0 but array empty), clamp to 0
-      final emptyPost = post.copyWith(
-        bookmarkedBy: [],
-        bookmarksCount: 0,
-      );
+      final emptyPost = post.copyWith(bookmarkedBy: [], bookmarksCount: 0);
 
       final count = emptyPost.bookmarksCount > 0
           ? emptyPost.bookmarksCount - 1
@@ -302,4 +299,3 @@ void main() {
     });
   });
 }
-

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Reusable card widget
+/// Clean card widget — flat with subtle border, no heavy shadows
 class CustomCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -21,18 +21,23 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: color ?? Colors.white,
-      elevation: elevation ?? 2.0,
+    return Container(
       margin: margin ?? EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      shadowColor: Colors.black.withValues(alpha: 0.1),
-      child: InkWell(
-        onTap: onTap,
+      decoration: BoxDecoration(
+        color: color ?? Colors.white,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: padding ?? const EdgeInsets.all(16.0),
-          child: child,
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: padding ?? const EdgeInsets.all(16.0),
+            child: child,
+          ),
         ),
       ),
     );

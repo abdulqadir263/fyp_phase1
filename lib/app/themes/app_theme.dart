@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-// App ka light aur dark theme - optimized for performance
 class AppTheme {
-  // Shared AppBar title style
   static const TextStyle _appBarTitleStyle = TextStyle(
     color: Colors.white,
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
   );
 
-  // Shared page transitions for smoother navigation
   static const PageTransitionsTheme _pageTransitions = PageTransitionsTheme(
     builders: {
       TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -18,7 +15,6 @@ class AppTheme {
     },
   );
 
-  // ✅ OPTIMIZED: Light Theme with performance improvements
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -27,67 +23,89 @@ class AppTheme {
         seedColor: AppColors.primaryGreen,
         brightness: Brightness.light,
       ),
-
-      // Optimized page transitions
+      scaffoldBackgroundColor: AppColors.background,
       pageTransitionsTheme: _pageTransitions,
 
-      // AppBar Theme
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
-        elevation: 2,
+        elevation: 0,
         centerTitle: true,
         titleTextStyle: _appBarTitleStyle,
+        surfaceTintColor: Colors.transparent,
       ),
 
-      // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          elevation: 0,
         ),
       ),
 
-      // Card Theme
-      cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: Colors.white,
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.darkGrey,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          side: BorderSide(color: AppColors.border),
+        ),
       ),
 
-      // Input Field Theme
+      cardTheme: CardThemeData(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        ),
+        color: AppColors.surface,
+      ),
+
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.primaryGreen, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 12,
+          vertical: 14,
         ),
+        filled: true,
+        fillColor: AppColors.surface,
       ),
 
-      // Text Theme
       textTheme: const TextTheme(
         displayLarge: TextStyle(
-          color: Colors.black87,
+          color: Color(0xFF1A1A1A),
           fontWeight: FontWeight.bold,
         ),
         headlineMedium: TextStyle(
-          color: Colors.black87,
-          fontWeight: FontWeight.bold,
+          color: Color(0xFF1A1A1A),
+          fontWeight: FontWeight.w600,
         ),
-        bodyLarge: TextStyle(color: Colors.black87),
-        bodyMedium: TextStyle(color: Colors.black54),
+        bodyLarge: TextStyle(color: Color(0xFF333333)),
+        bodyMedium: TextStyle(color: Color(0xFF666666)),
       ),
 
-      // Snackbar theme for faster display
+      dividerTheme: DividerThemeData(
+        color: AppColors.border,
+        thickness: 1,
+      ),
+
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -95,7 +113,6 @@ class AppTheme {
     );
   }
 
-  // ✅ OPTIMIZED: Dark Theme
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -104,45 +121,50 @@ class AppTheme {
         seedColor: AppColors.primaryGreen,
         brightness: Brightness.dark,
       ),
-
-      // Optimized page transitions
       pageTransitionsTheme: _pageTransitions,
 
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
-        elevation: 2,
+        elevation: 0,
         centerTitle: true,
         titleTextStyle: _appBarTitleStyle,
+        surfaceTintColor: Colors.transparent,
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          elevation: 0,
         ),
       ),
 
       cardTheme: CardThemeData(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey.shade800),
+        ),
         color: const Color(0xFF1E1E1E),
       ),
 
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade600),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade700),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppColors.primaryGreen, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 12,
+          vertical: 14,
         ),
       ),
 
@@ -153,13 +175,12 @@ class AppTheme {
         ),
         headlineMedium: TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
         bodyLarge: TextStyle(color: Colors.white),
         bodyMedium: TextStyle(color: Colors.white70),
       ),
 
-      // Snackbar theme for faster display
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

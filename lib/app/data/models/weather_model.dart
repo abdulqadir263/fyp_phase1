@@ -159,50 +159,6 @@ class WeatherRecommendation {
   }
 }
 
-class AgricultureRule {
-  final String id;
-  final String name;
-  final String category;
-  final bool isRecommended;
-  final String description;
-  final String detailedAdvice;
-  final List<String> conditions;
-
-  AgricultureRule({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.isRecommended,
-    required this.description,
-    required this.detailedAdvice,
-    required this.conditions,
-  });
-
-  factory AgricultureRule.fromMap(Map<String, dynamic> map) {
-    return AgricultureRule(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      category: map['category'] ?? '',
-      isRecommended: map['isRecommended'] ?? true,
-      description: map['description'] ?? '',
-      detailedAdvice: map['detailedAdvice'] ?? '',
-      conditions: List<String>.from(map['conditions'] ?? []),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'category': category,
-      'isRecommended': isRecommended,
-      'description': description,
-      'detailedAdvice': detailedAdvice,
-      'conditions': conditions,
-    };
-  }
-}
-
 class AgricultureRecommendation {
   final String category;
   final String title;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../core/constants/app_constants.dart';
 
-// Reusable button widget
+/// Clean, minimal primary button
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -19,21 +19,32 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: isLoading ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color ?? AppConstants.primaryGreen,
-        foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color ?? AppConstants.primaryGreen,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          elevation: 0,
+          disabledBackgroundColor:
+              (color ?? AppConstants.primaryGreen).withValues(alpha: 0.6),
+        ),
+        child: isLoading
+            ? const SpinKitThreeBounce(color: Colors.white, size: 18)
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
       ),
-      child: isLoading
-          ? const SpinKitThreeBounce(color: Colors.white, size: 20)
-          : Text(
-              text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
     );
   }
 }

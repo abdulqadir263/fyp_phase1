@@ -1,27 +1,22 @@
-// Sare routes ki strings yahan par define karenge
 class AppRoutes {
   // Auth Routes
   static const WELCOME = '/welcome';
   static const LOGIN = '/login';
-  static const SIGNUP = '/signup';
   static const FORGOT_PASSWORD = '/forgot-password';
 
-  // ========== NEW ONBOARDING ROUTES ==========
-  /// Role selection screen after signup
+  // Onboarding Routes
   static const ROLE_SELECTION = '/role-selection';
-
-  /// Profile completion screen based on selected role
   static const PROFILE_COMPLETION = '/profile-completion';
 
   // Main Routes
   static const HOME = '/home';
   static const PROFILE = '/profile';
 
-  // Add these routes to your existing AppRoutes class
+  // Weather Routes
   static const WEATHER = '/weather';
   static const WEATHER_DETAIL = '/weather-detail';
 
-  // Feature Routes — Field Visit / Appointments
+  // Field Visit / Appointments Routes
   static const APPOINTMENTS = '/appointments';
   static const EXPERT_PROFILE = '/appointments/expert-profile';
   static const REQUEST_VISIT = '/appointments/request-visit';
@@ -29,7 +24,7 @@ class AppRoutes {
   static const VISIT_DETAIL = '/appointments/visit-detail';
   static const EXPERT_DASHBOARD = '/appointments/expert-dashboard';
 
-  // Feature Routes — Marketplace
+  // Marketplace Routes
   static const MARKETPLACE = '/marketplace';
   static const MARKETPLACE_PRODUCT = '/marketplace/product';
   static const MARKETPLACE_CART = '/marketplace/cart';
@@ -41,16 +36,13 @@ class AppRoutes {
   static const ORDER_HISTORY = '/marketplace/orders';
   static const ORDER_DETAIL = '/marketplace/orders/detail';
 
+  // Feature Routes
   static const CROP_TRACKER = '/crop-tracker';
   static const COMMUNITY = '/community';
   static const CHATBOT = '/chatbot';
 
-  // Feature Routes — Crop Recommendation
+  // Crop Recommendation Routes
   static const CROP_RECOMMENDATION = '/crop-recommendation';
   static const CROP_RECOMMENDATION_RESULTS = '/crop-recommendation/results';
   static const CROP_RECOMMENDATION_HISTORY = '/crop-recommendation/history';
-
-  // Additional Routes
-  static const SETTINGS = '/settings';
-  static const ABOUT = '/about';
 }

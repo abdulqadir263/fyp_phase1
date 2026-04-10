@@ -11,13 +11,13 @@ import 'core/localization/language_controller.dart';
 import 'app/data/services/firebase_service.dart';
 import 'app/data/services/cloudinary_service.dart';
 import 'app/data/services/weather_service.dart';
-import 'app/data/providers/auth_provider.dart';
-import 'app/services/gemini_service.dart';
+import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
+
 import 'app/services/groq_service.dart';
-import 'modules/auth/controllers/auth_controller.dart';
-import 'modules/community/services/community_service.dart';
-import 'modules/appointments/services/appointment_service.dart';
-import 'modules/marketplace/services/marketplace_service.dart';
+import 'modules/auth/view_model/auth_controller.dart';
+import 'modules/community/repository/community_repository.dart';
+import 'modules/appointments/repository/appointment_repository.dart';
+import 'modules/marketplace/repository/marketplace_repository.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -44,13 +44,13 @@ void main() async {
   Get.put(FirebaseService(), permanent: true);
   Get.put(CloudinaryService(), permanent: true);
   Get.put(WeatherService(), permanent: true);
-  Get.put(GeminiService(), permanent: true);
+
   Get.put(GroqService(), permanent: true);
-  Get.put(AuthProvider(), permanent: true);
+  Get.put(AuthRepository(), permanent: true);
   Get.put(AuthController(), permanent: true);
-  Get.put(CommunityService(), permanent: true);
-  Get.put(AppointmentService(), permanent: true);
-  Get.put(MarketplaceService(), permanent: true);
+  Get.put(CommunityRepository(), permanent: true);
+  Get.put(AppointmentRepository(), permanent: true);
+  Get.put(MarketplaceRepository(), permanent: true);
 
   // Initialize language controller (permanent — lives for app lifetime)
   Get.put(LanguageController(), permanent: true);

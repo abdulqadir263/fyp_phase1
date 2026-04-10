@@ -7,7 +7,6 @@ import '../../core/errors/exceptions.dart';
 
 /// GroqService — Handles AI chat via the Groq API (LLaMA 3)
 /// Strictly scoped to agriculture-only responses.
-/// Replaces GeminiService for the chatbot module.
 class GroqService extends GetxService {
   static const String _baseUrl =
       'https://api.groq.com/openai/v1/chat/completions';

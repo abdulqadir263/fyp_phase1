@@ -7,11 +7,11 @@ import '../models/user_model.dart';
 // Firebase interaction layer — all auth and Firestore calls live here.
 // Controllers and providers call this; they never touch Firebase directly.
 class FirebaseService extends GetxService {
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Private property
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // ✅ NEW: Public getter for FirebaseAuth instance
-  FirebaseAuth get auth => _auth; // ✅ This fixes the error
+  /// Public getter for FirebaseAuth instance
+  FirebaseAuth get auth => _auth;
 
   // Current user ka stream get karna
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -108,9 +108,7 @@ class FirebaseService extends GetxService {
     }
   }
 
-  // Add this method to the FirebaseService class
-
-  // Send password reset email
+  /// Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);

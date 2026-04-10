@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import '../../app/data/providers/auth_provider.dart';
+import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/utils/app_snackbar.dart';
 
@@ -59,10 +59,10 @@ class RoleGuard {
     return allowed.contains(module);
   }
 
-  /// Get the current user's type from AuthProvider
+  /// Get the current user's type from AuthRepository
   static String get currentUserType {
     try {
-      return Get.find<AuthProvider>().currentUser.value?.userType ?? 'guest';
+      return Get.find<AuthRepository>().currentUser.value?.userType ?? 'guest';
     } catch (_) {
       return 'guest';
     }

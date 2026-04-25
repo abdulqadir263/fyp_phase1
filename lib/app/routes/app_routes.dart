@@ -40,9 +40,12 @@ class AppRoutes {
   static const CROP_TRACKER = '/crop-tracker';
   static const COMMUNITY = '/community';
   static const CHATBOT = '/chatbot';
+  static const DISEASE_DETECTION = '/disease-detection';
 
   // Crop Recommendation Routes
   static const CROP_RECOMMENDATION = '/crop-recommendation';
   static const CROP_RECOMMENDATION_RESULTS = '/crop-recommendation/results';
   static const CROP_RECOMMENDATION_HISTORY = '/crop-recommendation/history';
+
+
 }

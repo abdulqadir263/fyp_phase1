@@ -4,6 +4,10 @@ import '../../modules/auth/view/login_view.dart';
 import '../../modules/auth/view/welcome_view.dart';
 import '../../modules/auth/view/role_selection_view.dart';
 import '../../modules/auth/view/profile_completion_view.dart';
+import '../../modules/crop_tracker/binding/crop_tracker_binding.dart';
+import '../../modules/crop_tracker/view/crop_tracker_view.dart';
+import '../../modules/disease_detection/binding/disease_detection_binding.dart';
+import '../../modules/disease_detection/view/disease_detection_screen.dart';
 import '../../modules/home/view/home_view.dart';
 import '../../modules/profile/view/profile_view.dart';
 import '../../modules/weather/view/weather_view.dart';
@@ -61,6 +65,11 @@ class AppPages {
       page: () => ForgotPasswordView(),
       binding: AuthBinding(),
     ),
+    GetPage(
+      name: AppRoutes.DISEASE_DETECTION,
+      page: () => const DiseaseDetectionScreen(),
+      binding: DiseaseDetectionBinding(),
+    ),
 
     // ========== NEW ONBOARDING PAGES ==========
     GetPage(
@@ -94,6 +103,11 @@ class AppPages {
       middlewares: [RoleMiddleware()],
     ),
 
+    GetPage(
+      name: AppRoutes.CROP_TRACKER,
+      page: () => const CropTrackerView(),
+      binding: CropTrackerBinding(),
+    ),
     // Chatbot
     GetPage(
       name: AppRoutes.CHATBOT,

@@ -87,7 +87,7 @@ class AuthController extends GetxController {
     }
 
     _isRouting = true;
-    Future.microtask(() {
+    Future.delayed(Duration.zero,() {
       Get.offAllNamed(targetRoute);
       _isRouting = false;
     });
@@ -281,7 +281,7 @@ class AuthController extends GetxController {
   void _navigateTo(String route) {
     if (!_canNavigate || Get.key.currentState == null) return;
     if (Get.currentRoute == route) return;
-    Future.microtask(() => Get.toNamed(route));
+    Future.delayed(Duration.zero,() => Get.toNamed(route));
   }
 
   Future<void> signOut() async {

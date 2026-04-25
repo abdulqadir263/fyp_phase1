@@ -12,6 +12,9 @@ android {
     namespace = "com.example.fyp_phase1"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    aaptOptions {
+        noCompress("tflite")
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

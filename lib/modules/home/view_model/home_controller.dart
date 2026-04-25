@@ -80,6 +80,11 @@ class HomeController extends GetxController {
           Get.toNamed(AppRoutes.MARKETPLACE);
         }
         break;
+
+      case 'disease_detection':
+        Get.toNamed(AppRoutes.DISEASE_DETECTION);
+        break;
+
       case 'weather':
         Get.toNamed(AppRoutes.WEATHER);
         break;
@@ -244,7 +249,7 @@ class HomeController extends GetxController {
         Get.toNamed(AppRoutes.CHATBOT);
         break;
       case 'disease_detection':
-        Get.snackbar('info'.tr, 'disease_detection_coming_soon'.tr);
+        Get.toNamed(AppRoutes.DISEASE_DETECTION);
         break;
       case 'crop_recommendation':
         Get.toNamed(AppRoutes.CROP_RECOMMENDATION);

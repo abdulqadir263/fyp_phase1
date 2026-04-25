@@ -22,7 +22,7 @@ class RoleMiddleware extends GetMiddleware {
     // Blocked — redirect to role's default screen
     final redirectTo = RoleGuard.currentDefaultRoute;
     debugPrint(
-      '[RoleMiddleware] ❌ ${RoleGuard.currentUserType} blocked from $route → redirecting to $redirectTo',
+      '[RoleMiddleware]  ${RoleGuard.currentUserType} blocked from $route → redirecting to $redirectTo',
     );
     return RouteSettings(name: redirectTo);
   }

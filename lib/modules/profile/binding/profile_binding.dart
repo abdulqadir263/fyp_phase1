@@ -8,6 +8,6 @@ class ProfileBinding extends Bindings {
     if (!Get.isRegistered<ProfileRepository>()) {
       Get.lazyPut(() => ProfileRepository(), fenix: true);
     }
-    Get.lazyPut(() => ProfileController());
+    Get.lazyPut(() => ProfileController(), fenix: true); // Get.put ki jagah lazyPut + fenix:true
   }
 }

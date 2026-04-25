@@ -18,13 +18,14 @@ class ProfileController extends GetxController {
   final ImagePicker _picker = ImagePicker();
 
   // --- Form controllers ---
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  final phoneController = TextEditingController();
-  final locationController = TextEditingController();
-  final farmSizeController = TextEditingController();
-  final specializationController = TextEditingController();
-  final companyNameController = TextEditingController();
+// --- Form controllers --- (final hatao)
+  late TextEditingController nameController;
+  late TextEditingController emailController;
+  late TextEditingController phoneController;
+  late TextEditingController locationController;
+  late TextEditingController farmSizeController;
+  late TextEditingController specializationController;
+  late TextEditingController companyNameController;
 
   // --- Reactive state ---
   final RxBool isLoading = false.obs;
@@ -53,6 +54,14 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Controllers fresh initialize karo (agar pehle dispose ho chuke hon)
+    nameController = TextEditingController();
+    emailController = TextEditingController();
+    phoneController = TextEditingController();
+    locationController = TextEditingController();
+    farmSizeController = TextEditingController();
+    specializationController = TextEditingController();
+    companyNameController = TextEditingController();
     _populateFormFields();
   }
 

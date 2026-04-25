@@ -50,7 +50,8 @@ class ProfileView extends GetView<ProfileController> {
                     children: [
                       _buildProfileHeaderCard(),
                       const SizedBox(height: 16),
-                      _buildSectionCard(child: _buildUserInformationForm()),
+                      // Line 53 pe yeh change karo:
+                      _buildSectionCard(child: Obx(() => _buildUserInformationForm())),
                       const SizedBox(height: 16),
                       _buildLanguageToggle(),
                       if (controller.isEditing.value) ...[

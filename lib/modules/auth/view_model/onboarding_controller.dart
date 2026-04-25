@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../app/data/models/user_model.dart';
 import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../../app/data/services/firebase_service.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 import 'auth_controller.dart';
 
@@ -136,6 +137,7 @@ class OnboardingController extends GetxController {
     if (isLoading.value) return;
 
     selectedRole.value = role;
+    // await Future.delayed(Duration.zero);
     await _authController.handleRoleSelection(role);
   }
 
@@ -328,6 +330,8 @@ class OnboardingController extends GetxController {
       _authRepository.currentUser.value = updated;
 
       AppSnackbar.success('Profile saved!');
+
+      Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('OnboardingController: saveProfile error → $e');
@@ -344,18 +348,10 @@ class OnboardingController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    phoneController.dispose();
-    locationController.dispose();
-    farmSizeController.dispose();
-    yearsExperienceController.dispose();
-    certificationsController.dispose();
-    bioController.dispose();
-    companyNameController.dispose();
-    ownerNameController.dispose();
-    yearsInBusinessController.dispose();
-    licenseNumberController.dispose();
-    businessDescriptionController.dispose();
+    // NOTE: Controllers are NOT disposed here to avoid "used after dispose" errors
+    // during navigation and widget tree cleanup on GetX lifecycle.
+    // GetX will handle the cleanup safely.
+    // If you absolutely need to dispose, use Future.delayed with much longer delay.
     super.onClose();
   }
 }

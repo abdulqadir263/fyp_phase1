@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../view_model/onboarding_controller.dart';
 import '../../../app/widgets/custom_button.dart';
@@ -6,8 +7,6 @@ import '../../../app/widgets/custom_text_field.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/responsive_helper.dart';
 
-/// ProfileCompletionView - Dynamic profile form based on selected role
-/// Shows different fields for Farmer, Expert, and Company (Seller)
 class ProfileCompletionView extends GetView<OnboardingController> {
   const ProfileCompletionView({super.key});
 
@@ -18,41 +17,45 @@ class ProfileCompletionView extends GetView<OnboardingController> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(_getAppBarTitle()),
+        title: Obx(() => Text(_getAppBarTitle(),style: TextStyle(color: Colors.green),)),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back,color: Colors.green,),
           onPressed: controller.goBackToRoleSelection,
         ),
       ),
       body: SafeArea(
         child: Stack(
           children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 620),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 16),
-                      _buildDynamicForm(),
-                      const SizedBox(height: 16),
-                      _buildActionCard(),
-                      const SizedBox(height: 20),
-                    ],
+            // Form wraps all fields — enables validator + red border on submit
+            Form(
+              key: controller.formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 16),
+                        _buildDynamicForm(),
+                        const SizedBox(height: 16),
+                        _buildActionCard(),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
             Obx(
-              () => controller.isLoading.value
+                  () => controller.isLoading.value
                   ? Container(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      child: const Center(child: CircularProgressIndicator()),
-                    )
+                color: Colors.white.withValues(alpha: 0.7),
+                child: const Center(child: CircularProgressIndicator()),
+              )
                   : const SizedBox.shrink(),
             ),
           ],
@@ -61,21 +64,15 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Get app bar title based on role (localized)
   String _getAppBarTitle() {
     switch (controller.selectedRole.value) {
-      case 'farmer':
-        return 'farmer_profile'.tr;
-      case 'expert':
-        return 'expert_profile'.tr;
-      case 'company':
-        return 'business_profile'.tr;
-      default:
-        return 'complete_profile'.tr;
+      case 'farmer':  return 'farmer_profile'.tr;
+      case 'expert':  return 'expert_profile'.tr;
+      case 'company': return 'business_profile'.tr;
+      default:        return 'complete_profile'.tr;
     }
   }
 
-  /// Build header with role icon
   Widget _buildHeader() {
     IconData icon;
     Color color;
@@ -126,19 +123,11 @@ class ProfileCompletionView extends GetView<OnboardingController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  message,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
-                  ),
-                ),
+                Text(message,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[800])),
                 const SizedBox(height: 2),
-                Text(
-                  'fields_required'.tr,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                ),
+                Text('fields_required'.tr,
+                    style: TextStyle(fontSize: 13, color: Colors.grey[400])),
               ],
             ),
           ),
@@ -147,17 +136,17 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  Widget _buildActionCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: _buildSaveButton(),
-    );
+  Widget _buildDynamicForm() {
+    return Obx(() {
+      final Widget content;
+      switch (controller.selectedRole.value) {
+        case 'farmer':  content = _buildFarmerForm();  break;
+        case 'expert':  content = _buildExpertForm();  break;
+        case 'company': content = _buildCompanyForm(); break;
+        default:        content = const SizedBox();
+      }
+      return _buildSectionCard(child: content);
+    });
   }
 
   Widget _buildSectionCard({required Widget child}) {
@@ -183,10 +172,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: AppConstants.primaryGreen,
-          width: 1.5,
-        ),
+        borderSide: const BorderSide(color: AppConstants.primaryGreen, width: 1.5),
       ),
       filled: true,
       fillColor: Colors.white,
@@ -194,26 +180,9 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Build dynamic form based on selected role
-  Widget _buildDynamicForm() {
-    final Widget content;
-    switch (controller.selectedRole.value) {
-      case 'farmer':
-        content = _buildFarmerForm();
-        break;
-      case 'expert':
-        content = _buildExpertForm();
-        break;
-      case 'company':
-        content = _buildCompanyForm();
-        break;
-      default:
-        content = const SizedBox();
-    }
-    return _buildSectionCard(child: content);
-  }
+  // ── FARMER ─────────────────────────────────────────────────────────────
+  // Required: name*, phone*, location*, crops* | Optional: farmSize
 
-  // ========== FARMER FORM ==========
   Widget _buildFarmerForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,21 +192,29 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           labelText: '${'full_name'.tr} *',
           hintText: 'enter_full_name'.tr,
           prefixIcon: Icons.person,
+          validator: controller.validateName,
         ),
         const SizedBox(height: 14),
         CustomTextField(
           controller: controller.phoneController,
-          labelText: 'phone_number'.tr,
+          labelText: '${'phone_number'.tr} *',
           hintText: 'enter_phone'.tr,
           prefixIcon: Icons.phone,
           keyboardType: TextInputType.phone,
+          validator: controller.validatePhoneRequired,
+          // Only digits, max 11
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(11),
+          ],
         ),
         const SizedBox(height: 14),
         CustomTextField(
           controller: controller.locationController,
-          labelText: 'farm_location'.tr,
+          labelText: '${'farm_location'.tr} *',
           hintText: 'enter_farm_location'.tr,
           prefixIcon: Icons.location_on,
+          validator: controller.validateRequired,
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -246,6 +223,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           hintText: 'enter_farm_size'.tr,
           prefixIcon: Icons.square_foot,
           keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+          validator: controller.validateFarmSize,
         ),
         const SizedBox(height: 20),
         _buildCropsSection(),
@@ -253,27 +232,16 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Build crops multi-select section for farmers
   Widget _buildCropsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'crops_grown'.tr,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
-          ),
-        ),
+        Text('${'crops_grown'.tr} *',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[700])),
         const SizedBox(height: 4),
-        Text(
-          'select_crops'.tr,
-          style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-        ),
+        Text('select_crops'.tr,
+            style: TextStyle(fontSize: 13, color: Colors.grey[400])),
         const SizedBox(height: 10),
-
-        // Crops Grid
         Obx(() {
           final _ = controller.selectedCrops.length;
           return LayoutBuilder(
@@ -294,53 +262,36 @@ class ProfileCompletionView extends GetView<OnboardingController> {
                 itemBuilder: (context, index) {
                   final crop = OnboardingController.availableCrops[index];
                   final isSelected = controller.selectedCrops.contains(crop);
-
                   return InkWell(
                     onTap: () => controller.toggleCropSelection(crop),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppConstants.primaryGreen
-                                .withValues(alpha: 0.06)
+                            ? AppConstants.primaryGreen.withValues(alpha: 0.06)
                             : const Color(0xFFF8F9FA),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected
-                              ? AppConstants.primaryGreen
-                              : Colors.grey.shade300,
+                          color: isSelected ? AppConstants.primaryGreen : Colors.grey.shade300,
                           width: isSelected ? 1.5 : 1,
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(
-                            isSelected
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            color: isSelected
-                                ? AppConstants.primaryGreen
-                                : Colors.grey[400],
+                            isSelected ? Icons.check_box : Icons.check_box_outline_blank,
+                            color: isSelected ? AppConstants.primaryGreen : Colors.grey[400],
                             size: 18,
                           ),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: Text(
-                              crop,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                                color: isSelected
-                                    ? AppConstants.darkGreen
-                                    : Colors.grey[700],
-                              ),
-                            ),
+                            child: Text(crop,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  color: isSelected ? AppConstants.darkGreen : Colors.grey[700],
+                                )),
                           ),
                         ],
                       ),
@@ -355,7 +306,9 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  // ========== EXPERT FORM ==========
+  // ── EXPERT ─────────────────────────────────────────────────────────────
+  // Required: name*, specialization*, yearsExperience* | Optional: rest
+
   Widget _buildExpertForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,6 +318,7 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           labelText: '${'full_name'.tr} *',
           hintText: 'enter_full_name'.tr,
           prefixIcon: Icons.person,
+          validator: controller.validateName,
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -373,6 +327,11 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           hintText: 'enter_phone'.tr,
           prefixIcon: Icons.phone,
           keyboardType: TextInputType.phone,
+          validator: controller.validatePhoneOptional,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(11),
+          ],
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -386,10 +345,12 @@ class ProfileCompletionView extends GetView<OnboardingController> {
         const SizedBox(height: 14),
         CustomTextField(
           controller: controller.yearsExperienceController,
-          labelText: 'years_experience'.tr,
+          labelText: '${'years_experience'.tr} *',
           hintText: 'enter_years_experience'.tr,
           prefixIcon: Icons.work_history,
           keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          validator: controller.validateYearsExperience,
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -412,40 +373,27 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Build specialization dropdown for experts
   Widget _buildSpecializationDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'specialization'.tr,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
+        Text('${'specialization'.tr} *',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey[700])),
         const SizedBox(height: 6),
-        DropdownButtonFormField<String>(
-          initialValue: controller.selectedSpecialization.value.isEmpty
-              ? null
-              : controller.selectedSpecialization.value,
+        Obx(() => DropdownButtonFormField<String>(
+          value: controller.selectedSpecialization.value.isEmpty
+              ? null : controller.selectedSpecialization.value,
           decoration: _dropdownDecoration(Icons.workspace_premium),
           hint: Text('select_specialization'.tr),
           items: OnboardingController.expertSpecializations
-              .map((spec) => DropdownMenuItem(value: spec, child: Text(spec)))
+              .map((s) => DropdownMenuItem(value: s, child: Text(s)))
               .toList(),
-          onChanged: (value) {
-            if (value != null) {
-              controller.selectedSpecialization.value = value;
-            }
-          },
-        ),
+          onChanged: (v) { if (v != null) controller.selectedSpecialization.value = v; },
+        )),
       ],
     );
   }
 
-  /// Build consultation availability toggle
   Widget _buildConsultationToggle() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -462,51 +410,40 @@ class ProfileCompletionView extends GetView<OnboardingController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'available_appointments'.tr,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  'let_farmers_book'.tr,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                ),
+                Text('available_appointments'.tr,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                Text('let_farmers_book'.tr,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500])),
               ],
             ),
           ),
-          Obx(
-            () => Switch(
-              value: controller.isAvailableForConsultation.value,
-              onChanged: (value) {
-                controller.isAvailableForConsultation.value = value;
-              },
-              activeTrackColor:
-                  AppConstants.primaryGreen.withValues(alpha: 0.4),
-              thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return AppConstants.primaryGreen;
-                }
-                return Colors.grey;
-              }),
-            ),
-          ),
+          Obx(() => Switch(
+            value: controller.isAvailableForConsultation.value,
+            onChanged: (v) => controller.isAvailableForConsultation.value = v,
+            activeTrackColor: AppConstants.primaryGreen.withValues(alpha: 0.4),
+            thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.selected)) return AppConstants.primaryGreen;
+              return Colors.grey;
+            }),
+          )),
         ],
       ),
     );
   }
 
-  // ========== COMPANY FORM ==========
+  // ── COMPANY ────────────────────────────────────────────────────────────
+  // Required: companyName*, businessType* | Optional: rest
+
   Widget _buildCompanyForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomTextField(
           controller: controller.companyNameController,
-          labelText: 'company_name'.tr,
+          labelText: '${'company_name'.tr} *',
           hintText: 'enter_company_name'.tr,
           prefixIcon: Icons.business,
+          validator: controller.validateRequired,
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -522,6 +459,11 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           hintText: 'business_phone'.tr,
           prefixIcon: Icons.phone,
           keyboardType: TextInputType.phone,
+          validator: controller.validatePhoneOptional,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(11),
+          ],
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -539,6 +481,8 @@ class ProfileCompletionView extends GetView<OnboardingController> {
           hintText: 'how_many_years'.tr,
           prefixIcon: Icons.work_history,
           keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          validator: controller.validateYearsInBusiness,
         ),
         const SizedBox(height: 14),
         CustomTextField(
@@ -559,47 +503,41 @@ class ProfileCompletionView extends GetView<OnboardingController> {
     );
   }
 
-  /// Build business type dropdown for company/seller
   Widget _buildBusinessTypeDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'business_type'.tr,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
+        Text('${'business_type'.tr} *',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey[700])),
         const SizedBox(height: 6),
-        DropdownButtonFormField<String>(
-          initialValue: controller.selectedBusinessType.value.isEmpty
-              ? null
-              : controller.selectedBusinessType.value,
+        Obx(() => DropdownButtonFormField<String>(
+          value: controller.selectedBusinessType.value.isEmpty
+              ? null : controller.selectedBusinessType.value,
           decoration: _dropdownDecoration(Icons.category),
           hint: Text('select_business_type'.tr),
           items: OnboardingController.businessTypes
-              .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+              .map((t) => DropdownMenuItem(value: t, child: Text(t)))
               .toList(),
-          onChanged: (value) {
-            if (value != null) {
-              controller.selectedBusinessType.value = value;
-            }
-          },
-        ),
+          onChanged: (v) { if (v != null) controller.selectedBusinessType.value = v; },
+        )),
       ],
     );
   }
 
-  /// Build save button
-  Widget _buildSaveButton() {
-    return Obx(
-      () => CustomButton(
+  Widget _buildActionCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Obx(() => CustomButton(
         text: 'save_continue'.tr,
         onPressed: controller.saveProfile,
         isLoading: controller.isLoading.value,
-      ),
+      )),
     );
   }
 }

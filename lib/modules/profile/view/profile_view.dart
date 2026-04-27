@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../view_model/profile_controller.dart';
 import '../../../app/widgets/custom_button.dart';
@@ -7,7 +8,6 @@ import '../../../core/utils/responsive_helper.dart';
 import '../../../core/localization/language_controller.dart';
 import '../../../core/constants/app_constants.dart';
 
-/// Clean, flat profile view
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
@@ -16,56 +16,49 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: Text(
-          'my_profile'.tr,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
+        title: Text('my_profile'.tr,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         centerTitle: true,
         actions: [
-          Obx(
-            () => IconButton(
-              icon: Icon(controller.isEditing.value ? Icons.save : Icons.edit),
-              onPressed: controller.isEditing.value
-                  ? controller.updateProfile
-                  : controller.toggleEditMode,
-              tooltip: controller.isEditing.value ? 'save'.tr : 'edit'.tr,
-            ),
-          ),
+          // Sirf edit icon — save button form ke andar hai
+          Obx(() => controller.isEditing.value
+              ? const SizedBox.shrink()
+              : IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: controller.toggleEditMode,
+            tooltip: 'edit'.tr,
+          )),
         ],
       ),
       body: SafeArea(
         top: false,
         child: ResponsiveHelper.tabletCenter(
-          child: Obx(() {
-            if (controller.user.value == null) {
-              return Center(child: Text('user_data_not_found'.tr));
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 620),
-                  child: Column(
-                    children: [
-                      _buildProfileHeaderCard(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: Column(
+                  children: [
+                    _buildProfileHeaderCard(),
+                    const SizedBox(height: 16),
+                    _buildUserInformationSection(),
+                    const SizedBox(height: 16),
+                    _buildLanguageToggle(),
+                    Obx(() => controller.isEditing.value
+                        ? Column(children: [
                       const SizedBox(height: 16),
-                      // Line 53 pe yeh change karo:
-                      _buildSectionCard(child: Obx(() => _buildUserInformationForm())),
-                      const SizedBox(height: 16),
-                      _buildLanguageToggle(),
-                      if (controller.isEditing.value) ...[
-                        const SizedBox(height: 16),
-                        _buildUserTypeSection(),
-                      ],
-                      const SizedBox(height: 24),
-                      _buildActionButtons(),
-                    ],
-                  ),
+                      _buildUserTypeSection(),
+                    ])
+                        : const SizedBox.shrink()),
+                    const SizedBox(height: 24),
+                    _buildActionButtons(),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
-            );
-          }),
+            ),
+          ),
         ),
       ),
     );
@@ -90,37 +83,32 @@ class ProfileView extends GetView<ProfileController> {
         children: [
           _buildProfilePictureSection(),
           const SizedBox(height: 14),
-          Obx(
-            () => Text(
-              controller.nameController.text.isNotEmpty
-                  ? controller.nameController.text
-                  : 'full_name'.tr,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey[800],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+          Obx(() => Text(
+            controller.displayName.value.isNotEmpty
+                ? controller.displayName.value
+                : 'full_name'.tr,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700,
+                color: Colors.grey[800]),
+            textAlign: TextAlign.center,
+          )),
           const SizedBox(height: 4),
-          Obx(
-            () => Text(
-              controller.userType.value.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[500],
-                letterSpacing: 0.5,
-              ),
+          Obx(() => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppConstants.primaryGreen.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
+            child: Text(
+              controller.userType.value.toUpperCase(),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
+                  color: AppConstants.primaryGreen, letterSpacing: 0.8),
+            ),
+          )),
         ],
       ),
     );
   }
 
-  // Profile picture section - cleaner state loading
   Widget _buildProfilePictureSection() {
     return Center(
       child: Stack(
@@ -137,7 +125,7 @@ class ProfileView extends GetView<ProfileController> {
                 backgroundColor: const Color(0xFFF1F3F5),
                 backgroundImage: hasImage
                     ? NetworkImage(controller.profileImageUrl.value)
-                        as ImageProvider
+                as ImageProvider
                     : null,
                 child: !hasImage
                     ? Icon(Icons.person, size: 48, color: Colors.grey[400])
@@ -145,13 +133,10 @@ class ProfileView extends GetView<ProfileController> {
               ),
             );
           }),
-
-          // Camera / Upload indicator
           Obx(() {
             if (controller.isUploadingImage.value) {
               return Positioned(
-                bottom: 0,
-                right: 0,
+                bottom: 0, right: 0,
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
@@ -160,22 +145,15 @@ class ProfileView extends GetView<ProfileController> {
                     border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  ),
+                      width: 18, height: 18,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2)),
                 ),
               );
             }
-
-            if (controller.isEditing.value &&
-                !controller.isUploadingImage.value) {
+            if (controller.isEditing.value) {
               return Positioned(
-                bottom: 0,
-                right: 0,
+                bottom: 0, right: 0,
                 child: InkWell(
                   onTap: controller.pickAndUploadImage,
                   child: Container(
@@ -191,7 +169,6 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               );
             }
-
             return const SizedBox.shrink();
           }),
         ],
@@ -199,94 +176,143 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  // User information form
-  Widget _buildUserInformationForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'my_profile'.tr,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[800],
-          ),
+  Widget _buildUserInformationSection() {
+    return Obx(() {
+      final editing = controller.isEditing.value;
+      final type = controller.userType.value;
+      return _buildSectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('my_profile'.tr,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                    color: Colors.grey[800])),
+            const SizedBox(height: 4),
+            Text('Update your details to keep account information accurate.',
+                style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+            const SizedBox(height: 20),
+
+            CustomTextField(
+              controller: controller.nameController,
+              labelText: 'full_name'.tr,
+              prefixIcon: Icons.person_outline,
+              enabled: editing,
+            ),
+            const SizedBox(height: 14),
+            CustomTextField(
+              controller: controller.emailController,
+              labelText: 'email'.tr,
+              prefixIcon: Icons.email_outlined,
+              enabled: false,
+            ),
+            const SizedBox(height: 14),
+            CustomTextField(
+              controller: controller.phoneController,
+              labelText: 'phone_number'.tr,
+              prefixIcon: Icons.phone_outlined,
+              enabled: editing,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(11),
+              ],
+            ),
+
+            if (type == 'farmer') ...[
+              const SizedBox(height: 14),
+              CustomTextField(
+                controller: controller.locationController,
+                labelText: 'farm_location'.tr,
+                prefixIcon: Icons.location_on_outlined,
+                enabled: editing,
+              ),
+              const SizedBox(height: 14),
+              CustomTextField(
+                controller: controller.farmSizeController,
+                labelText: 'farm_size'.tr,
+                prefixIcon: Icons.square_foot_outlined,
+                enabled: editing,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
+              ),
+            ],
+
+            if (type == 'expert') ...[
+              const SizedBox(height: 14),
+              CustomTextField(
+                controller: controller.specializationController,
+                labelText: 'specialization'.tr,
+                prefixIcon: Icons.workspace_premium_outlined,
+                enabled: editing,
+              ),
+            ],
+
+            if (type == 'company') ...[
+              const SizedBox(height: 14),
+              CustomTextField(
+                controller: controller.companyNameController,
+                labelText: 'company_name'.tr,
+                prefixIcon: Icons.business_outlined,
+                enabled: editing,
+              ),
+            ],
+
+            // ✅ Save + Cancel buttons — editing mode mein fields ke neeche
+            if (editing) ...[
+              const SizedBox(height: 24),
+              Obx(() => SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : () {
+                    debugPrint(' Save button tapped'); // ← debug
+                    controller.updateProfile();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppConstants.primaryGreen,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                      width: 20, height: 20,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))
+                      : Text('save'.tr,
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white)),
+                ),
+              )),
+            ],
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: controller.toggleEditMode,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey[400]!),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text('cancel'.tr,
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Update your details to keep account information accurate.',
-          style: TextStyle(color: Colors.grey[500], fontSize: 13),
-        ),
-        const SizedBox(height: 20),
-
-        CustomTextField(
-          controller: controller.nameController,
-          labelText: 'full_name'.tr,
-          prefixIcon: Icons.person_outline,
-          enabled: controller.isEditing.value,
-        ),
-        const SizedBox(height: 14),
-
-        CustomTextField(
-          controller: controller.emailController,
-          labelText: 'email'.tr,
-          prefixIcon: Icons.email_outlined,
-          enabled: false,
-        ),
-        const SizedBox(height: 14),
-
-        CustomTextField(
-          controller: controller.phoneController,
-          labelText: 'phone_number'.tr,
-          prefixIcon: Icons.phone_outlined,
-          enabled: controller.isEditing.value,
-          keyboardType: TextInputType.phone,
-        ),
-        const SizedBox(height: 14),
-
-        // Location Field (farmers only)
-        if (controller.userType.value == 'farmer') ...[
-          CustomTextField(
-            controller: controller.locationController,
-            labelText: 'farm_location'.tr,
-            prefixIcon: Icons.location_on_outlined,
-            enabled: controller.isEditing.value,
-          ),
-          const SizedBox(height: 14),
-
-          CustomTextField(
-            controller: controller.farmSizeController,
-            labelText: 'farm_size'.tr,
-            prefixIcon: Icons.square_foot_outlined,
-            enabled: controller.isEditing.value,
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 14),
-        ],
-
-        // Specialization Field (experts only)
-        if (controller.userType.value == 'expert') ...[
-          CustomTextField(
-            controller: controller.specializationController,
-            labelText: 'specialization'.tr,
-            prefixIcon: Icons.workspace_premium_outlined,
-            enabled: controller.isEditing.value,
-          ),
-          const SizedBox(height: 14),
-        ],
-
-        // Company Name Field (companies only)
-        if (controller.userType.value == 'company') ...[
-          CustomTextField(
-            controller: controller.companyNameController,
-            labelText: 'company_name'.tr,
-            prefixIcon: Icons.business_outlined,
-            enabled: controller.isEditing.value,
-          ),
-          const SizedBox(height: 14),
-        ],
-      ],
-    );
+      );
+    });
   }
 
   Widget _buildUserTypeSection() {
@@ -294,108 +320,38 @@ class ProfileView extends GetView<ProfileController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'user_type'.tr,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
-          ),
+          Text('user_type'.tr,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+                  color: Colors.grey[700])),
           const SizedBox(height: 8),
-          Obx(
-            () => DropdownButtonFormField<String>(
-              initialValue: controller.userType.value,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
-                    color: AppConstants.primaryGreen,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-              onChanged: controller.changeUserType,
-              items: [
-                DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
-                DropdownMenuItem(
-                  value: 'expert',
-                  child: Text('agricultural_expert'.tr),
-                ),
-                DropdownMenuItem(value: 'company', child: Text('company'.tr)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Action buttons
-  Widget _buildActionButtons() {
-    return _buildSectionCard(
-      child: Column(
-        children: [
-          if (!controller.isEditing.value &&
-              controller.isProfileIncomplete) ...[
-            OutlinedButton(
-              onPressed: controller.skipProfileSetup,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.grey[300]!),
-                foregroundColor: Colors.grey[700],
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'create_profile_later'.tr,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          if (controller.isEditing.value)
-            CustomButton(
-              text: 'cancel'.tr,
-              onPressed: controller.toggleEditMode,
-              color: Colors.grey[700],
-            ),
-
-          if (controller.isEditing.value) const SizedBox(height: 12),
-
-          OutlinedButton(
-            onPressed: controller.deleteAccount,
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red),
-              minimumSize: const Size(double.infinity, 50),
-              shape: RoundedRectangleBorder(
+          Obx(() => DropdownButtonFormField<String>(
+            value: controller.userType.value,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey[300]!),
               ),
-              backgroundColor: Colors.red.withValues(alpha: 0.03),
-            ),
-            child: Text(
-              'delete_account'.tr,
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(
+                    color: AppConstants.primaryGreen, width: 1.5),
               ),
             ),
-          ),
+            onChanged: controller.changeUserType,
+            items: [
+              DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
+              DropdownMenuItem(
+                  value: 'expert', child: Text('agricultural_expert'.tr)),
+              DropdownMenuItem(
+                  value: 'company', child: Text('company'.tr)),
+            ],
+          )),
         ],
       ),
     );
@@ -407,14 +363,9 @@ class ProfileView extends GetView<ProfileController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'language'.tr,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
-          ),
+          Text('language'.tr,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                  color: Colors.grey[800])),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -423,54 +374,88 @@ class ProfileView extends GetView<ProfileController> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: Colors.grey.shade200),
             ),
-            child: Obx(
-              () => Row(
-                children: [
-                  Icon(Icons.language, color: Colors.grey[500], size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          langController.isUrdu ? 'اردو' : 'English',
-                          style: TextStyle(
-                            fontSize: 15,
+            child: Obx(() => Row(
+              children: [
+                Icon(Icons.language, color: Colors.grey[500], size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        langController.isUrdu ? 'اردو' : 'English',
+                        style: TextStyle(fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        Text(
-                          langController.isUrdu
-                              ? 'Switch to English'
-                              : 'اردو میں تبدیل کریں',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
+                            color: Colors.grey[800]),
+                      ),
+                      Text(
+                        langController.isUrdu
+                            ? 'Switch to English'
+                            : 'اردو میں تبدیل کریں',
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.grey[500]),
+                      ),
+                    ],
                   ),
-                  Switch(
-                    value: langController.isUrdu,
-                    onChanged: (_) => langController.toggleLanguage(),
-                    activeTrackColor: AppConstants.primaryGreen.withValues(
-                        alpha: 0.4),
-                    thumbColor:
-                        WidgetStateProperty.resolveWith<Color>((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return AppConstants.primaryGreen;
-                      }
-                      return Colors.grey;
-                    }),
-                  ),
-                ],
-              ),
-            ),
+                ),
+                Switch(
+                  value: langController.isUrdu,
+                  onChanged: (_) => langController.toggleLanguage(),
+                  activeTrackColor:
+                  AppConstants.primaryGreen.withValues(alpha: 0.4),
+                  thumbColor:
+                  WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return AppConstants.primaryGreen;
+                    }
+                    return Colors.grey;
+                  }),
+                ),
+              ],
+            )),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildActionButtons() {
+    return Obx(() {
+      final editing = controller.isEditing.value;
+      return _buildSectionCard(
+        child: Column(
+          children: [
+            if (!editing && controller.isProfileIncomplete) ...[
+              OutlinedButton(
+                onPressed: controller.skipProfileSetup,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.grey[300]!),
+                  foregroundColor: Colors.grey[700],
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                child: Text('create_profile_later'.tr,
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+              ),
+              const SizedBox(height: 12),
+            ],
+            OutlinedButton(
+              onPressed: controller.deleteAccount,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                backgroundColor: Colors.red.withValues(alpha: 0.03),
+              ),
+              child: Text('delete_account'.tr,
+                  style: const TextStyle(
+                      color: Colors.red, fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

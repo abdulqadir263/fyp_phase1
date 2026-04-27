@@ -1,36 +1,35 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../app/data/models/user_model.dart';
 import '../../../app/data/services/firebase_service.dart';
 import '../../../app/data/services/cloudinary_service.dart';
 
-/// ProfileRepository — handles all data operations for the Profile module.
-///
-/// Responsibilities:
-/// - Save profile data to Firestore (via FirebaseService)
-/// - Upload profile images to Cloudinary (via CloudinaryService)
+// dart:io File removed — XFile works on web + mobile both
 class ProfileRepository {
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
   final CloudinaryService _cloudinaryService = Get.find<CloudinaryService>();
 
-  /// Persist user profile to Firestore.
   Future<void> saveProfile(UserModel user) async {
     await _firebaseService.saveUserData(user);
   }
 
-  /// Upload an image file to Cloudinary and return the CDN URL.
-  /// Returns null if upload fails.
-  Future<String?> uploadProfileImage(File imageFile) async {
+  // XFile instead of File — reads bytes cross-platform
+  Future<String?> uploadProfileImage(XFile imageFile) async {
     try {
+      final Uint8List bytes = await imageFile.readAsBytes();
+      final String fileName = imageFile.name.isNotEmpty
+          ? imageFile.name
+          : 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
       return await _cloudinaryService.uploadImage(
-        imageFile,
+        bytes,
+        fileName,
         folder: 'profile_images',
       );
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('ProfileRepository: Image upload error → $e');
-      }
+      if (kDebugMode) debugPrint('ProfileRepository: image upload error → $e');
       return null;
     }
   }

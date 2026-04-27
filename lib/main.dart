@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,7 +24,6 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // Optimize system UI for better performance
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -36,7 +37,9 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  if (kIsWeb) {
+    await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  }
   // Load saved language preference before app starts
   final savedLocale = await LanguageController.getSavedLocale();
 

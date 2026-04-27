@@ -5,7 +5,7 @@ import '../../../core/utils/responsive_helper.dart';
 import '../view_model/seller_controller.dart';
 import '../models/product_model.dart';
 
-/// AddProductView — Form for seller to add/edit a product
+// dart:io Image.file removed — Image.memory used for web compatibility
 class AddProductView extends GetView<SellerController> {
   const AddProductView({super.key});
 
@@ -34,10 +34,8 @@ class AddProductView extends GetView<SellerController> {
                       // ── Image ──
                       Text(
                         'product_image'.tr,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       GestureDetector(
@@ -56,7 +54,6 @@ class AddProductView extends GetView<SellerController> {
 
                       const SizedBox(height: 20),
 
-                      // ── Name ──
                       _label('Product Name'),
                       TextField(
                         controller: controller.nameCtrl,
@@ -66,31 +63,21 @@ class AddProductView extends GetView<SellerController> {
 
                       const SizedBox(height: 16),
 
-                      // ── Category ──
                       _label('Category'),
-                      Obx(
-                        () => DropdownButtonFormField<String>(
-                          initialValue: controller.selectedCategory.value,
-                          decoration: _deco(null),
-                          items: ProductModel.categories.map((c) {
-                            final label =
-                                '${c[0].toUpperCase()}${c.substring(1)}';
-                            return DropdownMenuItem(
-                              value: c,
-                              child: Text(label),
-                            );
-                          }).toList(),
-                          onChanged: (v) {
-                            if (v != null) {
-                              controller.selectedCategory.value = v;
-                            }
-                          },
-                        ),
-                      ),
+                      Obx(() => DropdownButtonFormField<String>(
+                        value: controller.selectedCategory.value,
+                        decoration: _deco(null),
+                        items: ProductModel.categories.map((c) {
+                          final label = '${c[0].toUpperCase()}${c.substring(1)}';
+                          return DropdownMenuItem(value: c, child: Text(label));
+                        }).toList(),
+                        onChanged: (v) {
+                          if (v != null) controller.selectedCategory.value = v;
+                        },
+                      )),
 
                       const SizedBox(height: 16),
 
-                      // ── Price ──
                       _label('Price (Rs.)'),
                       TextField(
                         controller: controller.priceCtrl,
@@ -100,7 +87,6 @@ class AddProductView extends GetView<SellerController> {
 
                       const SizedBox(height: 16),
 
-                      // ── Stock ──
                       _label('Stock Quantity'),
                       TextField(
                         controller: controller.stockCtrl,
@@ -110,7 +96,6 @@ class AddProductView extends GetView<SellerController> {
 
                       const SizedBox(height: 16),
 
-                      // ── Description ──
                       _label('Description'),
                       TextField(
                         controller: controller.descCtrl,
@@ -122,7 +107,6 @@ class AddProductView extends GetView<SellerController> {
 
                       const SizedBox(height: 24),
 
-                      // ── Save button ──
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -133,12 +117,12 @@ class AddProductView extends GetView<SellerController> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryGreen,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                           child: Text(
                             'save_product'.tr,
-                            style: TextStyle(fontSize: 17, color: Colors.white),
+                            style: const TextStyle(
+                                fontSize: 17, color: Colors.white),
                           ),
                         ),
                       ),
@@ -148,29 +132,25 @@ class AddProductView extends GetView<SellerController> {
                   ),
                 ),
 
-                // Uploading overlay
+                // Loading overlay
                 if (controller.isSaving.value || controller.isUploading.value)
                   Container(
                     color: Colors.black26,
                     child: Center(
                       child: Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                            borderRadius: BorderRadius.circular(12)),
                         child: Padding(
                           padding: const EdgeInsets.all(24),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const CircularProgressIndicator(
-                                color: AppColors.primaryGreen,
-                              ),
+                                  color: AppColors.primaryGreen),
                               const SizedBox(height: 12),
-                              Text(
-                                controller.isUploading.value
-                                    ? 'Uploading image...'
-                                    : 'Saving product...',
-                              ),
+                              Text(controller.isUploading.value
+                                  ? 'Uploading image...'
+                                  : 'Saving product...'),
                             ],
                           ),
                         ),
@@ -186,10 +166,15 @@ class AddProductView extends GetView<SellerController> {
   }
 
   Widget _buildImagePreview() {
-    if (controller.selectedImage.value != null) {
+    // ✅ Bytes cached in controller — no repeated readAsBytes() on rebuild
+    if (controller.selectedImageBytes.value != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.file(controller.selectedImage.value!, fit: BoxFit.cover),
+        child: Image.memory(
+          controller.selectedImageBytes.value!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+        ),
       );
     }
     if (controller.imageUrl.value.isNotEmpty) {
@@ -203,7 +188,8 @@ class AddProductView extends GetView<SellerController> {
       children: [
         Icon(Icons.add_photo_alternate, size: 48, color: Colors.grey.shade500),
         const SizedBox(height: 8),
-        Text('Tap to add image', style: TextStyle(color: Colors.grey.shade600)),
+        Text('Tap to add image',
+            style: TextStyle(color: Colors.grey.shade600)),
       ],
     );
   }
@@ -211,10 +197,8 @@ class AddProductView extends GetView<SellerController> {
   Widget _label(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
+      child: Text(text,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
     );
   }
 
@@ -226,7 +210,8 @@ class AddProductView extends GetView<SellerController> {
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: Colors.grey.shade400),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     );
   }
 }

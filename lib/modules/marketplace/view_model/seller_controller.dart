@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,37 +9,38 @@ import '../models/product_model.dart';
 import '../models/order_model.dart';
 import '../repository/marketplace_repository.dart';
 
-/// SellerController — Handles company/seller product management & orders
+// dart:io removed — File not supported on Flutter Web
 class SellerController extends GetxController {
   final MarketplaceRepository _service = Get.find<MarketplaceRepository>();
   final AuthRepository _auth = Get.find<AuthRepository>();
   final CloudinaryService _cloudinary = Get.find<CloudinaryService>();
 
-  // ── Product management state ──
   final RxList<ProductModel> myProducts = <ProductModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isSaving = false.obs;
   final RxBool isUploading = false.obs;
 
-  // ── Add / Edit product form ──
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController priceCtrl = TextEditingController();
   final TextEditingController stockCtrl = TextEditingController();
   final TextEditingController descCtrl = TextEditingController();
   final RxString selectedCategory = 'seeds'.obs;
-  final Rx<File?> selectedImage = Rx<File?>(null);
-  final RxString imageUrl = ''.obs;
-  String? _editingProductId; // null = creating new
 
-  // ── Orders state ──
+  // XFile instead of File — works on web + mobile
+  final Rx<XFile?> selectedImage = Rx<XFile?>(null);
+  // Cached bytes for Image.memory preview — no repeated readAsBytes() calls
+  final Rx<Uint8List?> selectedImageBytes = Rx<Uint8List?>(null);
+  final RxString imageUrl = ''.obs;
+  String? _editingProductId;
+
   final RxList<OrderModel> sellerOrders = <OrderModel>[].obs;
   final RxBool isLoadingOrders = false.obs;
 
   String? get _uid => _auth.currentUser.value?.uid;
   String get _sellerName =>
       _auth.currentUser.value?.companyName ??
-      _auth.currentUser.value?.name ??
-      '';
+          _auth.currentUser.value?.name ??
+          '';
 
   @override
   void onInit() {
@@ -47,11 +48,6 @@ class SellerController extends GetxController {
     loadMyProducts();
   }
 
-  // ═══════════════════════════════════════════
-  //  PRODUCT MANAGEMENT
-  // ═══════════════════════════════════════════
-
-  /// Load products owned by the current seller
   Future<void> loadMyProducts() async {
     final uid = _uid;
     if (uid == null) return;
@@ -67,7 +63,6 @@ class SellerController extends GetxController {
     }
   }
 
-  /// Prepare the form for adding a new product
   void prepareNewProduct() {
     _editingProductId = null;
     nameCtrl.clear();
@@ -76,10 +71,10 @@ class SellerController extends GetxController {
     descCtrl.clear();
     selectedCategory.value = 'seeds';
     selectedImage.value = null;
+    selectedImageBytes.value = null;
     imageUrl.value = '';
   }
 
-  /// Prepare the form for editing an existing product
   void prepareEditProduct(ProductModel p) {
     _editingProductId = p.id;
     nameCtrl.text = p.name;
@@ -88,10 +83,10 @@ class SellerController extends GetxController {
     descCtrl.text = p.description;
     selectedCategory.value = p.category;
     selectedImage.value = null;
+    selectedImageBytes.value = null;
     imageUrl.value = p.imageUrl;
   }
 
-  /// Pick image from gallery
   Future<void> pickImage() async {
     try {
       final picked = await ImagePicker().pickImage(
@@ -100,15 +95,17 @@ class SellerController extends GetxController {
         maxHeight: 1024,
         imageQuality: 80,
       );
+      // XFile directly — no File(picked.path) wrapping needed
       if (picked != null) {
-        selectedImage.value = File(picked.path);
+        selectedImage.value = picked;
+        // Cache bytes immediately for preview
+        selectedImageBytes.value = await picked.readAsBytes();
       }
     } catch (e) {
       debugPrint('[SellerController] pickImage error: $e');
     }
   }
 
-  /// Validate and save product (create or update)
   Future<void> saveProduct() async {
     if (isSaving.value) return;
     if (!_validateProductForm()) return;
@@ -119,15 +116,24 @@ class SellerController extends GetxController {
     try {
       isSaving.value = true;
 
-      // Upload image if a new one was selected
       String finalImageUrl = imageUrl.value;
+
       if (selectedImage.value != null) {
         isUploading.value = true;
+
+        // Read bytes — works on web + mobile (no dart:io needed)
+        final bytes = await selectedImage.value!.readAsBytes();
+        final fileName = selectedImage.value!.name.isNotEmpty
+            ? selectedImage.value!.name
+            : 'product_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
         final url = await _cloudinary.uploadImage(
-          selectedImage.value!,
+          bytes,
+          fileName,
           folder: 'product_images',
         );
         isUploading.value = false;
+
         if (url == null) {
           AppSnackbar.error('Image upload failed.');
           return;
@@ -136,7 +142,6 @@ class SellerController extends GetxController {
       }
 
       if (_editingProductId == null) {
-        // ── CREATE ──
         final product = ProductModel(
           id: '',
           sellerId: uid,
@@ -153,7 +158,6 @@ class SellerController extends GetxController {
         await _service.createProduct(product);
         AppSnackbar.success('Product added!');
       } else {
-        // ── UPDATE ──
         await _service.updateProduct(_editingProductId!, {
           'name': nameCtrl.text.trim(),
           'category': selectedCategory.value,
@@ -195,7 +199,6 @@ class SellerController extends GetxController {
       AppSnackbar.warning('Description is required.');
       return false;
     }
-    // Image required for new product
     if (_editingProductId == null &&
         selectedImage.value == null &&
         imageUrl.value.isEmpty) {
@@ -205,7 +208,6 @@ class SellerController extends GetxController {
     return true;
   }
 
-  /// Toggle product active / inactive
   Future<void> toggleActive(ProductModel p) async {
     try {
       await _service.updateProduct(p.id, {'isActive': !p.isActive});
@@ -218,7 +220,6 @@ class SellerController extends GetxController {
     }
   }
 
-  /// Delete a product permanently
   Future<void> deleteProduct(ProductModel p) async {
     try {
       await _service.deleteProduct(p.id);
@@ -229,18 +230,12 @@ class SellerController extends GetxController {
     }
   }
 
-  // ═══════════════════════════════════════════
-  //  SELLER ORDERS
-  // ═══════════════════════════════════════════
-
-  /// Load orders that contain items sold by this seller
   Future<void> loadSellerOrders() async {
     final uid = _uid;
     if (uid == null) return;
     try {
       isLoadingOrders.value = true;
       final all = await _service.fetchAllOrders();
-      // Client-side filter: keep orders where any item.sellerId == me
       final filtered = all.where((order) {
         return order.items.any((item) => item['sellerId'] == uid);
       }).toList();
@@ -253,21 +248,16 @@ class SellerController extends GetxController {
     }
   }
 
-  /// Update order status (seller flow: confirmed → shipped → delivered)
   Future<void> updateOrderStatus(OrderModel order, String newStatus) async {
     try {
       await _service.updateOrderStatus(order.id, newStatus);
-
-      // When confirming: reduce stock
       if (newStatus == 'confirmed') {
         final uid = _uid;
-        // Only reduce stock for items belonging to this seller
         final myItems = order.items
             .where((item) => item['sellerId'] == uid)
             .toList();
         await _service.reduceStock(myItems);
       }
-
       await loadSellerOrders();
       AppSnackbar.success('Order status updated to $newStatus.');
     } catch (e) {

@@ -3,48 +3,34 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../app/data/models/user_model.dart';
 import '../../../app/data/services/firebase_service.dart';
+import '../../../app/routes/app_routes.dart';
+import '../../../app/utils/app_snackbar.dart';
 
-/// AuthRepository — the single source of truth for authentication state.
-///
-/// Responsibilities:
-/// - Holds the current logged-in user (reactive)
-/// - Listens to Firebase auth state changes for auto-login on cold start
-/// - Delegates all Firebase calls to FirebaseService (no direct Firebase here)
 class AuthRepository extends GetxService {
   final FirebaseService _firebase = Get.find<FirebaseService>();
 
-  // --- Reactive state ---
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   final RxBool isAuthenticated = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Listen to Firebase auth state — handles auto-login on cold start
     _firebase.authStateChanges.listen(_handleAuthStateChange);
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // AUTH STATE LISTENER
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Called by Firebase whenever auth state changes (login, logout, cold start).
   void _handleAuthStateChange(User? firebaseUser) {
     if (kDebugMode) {
       debugPrint('AuthRepository: Auth state changed → ${firebaseUser?.uid}');
     }
-
     if (firebaseUser == null) {
       currentUser.value = null;
       isAuthenticated.value = false;
       return;
     }
-
     isAuthenticated.value = true;
     _syncCurrentUser(firebaseUser.uid);
   }
 
-  /// Fetch Firestore user data and update in-memory auth state.
   Future<void> _syncCurrentUser(String uid) async {
     try {
       final userData = await _firebase.getUserData(uid);
@@ -55,11 +41,6 @@ class AuthRepository extends GetxService {
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // PUBLIC AUTH METHODS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Register with email + password.
   Future<void> signUp({
     required String name,
     required String email,
@@ -73,7 +54,7 @@ class AuthRepository extends GetxService {
       password: password,
     );
 
-    currentUser.value = UserModel(
+    final user = UserModel(
       uid: credential.user!.uid,
       name: name,
       email: email,
@@ -82,10 +63,14 @@ class AuthRepository extends GetxService {
       createdAt: DateTime.now(),
       isProfileComplete: false,
     );
+
+    // ✅ Firestore mein save karo — warna _syncCurrentUser null return karta tha
+    await _firebase.saveUserData(user);
+
+    currentUser.value = user;
     isAuthenticated.value = true;
   }
 
-  /// Login with email + password.
   Future<void> signIn({required String email, required String password}) async {
     if (kDebugMode) debugPrint('AuthRepository: Signing in → $email');
 
@@ -99,7 +84,6 @@ class AuthRepository extends GetxService {
     isAuthenticated.value = true;
   }
 
-  /// Anonymous sign-in for farmer flow.
   Future<void> signInAnonymouslyAsFarmer() async {
     if (kDebugMode) debugPrint('AuthRepository: Anonymous farmer sign-in');
 
@@ -126,31 +110,26 @@ class AuthRepository extends GetxService {
     );
 
     await _firebase.saveUserData(seededUser);
-
     currentUser.value = seededUser;
     isAuthenticated.value = true;
   }
 
-  /// Sign out the current user.
   Future<void> signOut() async {
     try {
-      if (kDebugMode) debugPrint('AuthRepository: Signing out');
-
       await _firebase.signOut();
-
-      currentUser.value = null;
-      isAuthenticated.value = false;
+      Get.offAllNamed(AppRoutes.WELCOME);
+      Future.delayed(const Duration(milliseconds: 400), () {
+        AppSnackbar.success('Logged out successfully.');
+      });
     } catch (e) {
-      if (kDebugMode) debugPrint('AuthRepository: Sign-out error → $e');
+      AppSnackbar.error(e.toString());
     }
   }
 
-  /// Send a password reset email.
   Future<void> forgotPassword(String email) async {
     await _firebase.sendPasswordResetEmail(email);
   }
 
-  /// Re-fetch user data from Firestore.
   Future<void> refreshUserData() async {
     final firebaseUser = _firebase.auth.currentUser;
     if (firebaseUser == null) return;

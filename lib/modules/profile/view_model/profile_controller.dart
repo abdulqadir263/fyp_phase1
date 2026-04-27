@@ -2,23 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+// dart:io removed — File not supported on Flutter Web
 import '../../../app/data/models/user_model.dart';
 import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 import '../repository/profile_repository.dart';
 
-/// ProfileController (ViewModel) — manages Profile screen state and logic.
-///
-/// No direct Firebase/Cloudinary calls — all data ops go through ProfileRepository.
 class ProfileController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
   final ProfileRepository _profileRepository = Get.find<ProfileRepository>();
   final ImagePicker _picker = ImagePicker();
 
-  // --- Form controllers ---
-// --- Form controllers --- (final hatao)
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
@@ -27,12 +22,15 @@ class ProfileController extends GetxController {
   late TextEditingController specializationController;
   late TextEditingController companyNameController;
 
-  // --- Reactive state ---
   final RxBool isLoading = false.obs;
   final RxBool isEditing = false.obs;
   final RxString userType = ''.obs;
   final RxString profileImageUrl = ''.obs;
   final RxBool isUploadingImage = false.obs;
+
+  // Reactive name — used in Obx header instead of nameController.text
+  // TextEditingController is NOT observable, so this bridges the gap
+  final RxString displayName = ''.obs;
 
   Rx<UserModel?> get user => _authRepository.currentUser;
 
@@ -54,7 +52,6 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Controllers fresh initialize karo (agar pehle dispose ho chuke hon)
     nameController = TextEditingController();
     emailController = TextEditingController();
     phoneController = TextEditingController();
@@ -62,6 +59,12 @@ class ProfileController extends GetxController {
     farmSizeController = TextEditingController();
     specializationController = TextEditingController();
     companyNameController = TextEditingController();
+
+    // Keep displayName in sync with nameController while editing
+    nameController.addListener(() {
+      displayName.value = nameController.text;
+    });
+
     _populateFormFields();
   }
 
@@ -78,58 +81,61 @@ class ProfileController extends GetxController {
     companyNameController.text = u.companyName ?? '';
     userType.value = u.userType;
     profileImageUrl.value = u.profileImage ?? '';
+    displayName.value = u.name; // sync on populate
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Reset editing state — agar pehle edit mode mein navigate kar gaye the
+    isEditing.value = false;
+    _populateFormFields();
   }
 
   void toggleEditMode() {
     isEditing.value = !isEditing.value;
-    if (!isEditing.value) {
-      _populateFormFields();
-    }
+    if (!isEditing.value) _populateFormFields();
   }
 
-  /// Pick image and upload via repository
   Future<void> pickAndUploadImage() async {
     try {
-      final XFile? picked = await _picker.pickImage(
-        source: ImageSource.gallery,
-      );
+      final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
       if (picked == null) return;
-
       isUploadingImage.value = true;
-
-      final url = await _profileRepository.uploadProfileImage(
-        File(picked.path),
-      );
-
+      // XFile passed directly — no File() wrapping needed (web compatible)
+      final url = await _profileRepository.uploadProfileImage(picked);
       if (url != null) {
         profileImageUrl.value = url;
         AppSnackbar.success('Profile photo updated!');
       }
     } catch (e) {
       AppSnackbar.error('Failed to upload image. Please try again.');
-      if (kDebugMode) debugPrint('ProfileController: Image upload error → $e');
+      if (kDebugMode) debugPrint('ProfileController: image upload error → $e');
     } finally {
       isUploadingImage.value = false;
     }
   }
 
   bool _validateForm() {
+    debugPrint('🔍 Validating — name: "${nameController.text.trim()}" length: ${nameController.text.trim().length}');
+
     if (nameController.text.trim().length < 3) {
+      debugPrint(' Name too short');
       AppSnackbar.error('Please enter a valid name (at least 3 characters)');
       return false;
     }
-    if (!GetUtils.isEmail(emailController.text.trim())) {
-      AppSnackbar.error('Please enter a valid email');
-      return false;
-    }
+
+    debugPrint('🔍 Phone: "${phoneController.text.trim()}" length: ${phoneController.text.trim().length}');
     if (phoneController.text.trim().length < 11) {
+      debugPrint(' Phone too short');
       AppSnackbar.error('Please enter a valid phone number');
       return false;
     }
+
+    debugPrint('✅ Validation passed');
     return true;
   }
 
-  /// Save profile via repository
   Future<void> updateProfile() async {
     if (!_validateForm()) return;
 
@@ -138,37 +144,30 @@ class ProfileController extends GetxController {
 
     try {
       final current = user.value!;
-
       final updated = current.copyWith(
         name: nameController.text.trim(),
         phone: phoneController.text.trim(),
         location: locationController.text.trim().isEmpty
-            ? null
-            : locationController.text.trim(),
+            ? null : locationController.text.trim(),
         farmSize: farmSizeController.text.trim().isEmpty
-            ? null
-            : farmSizeController.text.trim(),
+            ? null : farmSizeController.text.trim(),
         specialization: specializationController.text.trim().isEmpty
-            ? null
-            : specializationController.text.trim(),
+            ? null : specializationController.text.trim(),
         companyName: companyNameController.text.trim().isEmpty
-            ? null
-            : companyNameController.text.trim(),
+            ? null : companyNameController.text.trim(),
         profileImage: profileImageUrl.value.isEmpty
-            ? null
-            : profileImageUrl.value,
+            ? null : profileImageUrl.value,
         updatedAt: DateTime.now(),
       );
 
-      // Persist via repository
       await _profileRepository.saveProfile(updated);
-
-      // Update in-memory state
       _authRepository.currentUser.value = updated;
 
       isEditing.value = false;
-      AppSnackbar.success('Profile updated!');
-      Get.back();
+      // Delay — isEditing false hone ke baad overlay settle hoti hai
+      Future.delayed(const Duration(milliseconds: 300), () {
+        AppSnackbar.success('Profile updated!');
+      });
     } catch (e) {
       if (kDebugMode) debugPrint('ProfileController: updateProfile error → $e');
       AppSnackbar.error('Failed to update profile. Please try again.');
@@ -180,8 +179,7 @@ class ProfileController extends GetxController {
   void skipProfileSetup() {
     Get.defaultDialog(
       title: 'Skip for Now',
-      middleText:
-          'You can complete your profile later from the profile section.',
+      middleText: 'You can complete your profile later from the profile section.',
       textConfirm: 'Continue',
       textCancel: 'Cancel',
       confirmTextColor: Colors.white,
@@ -207,7 +205,6 @@ class ProfileController extends GetxController {
       buttonColor: Colors.red,
       onConfirm: () {
         Get.back();
-        // TODO: Implement account deletion — Phase 2
         AppSnackbar.info('Account deletion coming soon.');
       },
     );

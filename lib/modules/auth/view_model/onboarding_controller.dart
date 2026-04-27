@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../../app/data/models/user_model.dart';
 import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../../app/data/services/firebase_service.dart';
@@ -8,41 +9,31 @@ import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 import 'auth_controller.dart';
 
-/// OnboardingController — ViewModel for the Role Selection and Profile Completion screens.
-///
-/// Handles the one-time onboarding flow:
-/// 1. User picks a role (Farmer / Expert / Company)
-/// 2. Fills role-specific profile fields
-/// 3. Profile saved to Firestore → navigated to Home
 class OnboardingController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
   final AuthController _authController = Get.find<AuthController>();
 
-  // --- Role selection ---
+  // Used to trigger field-level validation (red borders + error text)
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   final RxString selectedRole = ''.obs;
   final RxBool isLoading = false.obs;
 
-  // --- Common profile fields ---
+  // Enables real-time validation after first save attempt
+  final RxBool autoValidate = false.obs;
+
   late final TextEditingController nameController;
   late final TextEditingController phoneController;
   late final TextEditingController locationController;
-
-  // --- Farmer-specific ---
   late final TextEditingController farmSizeController;
   final RxList<String> selectedCrops = <String>[].obs;
 
   static const List<String> availableCrops = [
-    'Wheat',
-    'Rice',
-    'Potatoes',
-    'Maize',
-    'Cotton',
-    'Sugarcane',
-    'Canola',
+    'Wheat', 'Rice', 'Potatoes', 'Maize',
+    'Cotton', 'Sugarcane', 'Canola',
   ];
 
-  // --- Expert-specific ---
   final RxString selectedSpecialization = ''.obs;
   late final TextEditingController yearsExperienceController;
   late final TextEditingController certificationsController;
@@ -50,18 +41,12 @@ class OnboardingController extends GetxController {
   final RxBool isAvailableForConsultation = true.obs;
 
   static const List<String> expertSpecializations = [
-    'Crop Management',
-    'Pest & Disease Control',
-    'Soil Science',
-    'Irrigation Systems',
-    'Livestock Management',
-    'Agricultural Machinery',
-    'Agri Business & Marketing',
-    'Organic Farming',
+    'Crop Management', 'Pest & Disease Control', 'Soil Science',
+    'Irrigation Systems', 'Livestock Management', 'Agricultural Machinery',
+    'Agri Business & Marketing', 'Organic Farming',
     'Fertilizer & Nutrient Management',
   ];
 
-  // --- Company/Seller-specific ---
   late final TextEditingController companyNameController;
   late final TextEditingController ownerNameController;
   final RxString selectedBusinessType = ''.obs;
@@ -70,33 +55,18 @@ class OnboardingController extends GetxController {
   late final TextEditingController businessDescriptionController;
 
   static const List<String> businessTypes = [
-    'Seeds Supplier',
-    'Fertilizer Dealer',
-    'Pesticide Dealer',
-    'Agricultural Equipment',
-    'Crop Buyer',
-    'Livestock Trader',
+    'Seeds Supplier', 'Fertilizer Dealer', 'Pesticide Dealer',
+    'Agricultural Equipment', 'Crop Buyer', 'Livestock Trader',
     'General Agri Store',
   ];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // COMPUTED GETTERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// True when the current user signed in anonymously (guest farmer flow).
-  /// Used by ProfileCompletionView to hide the "Skip" button.
   bool get isAnonymousFarmer =>
       (_authRepository.currentUser.value?.isAnonymous ?? false) &&
-      selectedRole.value == 'farmer';
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // INIT
-  // ─────────────────────────────────────────────────────────────────────────
+          selectedRole.value == 'farmer';
 
   @override
   void onInit() {
     super.onInit();
-
     nameController = TextEditingController();
     phoneController = TextEditingController();
     locationController = TextEditingController();
@@ -109,43 +79,26 @@ class OnboardingController extends GetxController {
     yearsInBusinessController = TextEditingController();
     licenseNumberController = TextEditingController();
     businessDescriptionController = TextEditingController();
-
     _prefillFromCurrentUser();
   }
 
-  /// Pre-fill fields with any existing user data (returning user or signup carry-over).
   void _prefillFromCurrentUser() {
     final user = _authRepository.currentUser.value;
     if (user == null) return;
-
     nameController.text = user.name;
     phoneController.text = user.phone;
     locationController.text = user.location ?? '';
-
-    if (user.userType.isNotEmpty) {
-      selectedRole.value = user.userType;
-    }
+    if (user.userType.isNotEmpty) selectedRole.value = user.userType;
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // ROLE SELECTION
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// User tapped a role card.
-  /// Navigation is centralized in AuthController.
   Future<void> selectRole(String role) async {
     if (isLoading.value) return;
-
     selectedRole.value = role;
-    // await Future.delayed(Duration.zero);
+    autoValidate.value = false;
     await _authController.handleRoleSelection(role);
   }
 
   void goBackToRoleSelection() => _authController.openRoleSelection();
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // CROP SELECTION (Farmers only)
-  // ─────────────────────────────────────────────────────────────────────────
 
   void toggleCropSelection(String crop) {
     if (selectedCrops.contains(crop)) {
@@ -157,87 +110,76 @@ class OnboardingController extends GetxController {
 
   bool isCropSelected(String crop) => selectedCrops.contains(crop);
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // VALIDATION
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── Field validators ───────────────────────────────────────────────────
 
-  /// Shared check — name must be at least 3 characters.
-  bool _validateName() {
-    if (nameController.text.trim().length < 3) {
-      AppSnackbar.error('Please enter your name (at least 3 characters)');
-      return false;
-    }
-    return true;
+  String? validateName(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Please fill this field';
+    if (v.trim().length < 3) return 'Minimum 3 characters required';
+    return null;
   }
 
-  /// Farmer profile: name + phone + location are required. Crops required too.
-  bool _validateFarmerProfile() {
-    if (!_validateName()) return false;
-    if (phoneController.text.trim().length < 11) {
-      AppSnackbar.error('Please enter a valid phone number');
-      return false;
-    }
-    if (locationController.text.trim().isEmpty) {
-      AppSnackbar.error('Please enter your farm location');
-      return false;
-    }
-    if (selectedCrops.isEmpty) {
-      AppSnackbar.error('Please select at least one crop');
-      return false;
-    }
-    return true;
+  // Farmer phone — required, exactly 11 digits
+  String? validatePhoneRequired(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Please fill this field';
+    if (v.trim().length < 11) return 'Phone number must be 11 digits';
+    return null;
   }
 
-  /// Expert profile: name + specialization + years of experience required.
-  bool _validateExpertProfile() {
-    if (!_validateName()) return false;
-    if (selectedSpecialization.value.isEmpty) {
-      AppSnackbar.error('Please select your specialization');
-      return false;
-    }
-    final years = int.tryParse(yearsExperienceController.text.trim());
-    if (years == null || years < 0) {
-      AppSnackbar.error('Please enter a valid number for years of experience');
-      return false;
-    }
-    return true;
+  // Expert/Company phone — optional, but if filled must be 11 digits
+  String? validatePhoneOptional(String? v) {
+    if (v == null || v.trim().isEmpty) return null;
+    if (v.trim().length < 11) return 'Phone number must be 11 digits';
+    return null;
   }
 
-  /// Company profile: company name + business type required.
-  bool _validateCompanyProfile() {
-    if (companyNameController.text.trim().isEmpty) {
-      AppSnackbar.error('Please enter your company name');
-      return false;
-    }
-    if (selectedBusinessType.value.isEmpty) {
-      AppSnackbar.error('Please select your business type');
-      return false;
-    }
-    return true;
+  String? validateRequired(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Please fill this field';
+    return null;
   }
 
-  /// Dispatches to the correct role validator.
-  bool validateProfile() {
-    switch (selectedRole.value) {
-      case 'farmer':
-        return _validateFarmerProfile();
-      case 'expert':
-        return _validateExpertProfile();
-      case 'company':
-        return _validateCompanyProfile();
-      default:
-        AppSnackbar.error('Please select a role first');
-        return false;
-    }
+  String? validateFarmSize(String? v) {
+    if (v == null || v.trim().isEmpty) return null;
+    if (double.tryParse(v.trim()) == null) return 'Numbers only';
+    return null;
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SAVE PROFILE
-  // ─────────────────────────────────────────────────────────────────────────
+  String? validateYearsExperience(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Please fill this field';
+    final years = int.tryParse(v.trim());
+    if (years == null || years < 0) return 'Enter a valid number';
+    return null;
+  }
 
-  /// Validate, build the updated UserModel, save to Firestore, navigate home.
+  String? validateYearsInBusiness(String? v) {
+    if (v == null || v.trim().isEmpty) return null;
+    final years = int.tryParse(v.trim());
+    if (years == null || years < 0) return 'Enter a valid number';
+    return null;
+  }
+
+  // ── Save ───────────────────────────────────────────────────────────────
+
   Future<void> saveProfile() async {
-    if (!validateProfile()) return;
+    autoValidate.value = true;
+
+    final fieldsValid = formKey.currentState?.validate() ?? false;
+
+    // Dropdowns and crops are outside Form — validate manually
+    bool extrasValid = true;
+    if (selectedRole.value == 'farmer' && selectedCrops.isEmpty) {
+      AppSnackbar.error('Please select at least one crop');
+      extrasValid = false;
+    }
+    if (selectedRole.value == 'expert' && selectedSpecialization.value.isEmpty) {
+      AppSnackbar.error('Please select your specialization');
+      extrasValid = false;
+    }
+    if (selectedRole.value == 'company' && selectedBusinessType.value.isEmpty) {
+      AppSnackbar.error('Please select your business type');
+      extrasValid = false;
+    }
+
+    if (!fieldsValid || !extrasValid) return;
 
     FocusManager.instance.primaryFocus?.unfocus();
     isLoading.value = true;
@@ -249,7 +191,6 @@ class OnboardingController extends GetxController {
         return;
       }
 
-      // Pre-trim once — avoids repeating .trim() throughout the switch
       final name = nameController.text.trim();
       final phone = phoneController.text.trim();
       final location = locationController.text.trim();
@@ -264,8 +205,7 @@ class OnboardingController extends GetxController {
             userType: 'farmer',
             location: location,
             farmSize: farmSizeController.text.trim().isEmpty
-                ? null
-                : farmSizeController.text.trim(),
+                ? null : farmSizeController.text.trim(),
             cropsGrown: selectedCrops.toList(),
             isProfileComplete: true,
             updatedAt: DateTime.now(),
@@ -279,15 +219,11 @@ class OnboardingController extends GetxController {
             userType: 'expert',
             location: location.isEmpty ? null : location,
             specialization: selectedSpecialization.value,
-            yearsOfExperience: int.tryParse(
-              yearsExperienceController.text.trim(),
-            ),
+            yearsOfExperience: int.tryParse(yearsExperienceController.text.trim()),
             certifications: certificationsController.text.trim().isEmpty
-                ? null
-                : certificationsController.text.trim(),
+                ? null : certificationsController.text.trim(),
             bio: bioController.text.trim().isEmpty
-                ? null
-                : bioController.text.trim(),
+                ? null : bioController.text.trim(),
             isAvailableForConsultation: isAvailableForConsultation.value,
             isProfileComplete: true,
             updatedAt: DateTime.now(),
@@ -303,16 +239,11 @@ class OnboardingController extends GetxController {
             location: location.isEmpty ? null : location,
             companyName: companyNameController.text.trim(),
             businessType: selectedBusinessType.value,
-            yearsInBusiness: int.tryParse(
-              yearsInBusinessController.text.trim(),
-            ),
+            yearsInBusiness: int.tryParse(yearsInBusinessController.text.trim()),
             licenseNumber: licenseNumberController.text.trim().isEmpty
-                ? null
-                : licenseNumberController.text.trim(),
-            businessDescription:
-                businessDescriptionController.text.trim().isEmpty
-                ? null
-                : businessDescriptionController.text.trim(),
+                ? null : licenseNumberController.text.trim(),
+            businessDescription: businessDescriptionController.text.trim().isEmpty
+                ? null : businessDescriptionController.text.trim(),
             isProfileComplete: true,
             updatedAt: DateTime.now(),
           );
@@ -323,35 +254,23 @@ class OnboardingController extends GetxController {
           return;
       }
 
-      // Persist to Firestore
       await _firebaseService.saveUserData(updated);
-
-      // Update in-memory state — no Firestore round-trip needed
       _authRepository.currentUser.value = updated;
 
-      AppSnackbar.success('Profile saved!');
-
       Get.offAllNamed(AppRoutes.HOME);
+      Future.delayed(const Duration(milliseconds: 400), () {
+        AppSnackbar.success('Profile saved!');
+      });
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('OnboardingController: saveProfile error → $e');
-      }
+      if (kDebugMode) debugPrint('saveProfile error → $e');
       AppSnackbar.error('Failed to save profile. Please try again.');
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // CLEANUP
-  // ─────────────────────────────────────────────────────────────────────────
-
   @override
   void onClose() {
-    // NOTE: Controllers are NOT disposed here to avoid "used after dispose" errors
-    // during navigation and widget tree cleanup on GetX lifecycle.
-    // GetX will handle the cleanup safely.
-    // If you absolutely need to dispose, use Future.delayed with much longer delay.
     super.onClose();
   }
 }

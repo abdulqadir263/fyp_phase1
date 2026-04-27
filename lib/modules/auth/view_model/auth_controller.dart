@@ -7,48 +7,34 @@ import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 
-/// AuthController — ViewModel for the Login/Signup screen.
-///
-/// Responsibilities:
-/// - Manages form state (text controllers, visibility toggles)
-/// - Validates user input before sending to AuthRepository
-/// - Manages password reset flow state
-/// - Never calls Firebase directly — all auth goes through AuthRepository
 class AuthController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
 
-  // --- Form controllers ---
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final TextEditingController phoneController;
   late final TextEditingController passwordController;
   late final TextEditingController confirmPasswordController;
-
-  // Kept here (not in the view) so it gets properly disposed in onClose()
   late final TextEditingController forgotEmailController;
 
-  // --- UI state ---
-  final RxBool isLogin = true.obs; // true = login, false = signup
+  final RxBool isLogin = true.obs;
   final RxBool isLoading = false.obs;
   final RxBool isPasswordVisible = false.obs;
   final RxBool isConfirmPasswordVisible = false.obs;
-
-  // --- Password reset state ---
-  // 0 = enter email step, 1 = success/email-sent step
   final RxInt resetStep = 0.obs;
-  final RxString resetEmailSentTo = ''.obs; // the address we sent the link to
-  final RxInt resendCooldown = 0.obs; // seconds before resend is allowed
+  final RxString resetEmailSentTo = ''.obs;
+  final RxInt resendCooldown = 0.obs;
   final RxString selectedRole = ''.obs;
 
   Timer? _resendTimer;
   Worker? _authStateWorker;
   bool _canNavigate = false;
   bool _isRouting = false;
+  bool _isSubmitting = false;
 
   @override
   void onInit() {
     super.onInit();
-
     nameController = TextEditingController();
     emailController = TextEditingController();
     phoneController = TextEditingController();
@@ -56,16 +42,19 @@ class AuthController extends GetxController {
     confirmPasswordController = TextEditingController();
     forgotEmailController = TextEditingController();
 
-    _authStateWorker = everAll([
+    // Delay — currentUser Firestore se load hone ka wait
+    _authStateWorker = ever(
       _authRepository.isAuthenticated,
-      _authRepository.currentUser,
-    ], (_) => _routeFromAuthState());
+          (_) => Future.delayed(
+        const Duration(milliseconds: 500),
+        _routeFromAuthState,
+      ),
+    );
   }
 
   @override
   void onReady() {
     super.onReady();
-    // Defer navigation until GetMaterialApp navigator is fully ready.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _canNavigate = true;
       _routeFromAuthState();
@@ -75,20 +64,18 @@ class AuthController extends GetxController {
   void _routeFromAuthState() {
     if (!_canNavigate || Get.key.currentState == null || _isRouting) return;
 
+    final currentRoute = Get.currentRoute;
+    if (_isStableRoute(currentRoute)) return;
+
     final targetRoute = _resolveAuthRoute();
     if (targetRoute == null) return;
-
-    final currentRoute = Get.currentRoute;
     if (currentRoute == targetRoute) return;
 
-    // Do not force unauthenticated users off public auth pages.
-    if (targetRoute == AppRoutes.WELCOME && _isPublicRoute(currentRoute)) {
-      return;
-    }
+    if (targetRoute == AppRoutes.WELCOME && _isPublicRoute(currentRoute)) return;
 
     _isRouting = true;
-    Future.delayed(Duration.zero,() {
-      Get.offAllNamed(targetRoute);
+    Get.offAllNamed(targetRoute);
+    Future.delayed(const Duration(milliseconds: 600), () {
       _isRouting = false;
     });
   }
@@ -100,12 +87,18 @@ class AuthController extends GetxController {
         route == AppRoutes.FORGOT_PASSWORD;
   }
 
+  bool _isStableRoute(String route) {
+    return route == AppRoutes.HOME ||
+        route == AppRoutes.PROFILE_COMPLETION ||
+        route == AppRoutes.ROLE_SELECTION ||
+        route == AppRoutes.WELCOME;
+  }
+
   String? _resolveAuthRoute() {
     final UserModel? user = _authRepository.currentUser.value;
     final bool isLoggedIn =
         _authRepository.isAuthenticated.value && user != null;
 
-    // Unauthenticated: default to welcome, but expert/seller role intent goes to login.
     if (!isLoggedIn) {
       if (selectedRole.value == 'expert' ||
           selectedRole.value == 'company' ||
@@ -118,25 +111,15 @@ class AuthController extends GetxController {
     final bool isAnonymousFarmer =
         user.isAnonymous || (user.userType == 'farmer' && user.email.isEmpty);
 
-    // Anonymous farmer flow
     if (isAnonymousFarmer) {
-      return user.isProfileComplete
-          ? AppRoutes.HOME
-          : AppRoutes.PROFILE_COMPLETION;
+      return user.isProfileComplete ? AppRoutes.HOME : AppRoutes.PROFILE_COMPLETION;
     }
 
-    // Expert/Seller flow
-    if (!user.isProfileComplete) return AppRoutes.PROFILE;
+    if (!user.isProfileComplete) return AppRoutes.PROFILE_COMPLETION;
 
     return AppRoutes.HOME;
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // TOGGLE HELPERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Switch between login and signup modes.
-  /// Clears signup-only fields when switching to avoid stale data.
   void toggleAuthMode() {
     isLogin.value = !isLogin.value;
     if (!isLogin.value) {
@@ -148,21 +131,15 @@ class AuthController extends GetxController {
 
   void togglePasswordVisibility() =>
       isPasswordVisible.value = !isPasswordVisible.value;
+
   void toggleConfirmPasswordVisibility() =>
       isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // VALIDATION
-  // ─────────────────────────────────────────────────────────────────────────
 
   bool _isValidEmail(String email) =>
       email.isNotEmpty && GetUtils.isEmail(email);
 
-  /// Validates all active form fields.
-  /// Shows an error snackbar and returns false on first failure.
   bool _validateForm() {
     if (!isLogin.value) {
-      // Signup-only checks
       if (nameController.text.trim().length < 3) {
         AppSnackbar.error('Please enter a valid name (at least 3 characters)');
         return false;
@@ -176,7 +153,6 @@ class AuthController extends GetxController {
         return false;
       }
     }
-
     if (!_isValidEmail(emailController.text)) {
       AppSnackbar.error('Please enter a valid email address');
       return false;
@@ -188,14 +164,13 @@ class AuthController extends GetxController {
     return true;
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // AUTH ACTIONS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Submit login or signup form.
   Future<void> submit() async {
-    if (isLoading.value) return;
-    if (!_validateForm()) return;
+    if (_isSubmitting || isLoading.value) return;
+    _isSubmitting = true;
+    if (!_validateForm()) {
+      _isSubmitting = false;
+      return;
+    }
 
     FocusManager.instance.primaryFocus?.unfocus();
     isLoading.value = true;
@@ -206,13 +181,15 @@ class AuthController extends GetxController {
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
         );
-
         final user = _authRepository.currentUser.value;
-        if (user != null && user.name.isNotEmpty) {
-          AppSnackbar.success('Welcome back, ${user.name}!');
-        } else {
-          AppSnackbar.success('Welcome back! Please complete your profile.');
-        }
+        // Delay — navigation complete hone ke baad snackbar
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (user != null && user.name.isNotEmpty) {
+            AppSnackbar.success('Welcome back, ${user.name}!');
+          } else {
+            AppSnackbar.success('Welcome back!');
+          }
+        });
       } else {
         await _authRepository.signUp(
           name: nameController.text.trim(),
@@ -220,28 +197,26 @@ class AuthController extends GetxController {
           phone: phoneController.text.trim(),
           password: passwordController.text.trim(),
         );
-
-        AppSnackbar.success('Account created! Please select your role.');
+        Future.delayed(const Duration(milliseconds: 500), () {
+          AppSnackbar.success('Account created! Please select your role.');
+        });
       }
     } catch (e) {
       AppSnackbar.error(e.toString());
     } finally {
       isLoading.value = false;
+      _isSubmitting = false;
     }
   }
 
-  /// Start anonymous sign-in for the guest farmer flow.
   Future<void> signInAsGuest() async {
     if (isLoading.value) return;
-
     isLoading.value = true;
     try {
       await _authRepository.signInAnonymouslyAsFarmer();
     } catch (e) {
       AppSnackbar.error('Could not sign in. Please try again.');
-      if (kDebugMode) {
-        debugPrint('AuthController: Anonymous sign-in error → $e');
-      }
+      if (kDebugMode) debugPrint('AuthController: Anonymous sign-in error → $e');
     } finally {
       isLoading.value = false;
     }
@@ -249,10 +224,8 @@ class AuthController extends GetxController {
 
   Future<void> handleRoleSelection(String role) async {
     if (isLoading.value) return;
-
     selectedRole.value = role;
 
-    // Role selection does not navigate directly. Routing is handled by auth-state resolver.
     if (role == 'farmer' && !_authRepository.isAuthenticated.value) {
       isLoading.value = true;
       try {
@@ -265,67 +238,64 @@ class AuthController extends GetxController {
       return;
     }
 
-    _routeFromAuthState();
+    if (_authRepository.isAuthenticated.value) {
+      final currentRoute = Get.currentRoute;
+      if (currentRoute != AppRoutes.PROFILE_COMPLETION) {
+        _isRouting = true;
+        Future.delayed(Duration.zero, () {
+          Get.toNamed(AppRoutes.PROFILE_COMPLETION);
+          _isRouting = false;
+        });
+      }
+    } else {
+      _navigateTo(AppRoutes.LOGIN);
+    }
   }
 
   void openRoleSelection() => _navigateTo(AppRoutes.ROLE_SELECTION);
-
   void openWelcome() => _navigateTo(AppRoutes.WELCOME);
 
   void closeCurrentScreen() {
-    if (Get.key.currentState?.canPop() ?? false) {
-      Get.back();
-    }
+    if (Get.key.currentState?.canPop() ?? false) Get.back();
   }
 
   void _navigateTo(String route) {
     if (!_canNavigate || Get.key.currentState == null) return;
     if (Get.currentRoute == route) return;
-    Future.delayed(Duration.zero,() => Get.toNamed(route));
+    Future.delayed(Duration.zero, () => Get.toNamed(route));
   }
 
   Future<void> signOut() async {
     try {
       await _authRepository.signOut();
-      AppSnackbar.success('Logged out successfully.');
     } catch (e) {
       AppSnackbar.error(e.toString());
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // PASSWORD RESET
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Navigate to forgot password screen, pre-filling the email field.
   void navigateToForgotPassword() {
-    // Reset all state before opening the screen
     resetStep.value = 0;
     resetEmailSentTo.value = '';
     resendCooldown.value = 0;
-    // Pre-fill from the login field if the user already typed their email
     forgotEmailController.text = emailController.text.trim();
     Get.toNamed(AppRoutes.FORGOT_PASSWORD);
   }
 
-  /// Send a password reset email.
-  /// On success, advances to step 1 and starts the 60-second resend cooldown.
   Future<void> sendPasswordResetEmail(String email) async {
     if (isLoading.value) return;
-
     if (!_isValidEmail(email)) {
       AppSnackbar.error('Please enter a valid email address');
       return;
     }
-
     isLoading.value = true;
     try {
-      // Routed through AuthRepository — no direct Firebase in this controller
       await _authRepository.forgotPassword(email);
       resetEmailSentTo.value = email;
       resetStep.value = 1;
       _startResendCooldown();
-      AppSnackbar.success('Reset link sent to $email');
+      Future.delayed(const Duration(milliseconds: 300), () {
+        AppSnackbar.success('Reset link sent to $email');
+      });
     } catch (e) {
       AppSnackbar.error('Failed to send reset email. Please try again.');
       if (kDebugMode) debugPrint('AuthController: Reset email error → $e');
@@ -334,11 +304,9 @@ class AuthController extends GetxController {
     }
   }
 
-  /// 60-second countdown before the "Resend" button becomes active again.
   void _startResendCooldown() {
     _resendTimer?.cancel();
     resendCooldown.value = 60;
-
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (resendCooldown.value <= 0) {
         timer.cancel();

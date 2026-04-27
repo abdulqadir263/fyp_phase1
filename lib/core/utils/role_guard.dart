@@ -1,65 +1,47 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:fyp_phase1/modules/appointments/view/appointment_detail_view.dart';
+import 'package:fyp_phase1/modules/home/view/home_view.dart';
 import 'package:get/get.dart';
 import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/utils/app_snackbar.dart';
 
-/// Centralized role-based access control for the entire app.
-///
-/// Defines which modules each user type can access.
-/// Used by: route middleware, controllers, navigation UI.
+// Module view imports — IndexedStack ke liye embedded widgets
+import '../../modules/marketplace/view/marketplace_view.dart';
+import '../../modules/marketplace/view/seller_dashboard_view.dart';
+import '../../modules/community/view/community_view.dart';
+import '../../modules/appointments/view/appointments_view.dart';
+import '../../modules/weather/view/weather_view.dart';
+import '../../modules/crop_tracker/view/crop_tracker_view.dart';
+
 class RoleGuard {
-  RoleGuard._(); // Prevent instantiation
+  RoleGuard._();
 
-  // ═══════════════════════════════════════════
-  //  MODULE IDENTIFIERS
-  // ═══════════════════════════════════════════
-
-  static const String marketplace = 'marketplace';
-  static const String sellerPanel = 'seller_panel';
-  static const String cart = 'cart';
-  static const String appointments = 'appointments';
-  static const String community = 'community';
-  static const String weather = 'weather';
-  static const String chatbot = 'chatbot';
-  static const String profile = 'profile';
-  static const String cropTracker = 'crop_tracker';
+  static const String marketplace       = 'marketplace';
+  static const String sellerPanel       = 'seller_panel';
+  static const String cart              = 'cart';
+  static const String appointments      = 'appointments';
+  static const String community         = 'community';
+  static const String weather           = 'weather';
+  static const String chatbot           = 'chatbot';
+  static const String profile           = 'profile';
+  static const String cropTracker       = 'crop_tracker';
   static const String cropRecommendation = 'crop_recommendation';
 
-  // ═══════════════════════════════════════════
-  //  ACCESS MATRIX
-  // ═══════════════════════════════════════════
-
-  /// Defines which modules each role can access
   static const Map<String, Set<String>> _accessMatrix = {
     'farmer': {
-      marketplace,
-      cart,
-      appointments,
-      community,
-      weather,
-      chatbot,
-      profile,
-      cropTracker,
-      cropRecommendation,
+      marketplace, cart, appointments, community,
+      weather, chatbot, profile, cropTracker, cropRecommendation,
     },
-    'expert': {appointments, community, chatbot, profile},
+    'expert':  {appointments, community, chatbot, profile},
     'company': {marketplace, sellerPanel, chatbot, profile},
-    'guest': {weather, chatbot},
+    'guest':   {weather, chatbot},
   };
 
-  // ═══════════════════════════════════════════
-  //  CORE ACCESS CHECK
-  // ═══════════════════════════════════════════
+  static bool canAccess(String module, String userType) =>
+      _accessMatrix[userType]?.contains(module) ?? false;
 
-  /// Check if a given userType can access a module
-  static bool canAccess(String module, String userType) {
-    final allowed = _accessMatrix[userType];
-    if (allowed == null) return false;
-    return allowed.contains(module);
-  }
-
-  /// Get the current user's type from AuthRepository
   static String get currentUserType {
     try {
       return Get.find<AuthRepository>().currentUser.value?.userType ?? 'guest';
@@ -68,163 +50,129 @@ class RoleGuard {
     }
   }
 
-  /// Check access for the currently logged-in user
-  static bool currentUserCanAccess(String module) {
-    return canAccess(module, currentUserType);
-  }
+  static bool currentUserCanAccess(String module) =>
+      canAccess(module, currentUserType);
 
-  // ═══════════════════════════════════════════
-  //  DEFAULT REDIRECT ROUTES PER ROLE
-  // ═══════════════════════════════════════════
-
-  /// Where to redirect when a role tries to access something unauthorized
   static String defaultRouteFor(String userType) {
     switch (userType) {
-      case 'company':
-        return AppRoutes.SELLER_DASHBOARD;
-      case 'expert':
-        return AppRoutes.EXPERT_DASHBOARD;
-      case 'farmer':
-        return AppRoutes.HOME;
-      default:
-        return AppRoutes.HOME;
+      case 'company': return AppRoutes.SELLER_DASHBOARD;
+      case 'expert':  return AppRoutes.EXPERT_DASHBOARD;
+      default:        return AppRoutes.HOME;
     }
   }
 
-  /// Default route for the current user
   static String get currentDefaultRoute => defaultRouteFor(currentUserType);
 
-  // ═══════════════════════════════════════════
-  //  ROUTE → MODULE MAPPING
-  // ═══════════════════════════════════════════
-
-  /// Maps route paths to their required module permission.
-  /// Routes not listed here are unrestricted (auth, home, profile, etc.)
   static String? moduleForRoute(String route) {
-    // Marketplace buyer routes
     if (route == AppRoutes.MARKETPLACE ||
         route == AppRoutes.MARKETPLACE_PRODUCT ||
         route == AppRoutes.ORDER_HISTORY ||
-        route == AppRoutes.ORDER_DETAIL) {
-      return marketplace;
-    }
+        route == AppRoutes.ORDER_DETAIL) return marketplace;
 
-    // Cart / Checkout — only buyers (farmer)
     if (route == AppRoutes.MARKETPLACE_CART ||
-        route == AppRoutes.MARKETPLACE_CHECKOUT) {
-      return cart;
-    }
+        route == AppRoutes.MARKETPLACE_CHECKOUT) return cart;
 
-    // Seller-only routes
     if (route == AppRoutes.SELLER_DASHBOARD ||
         route == AppRoutes.SELLER_PRODUCTS ||
         route == AppRoutes.SELLER_ADD_PRODUCT ||
-        route == AppRoutes.SELLER_ORDERS) {
-      return sellerPanel;
-    }
+        route == AppRoutes.SELLER_ORDERS) return sellerPanel;
 
-    // Appointments
-    if (route.startsWith('/appointments')) {
-      return appointments;
-    }
-
-    // Community
-    if (route == AppRoutes.COMMUNITY || route.startsWith('/community')) {
-      return community;
-    }
-
-    // Weather
-    if (route == AppRoutes.WEATHER) {
-      return weather;
-    }
-
-    // Chatbot
-    if (route == AppRoutes.CHATBOT) {
-      return chatbot;
-    }
-
-    // Crop Tracker
-    if (route == AppRoutes.CROP_TRACKER) {
-      return cropTracker;
-    }
-
-    // Crop Recommendation
+    if (route.startsWith('/appointments')) return appointments;
+    if (route == AppRoutes.COMMUNITY ||
+        route.startsWith('/community')) return community;
+    if (route == AppRoutes.WEATHER) return weather;
+    if (route == AppRoutes.CHATBOT) return chatbot;
+    if (route == AppRoutes.CROP_TRACKER) return cropTracker;
     if (route == AppRoutes.CROP_RECOMMENDATION ||
         route == AppRoutes.CROP_RECOMMENDATION_RESULTS ||
-        route == AppRoutes.CROP_RECOMMENDATION_HISTORY) {
-      return cropRecommendation;
-    }
+        route == AppRoutes.CROP_RECOMMENDATION_HISTORY) return cropRecommendation;
 
-    // No restriction for auth, home, profile, onboarding routes
     return null;
   }
 
-  // ═══════════════════════════════════════════
-  //  GUARD + REDIRECT HELPER
-  // ═══════════════════════════════════════════
-
-  /// Check access for a route and redirect if unauthorized.
-  /// Returns true if access is allowed, false if redirected.
   static bool guardRoute(String route) {
     final module = moduleForRoute(route);
-    if (module == null) return true; // Unrestricted route
-
+    if (module == null) return true;
     if (currentUserCanAccess(module)) return true;
 
-    debugPrint(
-      '[RoleGuard] ❌ $currentUserType blocked from $route (module: $module)',
-    );
+    debugPrint('[RoleGuard] $currentUserType blocked from $route');
     AppSnackbar.warning('You do not have access to this feature.');
     Get.offAllNamed(currentDefaultRoute);
     return false;
   }
 
-  // ═══════════════════════════════════════════
-  //  NAVIGATION UI HELPERS
-  // ═══════════════════════════════════════════
-
-  /// Get the list of feature cards to show on home screen for the current role
   static List<String> get allowedFeatures {
-    final type = currentUserType;
-    final allowed = _accessMatrix[type] ?? {};
+    final allowed = _accessMatrix[currentUserType] ?? {};
     final features = <String>[];
-
     if (allowed.contains(appointments)) features.add('appointments');
     if (allowed.contains(marketplace) || allowed.contains(sellerPanel)) {
       features.add('marketplace');
     }
     if (allowed.contains(weather)) features.add('weather');
     if (allowed.contains(cropTracker)) features.add('crop_tracker');
-    if (allowed.contains(cropRecommendation)) {
-      features.add('crop_recommendation');
-    }
+    if (allowed.contains(cropRecommendation)) features.add('crop_recommendation');
     if (allowed.contains(community)) features.add('community');
     if (allowed.contains(chatbot)) features.add('chatbot');
-
     return features;
   }
 
-  /// Get the bottom navigation items for the current role.
-  /// Returns a list of tab identifiers: 'home', 'marketplace', 'weather',
-  /// 'crop_tracker', 'community', 'appointments'.
   static List<String> get bottomNavTabs {
     final type = currentUserType;
     final allowed = _accessMatrix[type] ?? {};
-    final tabs = <String>['home']; // Home is always first
+    final tabs = <String>['home'];
 
     if (type == 'company') {
-      tabs.add('marketplace'); // Shows seller dashboard
+      tabs.add('marketplace');
     } else if (type == 'expert') {
       tabs.add('appointments');
       tabs.add('community');
     } else {
-      // Farmer / guest — full nav
       tabs.add('marketplace');
       tabs.add('weather');
       if (allowed.contains(cropTracker)) tabs.add('crop_tracker');
       tabs.add('community');
     }
-
     return tabs;
+  }
+
+  // IndexedStack ke liye — actual embedded widgets return karta hai
+  // Get.toNamed() nahi — tab switch pe widget rebuild nahi hota
+  static Widget contentForTab(String tab, BuildContext context) {
+    switch (tab) {
+      case 'home':
+        return const HomeView();
+      case 'marketplace':
+      // Company ko seller dashboard, farmer ko marketplace
+        return currentUserType == 'company'
+            ? const SellerDashboardView()
+            : const MarketplaceHomeView();
+      case 'weather':
+        return const WeatherView();
+      case 'crop_tracker':
+        return const CropTrackerView();
+      case 'community':
+        return const CommunityView();
+      case 'appointments':
+        return const AppointmentDetailView();
+      default:
+        return _buildPlaceholder(tab);
+    }
+  }
+
+  static Widget _buildPlaceholder(String tab) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.construction, size: 48, color: Colors.grey[400]),
+          const SizedBox(height: 12),
+          Text(tab,
+              style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+          const SizedBox(height: 4),
+          Text('Coming soon',
+              style: TextStyle(fontSize: 13, color: Colors.grey[400])),
+        ],
+      ),
+    );
   }
 }

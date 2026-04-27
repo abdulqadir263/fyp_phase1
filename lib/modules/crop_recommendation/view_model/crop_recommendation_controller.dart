@@ -3,13 +3,16 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/recommendation_model.dart';
 import '../repository/recommendation_repository.dart';
+import '../services/crop_recommender.dart';
 
 /// Controller for the Crop Recommendation module.
-/// Manages input form state, scoring, results, and history.
+/// Manages input form state, TFLite inference, results, and history.
 class CropRecommendationController extends GetxController {
-  final RecommendationRepository _service = RecommendationRepository();
+  // ── TFLite service (initialised once in onInit) ───────────────────────────
+  final CropRecommender _recommender = CropRecommender();
+  late final RecommendationRepository _service;
 
-  // ── Form Controllers ──
+  // ── Form Controllers ──────────────────────────────────────────────────────
   final nController = TextEditingController();
   final pController = TextEditingController();
   final kController = TextEditingController();
@@ -20,7 +23,7 @@ class CropRecommendationController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
 
-  // ── Observable State ──
+  // ── Observable State ──────────────────────────────────────────────────────
   final isLoading = false.obs;
   final isHistoryLoading = false.obs;
   final errorMessage = ''.obs;
@@ -31,6 +34,40 @@ class CropRecommendationController extends GetxController {
 
   /// Current user ID from FirebaseAuth.
   String get _userId => FirebaseAuth.instance.currentUser?.uid ?? '';
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Wire the recommender into the repository, then warm up the interpreter.
+    _service = RecommendationRepository(recommender: _recommender);
+    _initializeRecommender();
+  }
+
+  /// Load the TFLite model and JSON assets asynchronously.
+  Future<void> _initializeRecommender() async {
+    try {
+      await _recommender.initialize();
+    } catch (e) {
+      errorMessage.value = 'Failed to load recommendation model: $e';
+    }
+  }
+
+  @override
+  void onClose() {
+    _recommender.dispose();
+    nController.dispose();
+    pController.dispose();
+    kController.dispose();
+    temperatureController.dispose();
+    humidityController.dispose();
+    phController.dispose();
+    rainfallController.dispose();
+    super.onClose();
+  }
+
+  // ── Validation ────────────────────────────────────────────────────────────
 
   /// Validate a numeric input field.
   String? validateField(String? value, String fieldName) {
@@ -47,9 +84,21 @@ class CropRecommendationController extends GetxController {
     return null;
   }
 
-  /// Run the recommendation engine with current form values.
+  // ── Recommendation ────────────────────────────────────────────────────────
+
+  /// Run TFLite inference with current form values and save to Firestore.
   Future<void> getRecommendation() async {
     if (!formKey.currentState!.validate()) return;
+
+    if (!_recommender.isReady) {
+      Get.snackbar(
+        'Please wait',
+        'Recommendation model is still loading…',
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      return;
+    }
 
     isLoading.value = true;
     errorMessage.value = '';
@@ -89,6 +138,8 @@ class CropRecommendationController extends GetxController {
     }
   }
 
+  // ── History ───────────────────────────────────────────────────────────────
+
   /// Load recommendation history for current user.
   Future<void> loadHistory() async {
     if (_userId.isEmpty) return;
@@ -127,17 +178,5 @@ class CropRecommendationController extends GetxController {
     phController.clear();
     rainfallController.clear();
     errorMessage.value = '';
-  }
-
-  @override
-  void onClose() {
-    nController.dispose();
-    pController.dispose();
-    kController.dispose();
-    temperatureController.dispose();
-    humidityController.dispose();
-    phController.dispose();
-    rainfallController.dispose();
-    super.onClose();
   }
 }

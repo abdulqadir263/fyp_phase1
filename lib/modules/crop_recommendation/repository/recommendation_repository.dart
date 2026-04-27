@@ -1,151 +1,61 @@
-import '../models/crop_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/recommendation_model.dart';
-import 'crop_repository.dart';
+import '../repository/crop_repository.dart';
+import '../services/crop_recommender.dart';
 
-/// Service containing the deterministic weighted scoring engine
-/// for crop recommendation.
+/// Repository that coordinates TFLite inference + Firestore persistence.
+///
+/// The old rule-based weighted-scoring engine has been removed.
+/// All inference is now delegated to [CropRecommender].
 class RecommendationRepository {
-  final CropRepository _repository = CropRepository();
+  final CropRepository _cropRepo;
+  final CropRecommender _recommender;
 
-  // ── Scoring Weights ──
-  static const double _weightN = 1.2;
-  static const double _weightP = 1.0;
-  static const double _weightK = 1.0;
-  static const double _weightTemperature = 1.5;
-  static const double _weightHumidity = 1.0;
-  static const double _weightPH = 1.5;
-  static const double _weightRainfall = 1.3;
+  RecommendationRepository({
+    CropRepository? cropRepo,
+    required CropRecommender recommender,
+  })  : _cropRepo = cropRepo ?? CropRepository(),
+        _recommender = recommender;
 
-  static const double _totalWeight =
-      _weightN +
-      _weightP +
-      _weightK +
-      _weightTemperature +
-      _weightHumidity +
-      _weightPH +
-      _weightRainfall;
+  // ── Inference + persistence ───────────────────────────────────────────────
 
-  /// Compute a single parameter score.
+  /// Run on-device TFLite inference and save the result to Firestore.
   ///
-  /// If user value is inside [minVal, maxVal]:
-  ///   score = 1 - (|userValue - meanVal| / (maxVal - minVal))
-  /// Else:
-  ///   score = 0
-  ///
-  /// Result is clamped to [0, 1].
-  double _parameterScore(
-    double userValue,
-    double minVal,
-    double maxVal,
-    double meanVal,
-  ) {
-    if (userValue < minVal || userValue > maxVal) return 0.0;
-    final range = maxVal - minVal;
-    if (range <= 0) return 0.0;
-    final score = 1.0 - ((userValue - meanVal).abs() / range);
-    return score.clamp(0.0, 1.0);
-  }
-
-  /// Compute the final weighted score for a single crop.
-  double _computeCropScore(CropModel crop, CropInput input) {
-    final scores = [
-      _parameterScore(input.n, crop.minN, crop.maxN, crop.meanN) * _weightN,
-      _parameterScore(input.p, crop.minP, crop.maxP, crop.meanP) * _weightP,
-      _parameterScore(input.k, crop.minK, crop.maxK, crop.meanK) * _weightK,
-      _parameterScore(
-            input.temperature,
-            crop.minTemperature,
-            crop.maxTemperature,
-            crop.meanTemperature,
-          ) *
-          _weightTemperature,
-      _parameterScore(
-            input.humidity,
-            crop.minHumidity,
-            crop.maxHumidity,
-            crop.meanHumidity,
-          ) *
-          _weightHumidity,
-      _parameterScore(input.ph, crop.minPH, crop.maxPH, crop.meanPH) *
-          _weightPH,
-      _parameterScore(
-            input.rainfall,
-            crop.minRainfall,
-            crop.maxRainfall,
-            crop.meanRainfall,
-          ) *
-          _weightRainfall,
-    ];
-
-    final weightedSum = scores.fold(0.0, (sum, s) => sum + s);
-    return (weightedSum / _totalWeight).clamp(0.0, 1.0);
-  }
-
-  /// Run the recommendation engine.
-  ///
-  /// 1. Fetch all crops from Firestore (single read).
-  /// 2. Score each crop using weighted scoring.
-  /// 3. Sort descending and return top 3.
-  /// 4. Save the recommendation record.
-  ///
-  /// Returns the list of top 3 [CropResult] and the saved record ID.
+  /// Returns the saved [RecommendationModel] with the assigned Firestore ID.
   Future<RecommendationModel> getRecommendations({
     required CropInput input,
     required String userId,
   }) async {
-    // Fetch crops once
-    final crops = await _repository.fetchAllCrops();
+    // Run synchronous TFLite inference (no network call)
+    final top3 = _recommender.recommend(input);
 
-    if (crops.isEmpty) {
-      throw Exception('No crop data available in database.');
-    }
-
-    // Score all crops
-    final scoredCrops = <MapEntry<String, double>>[];
-    for (final crop in crops) {
-      final score = _computeCropScore(crop, input);
-      scoredCrops.add(
-        MapEntry(crop.name.isNotEmpty ? crop.name : crop.id, score),
-      );
-    }
-
-    // Sort descending by score
-    scoredCrops.sort((a, b) => b.value.compareTo(a.value));
-
-    // Take top 3
-    final top3 = scoredCrops.take(3).map((entry) {
-      final percentage = double.parse((entry.value * 100).toStringAsFixed(1));
-      return CropResult(
-        cropName: entry.key,
-        score: double.parse(entry.value.toStringAsFixed(4)),
-        suitabilityPercentage: percentage,
-      );
-    }).toList();
-
-    // Build recommendation model
     final recommendation = RecommendationModel(
-      id: '', // will be assigned by Firestore
-      userId: userId,
-      input: input,
-      results: top3,
-      createdAt: DateTime.now(), // server timestamp used in toJson
-    );
-
-    // Save to Firestore
-    final docId = await _repository.saveRecommendation(recommendation);
-
-    // Return with the assigned document ID
-    return RecommendationModel(
-      id: docId,
-      userId: userId,
+      id: '', // assigned by Firestore
+      userId: userId.isNotEmpty
+          ? userId
+          : FirebaseAuth.instance.currentUser?.uid ?? '',
       input: input,
       results: top3,
       createdAt: DateTime.now(),
     );
+
+    // Persist to Firestore (history stays intact)
+    final docId = await _cropRepo.saveRecommendation(recommendation);
+
+    return RecommendationModel(
+      id: docId,
+      userId: recommendation.userId,
+      input: input,
+      results: top3,
+      createdAt: recommendation.createdAt,
+    );
   }
 
-  /// Fetch user's recommendation history.
+  // ── History (Firestore read — unchanged) ─────────────────────────────────
+
+  /// Fetch recommendation history for [userId] from Firestore.
   Future<List<RecommendationModel>> getHistory(String userId) {
-    return _repository.fetchHistory(userId);
+    return _cropRepo.fetchHistory(userId);
   }
 }

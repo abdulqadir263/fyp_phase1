@@ -1,25 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/crop_model.dart';
 import '../models/recommendation_model.dart';
 
-/// Repository handling all Firestore operations for crop recommendation.
+/// Repository handling Firestore persistence for the Crop Recommendation module.
+///
+/// [fetchAllCrops] has been removed — crop data is no longer fetched from
+/// Firestore for inference. The TFLite model is the sole inference source.
 class CropRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static const String _cropsCollection = 'crops';
   static const String _recommendationsCollection = 'cropRecommendations';
-
-  /// Fetch all crop documents from the 'crops' collection.
-  Future<List<CropModel>> fetchAllCrops() async {
-    try {
-      final snapshot = await _firestore.collection(_cropsCollection).get();
-      return snapshot.docs
-          .map((doc) => CropModel.fromJson(doc.data(), docId: doc.id))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to fetch crops: $e');
-    }
-  }
 
   /// Save a recommendation record to Firestore.
   Future<String> saveRecommendation(RecommendationModel recommendation) async {
@@ -44,7 +33,8 @@ class CropRepository {
           .get();
 
       return snapshot.docs
-          .map((doc) => RecommendationModel.fromJson(doc.data(), docId: doc.id))
+          .map((doc) =>
+              RecommendationModel.fromJson(doc.data(), docId: doc.id))
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch history: $e');

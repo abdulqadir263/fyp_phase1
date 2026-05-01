@@ -1,138 +1,105 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../app/data/models/user_model.dart';
-import '../../../app/data/services/firebase_service.dart';
-import '../../../app/routes/app_routes.dart';
-import '../../../app/utils/app_snackbar.dart';
-
+import '../../../app/data/services/session_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../app/routes/app_routes.dart';/// Single source of truth for the *currently active user state* in the app.
+/// It no longer performs auth itself (the role-specific controllers do that),
+/// but it holds `currentUser` so the UI (Home, Community, etc.) stays happy.
 class AuthRepository extends GetxService {
-  final FirebaseService _firebase = Get.find<FirebaseService>();
-
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   final RxBool isAuthenticated = false.obs;
+
+  final SessionService _session = SessionService();
+
+  final RxString currentRole = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _firebase.authStateChanges.listen(_handleAuthStateChange);
+    _loadRole();
   }
 
-  void _handleAuthStateChange(User? firebaseUser) {
-    if (kDebugMode) {
-      debugPrint('AuthRepository: Auth state changed → ${firebaseUser?.uid}');
-    }
-    if (firebaseUser == null) {
-      currentUser.value = null;
-      isAuthenticated.value = false;
-      return;
-    }
-    isAuthenticated.value = true;
-    _syncCurrentUser(firebaseUser.uid);
+  Future<void> _loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    currentRole.value = prefs.getString('current_role') ?? '';
   }
 
-  Future<void> _syncCurrentUser(String uid) async {
-    try {
-      final userData = await _firebase.getUserData(uid);
-      currentUser.value = userData;
-    } catch (e) {
-      if (kDebugMode) debugPrint('AuthRepository: Error fetching user → $e');
-      currentUser.value = null;
-    }
-  }
-
-  Future<void> signUp({
-    required String name,
-    required String email,
-    required String phone,
-    required String password,
-  }) async {
-    if (kDebugMode) debugPrint('AuthRepository: Signing up → $email');
-
-    final credential = await _firebase.signUpWithEmail(
-      email: email,
-      password: password,
-    );
-
-    final user = UserModel(
-      uid: credential.user!.uid,
-      name: name,
-      email: email,
-      phone: phone,
-      userType: '',
-      createdAt: DateTime.now(),
-      isProfileComplete: false,
-    );
-
-    // ✅ Firestore mein save karo — warna _syncCurrentUser null return karta tha
-    await _firebase.saveUserData(user);
-
-    currentUser.value = user;
-    isAuthenticated.value = true;
-  }
-
-  Future<void> signIn({required String email, required String password}) async {
-    if (kDebugMode) debugPrint('AuthRepository: Signing in → $email');
-
-    final credential = await _firebase.signInWithEmail(
-      email: email,
-      password: password,
-    );
-
-    final userData = await _firebase.getUserData(credential.user!.uid);
-    currentUser.value = userData;
-    isAuthenticated.value = true;
-  }
-
-  Future<void> signInAnonymouslyAsFarmer() async {
-    if (kDebugMode) debugPrint('AuthRepository: Anonymous farmer sign-in');
-
-    final credential = await _firebase.signInAnonymously();
-    final uid = credential.user!.uid;
-
-    final existing = await _firebase.getUserData(uid);
-    if (existing != null) {
-      currentUser.value = existing;
-      isAuthenticated.value = true;
-      return;
-    }
-
-    final seededUser = UserModel(
-      uid: uid,
-      name: '',
-      email: '',
-      phone: '',
-      userType: 'farmer',
-      isAnonymous: true,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      isProfileComplete: false,
-    );
-
-    await _firebase.saveUserData(seededUser);
-    currentUser.value = seededUser;
-    isAuthenticated.value = true;
+  void setRole(String role) async {
+    currentRole.value = role;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('current_role', role);
   }
 
   Future<void> signOut() async {
-    try {
-      await _firebase.signOut();
-      Get.offAllNamed(AppRoutes.WELCOME);
-      Future.delayed(const Duration(milliseconds: 400), () {
-        AppSnackbar.success('Logged out successfully.');
-      });
-    } catch (e) {
-      AppSnackbar.error(e.toString());
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('farmer_anonymous_uid');
+    await prefs.remove('current_role');
+    await _session.signOut();
+    currentUser.value = null;
+    isAuthenticated.value = false;
+    currentRole.value = '';
+    Get.offAllNamed(AppRoutes.WELCOME);
+  }
+
+  Future<void> signUpWithEmail(String email, String password) async {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email, password: password);
+  }
+
+  Future<void> signInWithEmail(String email, String password) async {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email, password: password);
+  }
+
+  Future<void> sendVerificationEmail() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
     }
   }
 
-  Future<void> forgotPassword(String email) async {
-    await _firebase.sendPasswordResetEmail(email);
+  Future<bool> reloadAndCheckVerified() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await user.reload();
+      return FirebaseAuth.instance.currentUser!.emailVerified;
+    }
+    return false;
   }
 
+  Future<bool> hasProfile(String role, String uid) async {
+    final doc = await FirebaseFirestore.instance.collection('${role}s').doc(uid).get();
+    return doc.exists;
+  }
+
+  /// Called after profile updates in edit_profile, etc.
   Future<void> refreshUserData() async {
-    final firebaseUser = _firebase.auth.currentUser;
-    if (firebaseUser == null) return;
-    await _syncCurrentUser(firebaseUser.uid);
+    final role = await _session.getCurrentUserRole();
+    if (role == null) return;
+    final user = _session.currentUser;
+    if (user == null) return;
+
+    final data = await _session.getUserData(role, user.uid);
+    if (data == null) return;
+
+    // Use SplashController's builder logic, or just a simplified update:
+    currentUser.value = UserModel(
+      uid: user.uid,
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+      phone: data['phone'] ?? '',
+      userType: role == 'seller' ? 'company' : role,
+      location: data['farmLocation'] ?? data['location'],
+      farmSize: data['farmSize'],
+      cropsGrown: data['cropsGrown'] != null
+          ? List<String>.from(data['cropsGrown'])
+          : null,
+      specialization: data['specialization'],
+      companyName: data['shopName'],
+      isProfileComplete: data['isProfileComplete'] ?? true,
+      createdAt: currentUser.value?.createdAt ?? DateTime.now(),
+    );
   }
 }

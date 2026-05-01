@@ -16,7 +16,6 @@ import 'app/data/services/weather_service.dart';
 import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 
 import 'app/services/groq_service.dart';
-import 'modules/auth/view_model/auth_controller.dart';
 import 'modules/community/repository/community_repository.dart';
 import 'modules/appointments/repository/appointment_repository.dart';
 import 'modules/marketplace/repository/marketplace_repository.dart';
@@ -50,7 +49,6 @@ void main() async {
 
   Get.put(GroqService(), permanent: true);
   Get.put(AuthRepository(), permanent: true);
-  Get.put(AuthController(), permanent: true);
   Get.put(CommunityRepository(), permanent: true);
   Get.put(AppointmentRepository(), permanent: true);
   Get.put(MarketplaceRepository(), permanent: true);
@@ -87,7 +85,7 @@ class FarmAssistApp extends StatelessWidget {
       locale: savedLocale,
       fallbackLocale: const Locale('en'),
 
-      initialRoute: AppRoutes.WELCOME,
+      initialRoute: AppRoutes.SPLASH,
       getPages: AppPages.routes,
 
       // Optimized transitions for smoother navigation

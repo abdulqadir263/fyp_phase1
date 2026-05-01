@@ -1,50 +1,21 @@
-import 'package:flutter/foundation.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'dart:io';
 
-import 'mobile_detector.dart'
-if (dart.library.html) 'web_stub.dart';
+import 'disease_detector.dart';
 
+/// Facade for disease detection.
+///
+/// All inference is performed on-device via [DiseaseDetector].
+/// Zero network calls are made during prediction.
 class DiseaseService {
-  // Render.com URL — deploy hone ke baad update karna
-  static const String _apiUrl =
-      'https://aasaan-kisaan-api.onrender.com/predict';
+  bool get isReady => DiseaseDetector.instance.isReady;
 
-  bool get isReady =>
-      kIsWeb ? true : MobileDetector.instance.isReady;
+  /// Warm up the TFLite interpreter and load JSON assets.
+  Future<void> init() => DiseaseDetector.instance.initialize();
 
-  Future<void> init() async {
-    if (!kIsWeb) {
-      await MobileDetector.instance.loadModel();
-    }
-  }
+  /// Run on-device inference and return a [DiseaseResult].
+  Future<DiseaseResult> detect(File imageFile) =>
+      DiseaseDetector.instance.predict(imageFile);
 
-  Future<Map<String, dynamic>> detect(XFile image) async {
-    try {
-      if (kIsWeb) {
-        return await _detectViaApi(image);
-      } else {
-        return await MobileDetector.instance.detect(image);
-      }
-    } catch (e) {
-      return {'error': 'Detection mein masla aya: $e'};
-    }
-  }
-
-  // Web: FastAPI backend
-  Future<Map<String, dynamic>> _detectViaApi(XFile image) async {
-    final bytes = await image.readAsBytes();
-    final request = http.MultipartRequest(
-        'POST', Uri.parse(_apiUrl));
-    request.files.add(
-      http.MultipartFile.fromBytes(
-          'file', bytes, filename: 'leaf.jpg'),
-    );
-
-    final response = await request.send()
-        .timeout(const Duration(seconds: 60));
-    final body = await response.stream.bytesToString();
-    return json.decode(body);
-  }
+  /// Release the native interpreter (call from dispose).
+  void dispose() => DiseaseDetector.instance.dispose();
 }

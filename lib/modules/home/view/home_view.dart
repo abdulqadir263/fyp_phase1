@@ -137,7 +137,7 @@ class _HomeViewState extends State<HomeView> {
             onTap: () {
               _closeDrawer(); // ✅
               if (controller.isGuestUser) {
-                Get.offAllNamed(AppRoutes.LOGIN);
+                Get.offAllNamed(AppRoutes.WELCOME);
               } else {
                 controller.goToProfile();
               }
@@ -168,7 +168,7 @@ class _HomeViewState extends State<HomeView> {
             onTap: () {
               _closeDrawer(); // ✅
               if (controller.isGuestUser) {
-                Get.offAllNamed(AppRoutes.LOGIN);
+                Get.offAllNamed(AppRoutes.WELCOME);
               } else {
                 controller.logout();
               }

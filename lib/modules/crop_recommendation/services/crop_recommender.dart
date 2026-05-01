@@ -21,9 +21,12 @@ class CropRecommender {
 
   // ── Asset paths ──────────────────────────────────────────────────────────
 
-  static const String _modelPath = 'assets/models/crop_model.tflite';
-  static const String _labelMapPath = 'assets/models/label_map.json';
-  static const String _scalerPath = 'assets/models/scaler_params.json';
+  static const String _modelPath =
+      'assets/models/crop_recommendation/crop_model.tflite';
+  static const String _labelMapPath =
+      'assets/models/crop_recommendation/label_map.json';
+  static const String _scalerPath =
+      'assets/models/crop_recommendation/scaler_params.json';
 
   // ── Initialization ────────────────────────────────────────────────────────
 

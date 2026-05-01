@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../models/post_model.dart';
+import 'post_image_widget.dart';
 
 /// Post card widget for the community feed.
 ///
@@ -264,63 +265,37 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
       child: GestureDetector(
         onTap: () => _openFullScreenViewer(0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 300),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Always show the first image
-                  CachedNetworkImage(
-                    imageUrl: post.imageUrls[0],
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    memCacheHeight: 400,
-                    memCacheWidth: 700,
-                    fadeInDuration: const Duration(milliseconds: 200),
-                    fadeOutDuration: const Duration(milliseconds: 200),
-                    placeholder: (_, __) => Container(
-                      color: Colors.grey[200],
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ),
-                    errorWidget: (_, __, ___) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.broken_image, color: Colors.grey),
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            PostImageWidget(
+              imageUrl: post.imageUrls[0],
+              aspectRatio: 1.2,
+            ),
+            if (post.imageUrls.length > 1)
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '+${post.imageUrls.length - 1}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  // "+N" badge if there are more images
-                  if (post.imageUrls.length > 1)
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          '+${post.imageUrls.length - 1}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                ),
               ),
-            ),
-          ),
+          ],
         ),
       ),
     );

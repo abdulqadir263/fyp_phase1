@@ -11,6 +11,7 @@ class AppConstants {
 
   // Firebase Collections
   static const String usersCollection = 'users';
+  static const String farmersCollection = 'farmers'; // anonymous farmer profiles
   static const String appointmentsCollection = 'appointments';
   static const String productsCollection = 'products';
   static const String cropsCollection = 'crops';

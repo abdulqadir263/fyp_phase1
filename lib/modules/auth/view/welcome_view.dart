@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/widgets/custom_button.dart';
 import '../../../core/constants/app_constants.dart';
-import '../view_model/auth_controller.dart';
+import '../../../app/routes/app_routes.dart';
 
-class WelcomeView extends GetView<AuthController> {
+class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
 
   @override
@@ -36,7 +36,7 @@ class WelcomeView extends GetView<AuthController> {
                         color: AppConstants.lightGreen.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.agriculture,
                         size: 56,
                         color: AppConstants.primaryGreen,
@@ -70,7 +70,7 @@ class WelcomeView extends GetView<AuthController> {
                     const SizedBox(height: 32),
                     CustomButton(
                       text: 'Continue',
-                      onPressed: controller.openRoleSelection,
+                      onPressed: () => Get.toNamed(AppRoutes.ROLE_SELECTION),
                     ),
                   ],
                 ),

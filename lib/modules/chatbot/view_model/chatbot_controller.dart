@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import '../../../app/services/groq_service.dart';
-import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
+import '../../../modules/auth/repository/auth_repository.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/message_model.dart';
 import '../repository/chat_repository.dart';
 
 /// ChatbotController (ViewModel) — manages chatbot UI state and orchestrates
-/// communication between the view, GroqService, and ChatRepository.
+/// communication between the view, GeminiChatService, and ChatRepository.
 ///
-/// No direct Firebase/Firestore calls — all data ops go through ChatRepository.
+/// Agriculture-only enforcement is handled by the system prompt inside
+/// GeminiChatService. This controller is purely UI + persistence.
 class ChatbotController extends GetxController {
   final GroqService _groqService = Get.find<GroqService>();
   final AuthRepository _authRepository = Get.find<AuthRepository>();
@@ -28,11 +30,13 @@ class ChatbotController extends GetxController {
   final RxInt characterCount = 0.obs;
   final RxBool hasValidInput = false.obs;
 
-  // Welcome message
-  static const String welcomeMessageEn =
-      "👋 Hello! I'm your farming assistant. Ask me anything about agriculture!";
-  static const String welcomeMessageUr =
-      "👋 السلام علیکم! میں آپ کا زرعی معاون ہوں۔ کھیتی باڑی کے بارے میں کچھ بھی پوچھیں!";
+  // Welcome messages
+  static const String _welcomeEn =
+      '👋 Hello! I\'m AgriBot, your farming assistant.\n'
+      'Ask me anything about crops, pests, irrigation, livestock, and more!';
+  static const String _welcomeUr =
+      '👋 السلام علیکم! میں AgriBot ہوں، آپ کا زرعی معاون۔\n'
+      'فصلوں، کیڑوں، آبپاشی، مویشیوں وغیرہ کے بارے میں کچھ بھی پوچھیں!';
 
   String? get _userId {
     final uid = _authRepository.currentUser.value?.uid;
@@ -63,19 +67,15 @@ class ChatbotController extends GetxController {
   }
 
   void _addWelcomeMessage() {
-    final welcomeMessage = MessageModel(
+    messages.add(MessageModel(
       id: 'welcome',
-      text: selectedLanguage.value == 'en'
-          ? welcomeMessageEn
-          : welcomeMessageUr,
+      text: selectedLanguage.value == 'en' ? _welcomeEn : _welcomeUr,
       isUser: false,
       timestamp: DateTime.now(),
       language: selectedLanguage.value,
-    );
-    messages.add(welcomeMessage);
+    ));
   }
 
-  /// Load chat history via repository
   Future<void> _loadChatHistory() async {
     final userId = _userId;
     if (userId == null) return;
@@ -88,14 +88,15 @@ class ChatbotController extends GetxController {
     }
   }
 
-  /// Send text message
+  // ── Send message ────────────────────────────────────────────────────────────
+
   Future<void> sendTextMessage() async {
     final text = textController.text.trim();
     if (text.isEmpty || isLoading.value) return;
 
     if (text.length > AppConstants.maxMessageLength) {
       Get.snackbar(
-        'Error',
+        'Too long',
         'Message cannot exceed ${AppConstants.maxMessageLength} characters',
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -119,7 +120,6 @@ class ChatbotController extends GetxController {
     messages.add(userMessage);
     _scrollToBottom();
 
-    // Save via repository
     final userId = _userId;
     if (userId != null) {
       await _chatRepository.saveMessage(userId, userMessage);
@@ -128,14 +128,14 @@ class ChatbotController extends GetxController {
     await _getAIResponse(text);
   }
 
-  /// Get AI response (via Groq — agriculture only)
+  // ── AI response via Gemini ──────────────────────────────────────────────────
+
   Future<void> _getAIResponse(String text) async {
+    isLoading.value = true;
+    isTyping.value = true;
+
     try {
-      isLoading.value = true;
-      isTyping.value = true;
-
       final response = await _groqService.sendMessage(text);
-
       isTyping.value = false;
 
       final botMessage = MessageModel(
@@ -161,26 +161,38 @@ class ChatbotController extends GetxController {
     }
   }
 
+  // ── Error handling ──────────────────────────────────────────────────────────
+
   void _handleError(dynamic error) {
-    final errorMessage = MessageModel(
+    // Extract the user-friendly message thrown by GroqService
+    String errorText;
+    if (error is Exception) {
+      errorText = error.toString().replaceFirst('Exception: ', '');
+    } else {
+      errorText = selectedLanguage.value == 'en'
+          ? '❌ Sorry, something went wrong. Please try again.'
+          : '❌ معذرت، کوئی خرابی ہوئی۔ براہ کرم دوبارہ کوشش کریں۔';
+    }
+
+    messages.add(MessageModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      text: selectedLanguage.value == 'en'
-          ? '❌ Sorry, I encountered an error. Please try again.'
-          : '❌ معذرت، کوئی خرابی ہوئی۔ براہ کرم دوبارہ کوشش کریں۔',
+      text: '❌ $errorText',
       isUser: false,
       timestamp: DateTime.now(),
       language: selectedLanguage.value,
-    );
-
-    messages.add(errorMessage);
+    ));
     _scrollToBottom();
-    debugPrint('Chatbot error: $error');
+    debugPrint('[ChatbotController] error: $error');
   }
+
+  // ── Language toggle ─────────────────────────────────────────────────────────
 
   void toggleLanguage() {
     selectedLanguage.value = selectedLanguage.value == 'en' ? 'ur' : 'en';
     HapticFeedback.selectionClick();
   }
+
+  // ── Scroll ──────────────────────────────────────────────────────────────────
 
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -194,7 +206,8 @@ class ChatbotController extends GetxController {
     });
   }
 
-  /// Clear chat via repository
+  // ── Clear chat ──────────────────────────────────────────────────────────────
+
   Future<void> clearChat() async {
     Get.defaultDialog(
       title: 'Clear Chat',
@@ -212,12 +225,11 @@ class ChatbotController extends GetxController {
           await _chatRepository.clearHistory(userId);
         }
 
+        // Reset Groq conversation so history doesn't persist across sessions
         _groqService.startNewChat();
       },
     );
   }
 
-  bool get canSend {
-    return hasValidInput.value && !isLoading.value;
-  }
+  bool get canSend => hasValidInput.value && !isLoading.value;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
+import 'post_image_widget.dart';
 
 /// Widget for displaying images in post detail view.
 ///
@@ -27,31 +28,9 @@ class ImageGrid extends StatelessWidget {
   Widget _buildSingleImage(String url) {
     return GestureDetector(
       onTap: () => _openFullScreen(0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: CachedNetworkImage(
-            imageUrl: url,
-            fit: BoxFit.cover,
-            memCacheHeight: 440,
-            memCacheWidth: 780,
-            fadeInDuration: const Duration(milliseconds: 200),
-            fadeOutDuration: const Duration(milliseconds: 200),
-            placeholder: (_, __) => Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-            errorWidget: (_, __, ___) => Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: Icon(Icons.broken_image, color: Colors.grey, size: 40),
-              ),
-            ),
-          ),
-        ),
+      child: PostImageWidget(
+        imageUrl: url,
+        aspectRatio: 4 / 3,
       ),
     );
   }
@@ -68,19 +47,10 @@ class ImageGrid extends StatelessWidget {
               flex: 3,
               child: GestureDetector(
                 onTap: () => _openFullScreen(0),
-                child: CachedNetworkImage(
+                child: PostImageWidget(
                   imageUrl: imageUrls[0],
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  memCacheHeight: 440,
-                  memCacheWidth: 440,
-                  fadeInDuration: const Duration(milliseconds: 200),
-                  fadeOutDuration: const Duration(milliseconds: 200),
-                  placeholder: (_, __) => Container(color: Colors.grey[200]),
-                  errorWidget: (_, __, ___) => Container(
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.broken_image, color: Colors.grey),
-                  ),
+                  aspectRatio: null,
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
             ),
@@ -93,22 +63,10 @@ class ImageGrid extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CachedNetworkImage(
+                    PostImageWidget(
                       imageUrl: imageUrls[1],
-                      fit: BoxFit.cover,
-                      memCacheHeight: 440,
-                      memCacheWidth: 300,
-                      fadeInDuration: const Duration(milliseconds: 200),
-                      fadeOutDuration: const Duration(milliseconds: 200),
-                      placeholder: (_, __) =>
-                          Container(color: Colors.grey[200]),
-                      errorWidget: (_, __, ___) => Container(
-                        color: Colors.grey[200],
-                        child: const Icon(
-                          Icons.broken_image,
-                          color: Colors.grey,
-                        ),
-                      ),
+                      aspectRatio: null,
+                      borderRadius: BorderRadius.zero,
                     ),
                     if (imageUrls.length > 2)
                       Container(

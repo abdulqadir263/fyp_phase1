@@ -89,6 +89,48 @@
         { "fieldPath": "userType", "order": "ASCENDING" },
         { "fieldPath": "isProfileComplete", "order": "ASCENDING" }
       ]
+    },
+
+    // ── Appointments collection indexes ─────────────────────────────────────
+    // Query: slot availability stream (expertUid + day + status)
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "expertUid", "order": "ASCENDING" },
+        { "fieldPath": "day",       "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" }
+      ]
+    },
+    // Query: expert active dashboard (expertUid + status + bookedAt ASC)
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "expertUid", "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "bookedAt",  "order": "ASCENDING" }
+      ]
+    },
+    // Query: farmer's own appointments (farmerUid + bookedAt DESC)
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "farmerUid", "order": "ASCENDING" },
+        { "fieldPath": "bookedAt",  "order": "DESCENDING" }
+      ]
+    },
+    // Query: race-condition check (expertUid + day + slot + status)
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "expertUid", "order": "ASCENDING" },
+        { "fieldPath": "day",       "order": "ASCENDING" },
+        { "fieldPath": "slot",      "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

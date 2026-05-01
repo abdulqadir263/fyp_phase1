@@ -1,0 +1,211 @@
+{
+  "Corn___Common_Rust": {
+    "display_name": "Corn — Common Rust",
+    "display_name_ur": "مکئی — عام زنگ",
+    "description": "Small orange-brown spots appear on both sides of the leaves. This is a fungal disease that spreads quickly in cool and humid weather.",
+    "description_ur": "پتوں کے دونوں طرف چھوٹے نارنجی-بھورے دھبے نظر آتے ہیں۔ یہ پھپھوندی کی بیماری ہے جو ٹھنڈے اور نم موسم میں تیزی سے پھیلتی ہے۔",
+    "treatment": "Spray Azoxystrobin or Propiconazole fungicide on the crop. Cut and burn the infected leaves. Spray again after 10 days if needed.",
+    "treatment_ur": "فصل پر Azoxystrobin یا Propiconazole دوائی کا سپرے کریں۔ متاثرہ پتے کاٹ کر جلا دیں۔ ضرورت پڑنے پر 10 دن بعد دوبارہ سپرے کریں۔",
+    "prevention": "Plant disease-resistant corn varieties. Do not water the crop from above. Keep enough space between plants for air to pass through.",
+    "prevention_ur": "بیماری مزاحم مکئی کی اقسام لگائیں۔ فصل پر اوپر سے پانی نہ ڈالیں۔ ہوا کے گزرنے کے لیے پودوں کے درمیان مناسب فاصلہ رکھیں۔",
+    "severity": "moderate",
+    "severity_ur": "درمیانہ خطرہ",
+    "farmer_tip": "Check your crop weekly. If you see orange spots on more than 10 leaves, spray immediately.",
+    "farmer_tip_ur": "ہر ہفتے اپنی فصل چیک کریں۔ اگر 10 سے زیادہ پتوں پر نارنجی دھبے نظر آئیں تو فوراً سپرے کریں۔"
+  },
+
+  "Corn___Gray_Leaf_Spot": {
+    "display_name": "Corn — Gray Leaf Spot",
+    "display_name_ur": "مکئی — سرمئی پتے کا دھبہ",
+    "description": "Long rectangular gray-brown patches appear along the leaf, running in straight lines. Leaves slowly dry out and die.",
+    "description_ur": "پتے پر لمبے آئتاکار سرمئی-بھورے دھبے سیدھی لکیروں میں نظر آتے ہیں۔ پتے آہستہ آہستہ سوکھ کر مر جاتے ہیں۔",
+    "treatment": "Spray Strobilurin fungicide as soon as you see the first signs. After harvest, remove all leftover crop from the field and burn it.",
+    "treatment_ur": "پہلی علامات نظر آتے ہی Strobilurin دوائی کا سپرے کریں۔ فصل کٹائی کے بعد کھیت سے باقی ماندہ فصل نکال کر جلا دیں۔",
+    "prevention": "Plant resistant varieties. Do not grow corn in the same field two years in a row. Make sure water does not stand in the field.",
+    "prevention_ur": "مزاحم اقسام لگائیں۔ ایک ہی کھیت میں دو سال لگاتار مکئی نہ اگائیں۔ یقینی بنائیں کہ کھیت میں پانی کھڑا نہ رہے۔",
+    "severity": "high",
+    "severity_ur": "زیادہ خطرہ",
+    "farmer_tip": "This disease spreads fast in humid weather. Act within 2-3 days of first seeing symptoms.",
+    "farmer_tip_ur": "یہ بیماری نم موسم میں تیزی سے پھیلتی ہے۔ علامات نظر آنے کے 2-3 دن کے اندر اقدام کریں۔"
+  },
+
+  "Corn___Northern_Leaf_Blight": {
+    "display_name": "Corn — Northern Leaf Blight",
+    "display_name_ur": "مکئی — شمالی پتے کی جھلساہٹ",
+    "description": "Long gray-green oval patches appear on the leaves. These patches grow bigger over time and can kill the whole leaf.",
+    "description_ur": "پتوں پر لمبے سرمئی-سبز بیضوی دھبے نمودار ہوتے ہیں۔ یہ دھبے وقت کے ساتھ بڑے ہوتے ہیں اور پورا پتہ تباہ کر سکتے ہیں۔",
+    "treatment": "Spray Mancozeb or Chlorothalonil fungicide. Remove and destroy heavily infected plants from the field immediately.",
+    "treatment_ur": "Mancozeb یا Chlorothalonil دوائی کا سپرے کریں۔ بہت زیادہ متاثرہ پودوں کو کھیت سے فوراً نکال کر تلف کریں۔",
+    "prevention": "Use resistant hybrid seeds. After harvest, rotate with a different crop. Do not plant corn too close together.",
+    "prevention_ur": "مزاحم ہائبرڈ بیج استعمال کریں۔ فصل کٹائی کے بعد دوسری فصل اگائیں۔ مکئی کو بہت پاس پاس نہ لگائیں۔",
+    "severity": "high",
+    "severity_ur": "زیادہ خطرہ",
+    "farmer_tip": "If more than 1/3 of the leaves are infected, your yield will drop significantly. Spray early — do not wait.",
+    "farmer_tip_ur": "اگر ایک تہائی سے زیادہ پتے متاثر ہوں تو پیداوار بہت کم ہو جائے گی۔ جلدی سپرے کریں — انتظار نہ کریں۔"
+  },
+
+  "Corn___Healthy": {
+    "display_name": "Corn — Healthy",
+    "display_name_ur": "مکئی — صحت مند",
+    "description": "Your corn crop looks healthy. No disease has been found.",
+    "description_ur": "آپ کی مکئی کی فصل صحت مند نظر آتی ہے۔ کوئی بیماری نہیں پائی گئی۔",
+    "treatment": "No treatment needed at this time.",
+    "treatment_ur": "ابھی کسی علاج کی ضرورت نہیں۔",
+    "prevention": "Keep checking the crop every week. Water properly and use balanced fertilizer (N, P, K).",
+    "prevention_ur": "ہر ہفتے فصل کا معائنہ کرتے رہیں۔ صحیح طریقے سے پانی دیں اور متوازن کھاد (N، P، K) استعمال کریں۔",
+    "severity": "none",
+    "severity_ur": "کوئی خطرہ نہیں",
+    "farmer_tip": "Healthy crops still need regular monitoring. Check leaves from bottom to top once a week.",
+    "farmer_tip_ur": "صحت مند فصل کو بھی باقاعدہ نگرانی کی ضرورت ہے۔ ہفتے میں ایک بار نیچے سے اوپر تک پتوں کا جائزہ لیں۔"
+  },
+
+  "Rice___Brown_Spot": {
+    "display_name": "Rice — Brown Spot",
+    "display_name_ur": "چاول — بھورا دھبہ",
+    "description": "Round brown spots appear on rice leaves. This disease is common when the soil is low in nutrients, especially potassium.",
+    "description_ur": "چاول کے پتوں پر گول بھورے دھبے نمودار ہوتے ہیں۔ یہ بیماری عام طور پر اس وقت ہوتی ہے جب مٹی میں غذائیت، خاص طور پر پوٹاشیم، کم ہو۔",
+    "treatment": "Spray Tricyclazole or Carbendazim fungicide. Also add potassium fertilizer (Potash) to the soil.",
+    "treatment_ur": "Tricyclazole یا Carbendazim دوائی کا سپرے کریں۔ مٹی میں پوٹاشیم کھاد (پوٹاش) بھی ڈالیں۔",
+    "prevention": "Always use certified clean seeds. Keep the soil well-fed. Do not let the crop go dry (water stress causes this disease).",
+    "prevention_ur": "ہمیشہ تصدیق شدہ صاف بیج استعمال کریں۔ مٹی کو اچھی طرح کھادیں۔ فصل کو خشک نہ ہونے دیں (پانی کی کمی اس بیماری کا سبب بنتی ہے)۔",
+    "severity": "moderate",
+    "severity_ur": "درمیانہ خطرہ",
+    "farmer_tip": "If your soil has not had potash (potassium fertilizer) for 2+ seasons, add it now along with the fungicide spray.",
+    "farmer_tip_ur": "اگر آپ کی مٹی میں 2 یا زیادہ فصلوں سے پوٹاش نہیں ڈالی گئی تو فنگی سائیڈ سپرے کے ساتھ ابھی ڈالیں۔"
+  },
+
+  "Rice___Leaf_Blast": {
+    "display_name": "Rice — Leaf Blast",
+    "display_name_ur": "چاول — پتے کا جھلساؤ",
+    "description": "Diamond or eye-shaped gray spots with dark borders appear on leaves. In bad cases, the whole leaf turns gray and dies.",
+    "description_ur": "پتوں پر ہیرے یا آنکھ کی شکل کے سرمئی دھبے گہرے کنارے کے ساتھ نمودار ہوتے ہیں۔ شدید صورت میں پورا پتہ سرمئی ہو کر مر جاتا ہے۔",
+    "treatment": "Spray Tricyclazole or Isoprothiolane immediately. Temporarily reduce the amount of urea (nitrogen) fertilizer you are using.",
+    "treatment_ur": "فوراً Tricyclazole یا Isoprothiolane کا سپرے کریں۔ یوریا (نائٹروجن) کھاد کی مقدار عارضی طور پر کم کر دیں۔",
+    "prevention": "Use blast-resistant rice varieties. Avoid putting too much urea. Keep the field clean of old crop waste.",
+    "prevention_ur": "بلاسٹ مزاحم چاول کی اقسام استعمال کریں۔ بہت زیادہ یوریا ڈالنے سے گریز کریں۔ پرانی فصل کے باقیات سے کھیت صاف رکھیں۔",
+    "severity": "high",
+    "severity_ur": "زیادہ خطرہ",
+    "farmer_tip": "Too much urea makes this disease worse. If you have been giving a lot of urea, stop and spray fungicide right away.",
+    "farmer_tip_ur": "بہت زیادہ یوریا اس بیماری کو بدتر بناتا ہے۔ اگر آپ زیادہ یوریا دے رہے ہیں تو رک جائیں اور فوراً فنگی سائیڈ سپرے کریں۔"
+  },
+
+  "Rice___Neck_Blast": {
+    "display_name": "Rice — Neck Blast",
+    "display_name_ur": "چاول — گردن کا جھلساؤ",
+    "description": "The stem just below the rice grain bunch (panicle) turns black and breaks. This causes grain loss directly — the whole bunch can die before filling with grain.",
+    "description_ur": "چاول کے خوشے کے بالکل نیچے تنا کالا پڑ جاتا ہے اور ٹوٹ جاتا ہے۔ اس سے براہ راست اناج کا نقصان ہوتا ہے — پورا خوشہ دانے بھرنے سے پہلے مر سکتا ہے۔",
+    "treatment": "⚠️ URGENT — Act immediately. Spray Tricyclazole at the 'booting' stage (when the grain head is just forming inside the stem). Waiting even a few days can cause total crop loss.",
+    "treatment_ur": "⚠️ فوری اقدام ضروری ہے — ابھی کام کریں۔ 'بوٹنگ' مرحلے پر (جب تنے کے اندر خوشہ بننا شروع ہو) Tricyclazole کا سپرے کریں۔ چند دن کی دیر بھی پوری فصل برباد کر سکتی ہے۔",
+    "prevention": "Use resistant varieties. Plant at a time when the grain-forming stage does not fall in very humid weather.",
+    "prevention_ur": "مزاحم اقسام لگائیں۔ کاشت کا وقت ایسا رکھیں کہ دانہ بننے کا مرحلہ بہت نم موسم میں نہ پڑے۔",
+    "severity": "critical",
+    "severity_ur": "انتہائی خطرناک",
+    "farmer_tip": "This is the most dangerous rice disease for your income. If you see even one broken black neck, check the whole field immediately and spray the same day.",
+    "farmer_tip_ur": "یہ آپ کی آمدنی کے لیے چاول کی سب سے خطرناک بیماری ہے۔ اگر ایک بھی کالی ٹوٹی گردن نظر آئے تو اسی دن پورا کھیت چیک کر کے سپرے کریں۔"
+  },
+
+  "Rice___Healthy": {
+    "display_name": "Rice — Healthy",
+    "display_name_ur": "چاول — صحت مند",
+    "description": "Your rice crop looks healthy. No disease has been found.",
+    "description_ur": "آپ کی چاول کی فصل صحت مند نظر آتی ہے۔ کوئی بیماری نہیں پائی گئی۔",
+    "treatment": "No treatment needed at this time.",
+    "treatment_ur": "ابھی کسی علاج کی ضرورت نہیں۔",
+    "prevention": "Keep water level steady in the field. Check the crop every week. Use balanced fertilizer.",
+    "prevention_ur": "کھیت میں پانی کی سطح یکساں رکھیں۔ ہر ہفتے فصل کا جائزہ لیں۔ متوازن کھاد استعمال کریں۔",
+    "severity": "none",
+    "severity_ur": "کوئی خطرہ نہیں",
+    "farmer_tip": "Rice blast spreads fast after rain. Check your crop 2-3 days after every rainfall.",
+    "farmer_tip_ur": "بارش کے بعد چاول کا جھلساؤ تیزی سے پھیلتا ہے۔ ہر بارش کے 2-3 دن بعد فصل کا معائنہ کریں۔"
+  },
+
+  "Wheat___Brown_Rust": {
+    "display_name": "Wheat — Brown Rust",
+    "display_name_ur": "گندم — بھوری زنگ",
+    "description": "Small orange-brown raised spots (like tiny blisters) appear scattered on the top side of leaves.",
+    "description_ur": "پتوں کی اوپری سطح پر چھوٹے نارنجی-بھورے ابھرے ہوئے دھبے (چھوٹے چھالوں کی طرح) بکھرے ہوئے نظر آتے ہیں۔",
+    "treatment": "Spray Tebuconazole or Propiconazole fungicide as soon as you see the spots. Do not delay — brown rust spreads quickly.",
+    "treatment_ur": "دھبے نظر آتے ہی Tebuconazole یا Propiconazole دوائی کا سپرے کریں۔ دیر نہ کریں — بھوری زنگ تیزی سے پھیلتی ہے۔",
+    "prevention": "Use rust-resistant wheat varieties (NARC or Punjab Agriculture Department recommended varieties). Monitor closely in warm and humid weather.",
+    "prevention_ur": "زنگ مزاحم گندم کی اقسام استعمال کریں (NARC یا محکمہ زراعت پنجاب کی سفارش کردہ اقسام)۔ گرم اور نم موسم میں قریبی نگرانی رکھیں۔",
+    "severity": "moderate",
+    "severity_ur": "درمیانہ خطرہ",
+    "farmer_tip": "Brown rust is common in Punjab during February-March. Check your wheat weekly during this period.",
+    "farmer_tip_ur": "بھوری زنگ پنجاب میں فروری-مارچ میں عام ہے۔ اس دوران ہر ہفتے اپنی گندم کی جانچ کریں۔"
+  },
+
+  "Wheat___Yellow_Rust": {
+    "display_name": "Wheat — Yellow Rust",
+    "display_name_ur": "گندم — پیلی زنگ",
+    "description": "Bright yellow stripes or rows of yellow powder appear along the leaf veins. The yellow powder rubs off on your fingers when you touch it.",
+    "description_ur": "پتوں کی رگوں کے ساتھ چمکدار پیلی لکیریں یا پیلے پاؤڈر کی قطاریں نظر آتی ہیں۔ چھونے پر پیلا پاؤڈر انگلیوں پر لگ جاتا ہے۔",
+    "treatment": "⚠️ URGENT — Spray Propiconazole or Tebuconazole immediately. Yellow rust spreads faster than any other wheat disease. One infected plant can spread to the whole field in days.",
+    "treatment_ur": "⚠️ فوری اقدام ضروری — فوراً Propiconazole یا Tebuconazole کا سپرے کریں۔ پیلی زنگ کسی بھی گندم کی بیماری سے تیز پھیلتی ہے۔ ایک متاثرہ پودا چند دنوں میں پورے کھیت کو متاثر کر سکتا ہے۔",
+    "prevention": "Plant resistant varieties. Earlier sowing (October instead of November) reduces the risk. Do not plant wheat too densely.",
+    "prevention_ur": "مزاحم اقسام لگائیں۔ جلد بوائی (نومبر کی بجائے اکتوبر) خطرہ کم کرتی ہے۔ گندم کو بہت گھنی نہ بوئیں۔",
+    "severity": "high",
+    "severity_ur": "زیادہ خطرہ",
+    "farmer_tip": "If your neighbor's wheat has yellow rust, spray YOUR crop preventively right away even if you don't see it yet.",
+    "farmer_tip_ur": "اگر آپ کے پڑوسی کی گندم میں پیلی زنگ ہو تو اپنی فصل پر بھی احتیاطی سپرے فوراً کریں، چاہے ابھی نظر نہ آئے۔"
+  },
+
+  "Wheat___Healthy": {
+    "display_name": "Wheat — Healthy",
+    "display_name_ur": "گندم — صحت مند",
+    "description": "Your wheat crop looks healthy. No disease has been found.",
+    "description_ur": "آپ کی گندم کی فصل صحت مند نظر آتی ہے۔ کوئی بیماری نہیں پائی گئی۔",
+    "treatment": "No treatment needed at this time.",
+    "treatment_ur": "ابھی کسی علاج کی ضرورت نہیں۔",
+    "prevention": "Rotate crops — do not grow wheat in the same field more than 2 years in a row. Water on time and use NPK fertilizer properly.",
+    "prevention_ur": "فصلیں بدلتے رہیں — ایک ہی کھیت میں 2 سال سے زیادہ لگاتار گندم نہ اگائیں۔ بروقت پانی دیں اور NPK کھاد صحیح طریقے سے استعمال کریں۔",
+    "severity": "none",
+    "severity_ur": "کوئی خطرہ نہیں",
+    "farmer_tip": "Yellow rust can appear overnight after fog or dew. Check your wheat every morning during December to February.",
+    "farmer_tip_ur": "پیلی زنگ کوہرے یا شبنم کے بعد راتوں رات ظاہر ہو سکتی ہے۔ دسمبر سے فروری تک ہر صبح اپنی گندم چیک کریں۔"
+  },
+
+  "Potato___Early_Blight": {
+    "display_name": "Potato — Early Blight",
+    "display_name_ur": "آلو — ابتدائی جھلساؤ",
+    "description": "Dark brown spots with rings inside (like a tree trunk pattern) appear on the older lower leaves first, then spread upward.",
+    "description_ur": "گہرے بھورے دھبے اندر حلقوں کے ساتھ (درخت کے تنے کی طرح) پہلے پرانے نچلے پتوں پر نظر آتے ہیں، پھر اوپر کی طرف پھیلتے ہیں۔",
+    "treatment": "Spray Chlorothalonil or Mancozeb every 7-10 days. Remove infected leaves by hand and do not leave them on the ground near the crop.",
+    "treatment_ur": "ہر 7-10 دن بعد Chlorothalonil یا Mancozeb کا سپرے کریں۔ متاثرہ پتے ہاتھ سے اتار لیں اور انہیں فصل کے قریب زمین پر نہ چھوڑیں۔",
+    "prevention": "Always use certified healthy seed potatoes. Do not grow potatoes in the same field every year. Do not water from above — use furrow irrigation.",
+    "prevention_ur": "ہمیشہ تصدیق شدہ صحت مند بیج آلو استعمال کریں۔ ہر سال ایک ہی کھیت میں آلو نہ اگائیں۔ اوپر سے پانی نہ ڈالیں — نالی سے پانی لگائیں۔",
+    "severity": "moderate",
+    "severity_ur": "درمیانہ خطرہ",
+    "farmer_tip": "This disease starts from the bottom leaves. Make a habit of checking the lower leaves of your potato plants every few days.",
+    "farmer_tip_ur": "یہ بیماری نچلے پتوں سے شروع ہوتی ہے۔ ہر چند دن بعد آلو کے پودوں کے نچلے پتے چیک کرنے کی عادت بنائیں۔"
+  },
+
+  "Potato___Late_Blight": {
+    "display_name": "Potato — Late Blight",
+    "display_name_ur": "آلو — دیر کا جھلساؤ",
+    "description": "Dark water-soaked patches appear on leaves and stems, often with white mold on the underside in humid conditions. It also rots the potato tubers in the ground. This disease destroyed entire potato harvests historically.",
+    "description_ur": "پتوں اور تنوں پر گہرے پانی سے بھیگے ہوئے دھبے نمودار ہوتے ہیں، نم موسم میں اکثر نیچے کی طرف سفید پھپھوندی کے ساتھ۔ یہ زمین میں آلو کے کند بھی گلا دیتی ہے۔ اس بیماری نے تاریخی طور پر پوری آلو کی فصلیں تباہ کی ہیں۔",
+    "treatment": "⚠️ CRITICAL EMERGENCY — Act today, not tomorrow. Spray Metalaxyl or Cymoxanil immediately. Remove and completely destroy ALL infected plants — do not compost them, burn them far from the field. Check the harvested potatoes for dark rot before storing.",
+    "treatment_ur": "⚠️ انتہائی ضروری — آج ہی کام کریں، کل نہیں۔ فوراً Metalaxyl یا Cymoxanil کا سپرے کریں۔ تمام متاثرہ پودے نکال کر مکمل طور پر تلف کریں — کھاد نہ بنائیں، کھیت سے دور جلائیں۔ ذخیرہ کرنے سے پہلے کھودے گئے آلوؤں میں گہرے سڑاند کی جانچ کریں۔",
+    "prevention": "Use certified blight-resistant seed potatoes. Improve water drainage in the field. Never water from above. Do not grow potatoes in the same field more than once every 3 years.",
+    "prevention_ur": "تصدیق شدہ جھلساؤ مزاحم بیج آلو استعمال کریں۔ کھیت میں پانی نکاسی بہتر بنائیں۔ کبھی اوپر سے پانی نہ دیں۔ ہر 3 سال میں ایک بار سے زیادہ ایک ہی کھیت میں آلو نہ اگائیں۔",
+    "severity": "critical",
+    "severity_ur": "انتہائی خطرناک",
+    "farmer_tip": "Late blight can destroy your entire crop in just 3-4 days in wet weather. If you see even one dark wet patch on any leaf, treat the WHOLE field the same day.",
+    "farmer_tip_ur": "دیر کا جھلساؤ گیلے موسم میں صرف 3-4 دنوں میں آپ کی پوری فصل تباہ کر سکتا ہے۔ اگر کسی بھی پتے پر ایک بھی گہرا گیلا دھبہ نظر آئے تو اسی دن پورے کھیت کا علاج کریں۔"
+  },
+
+  "Potato___Healthy": {
+    "display_name": "Potato — Healthy",
+    "display_name_ur": "آلو — صحت مند",
+    "description": "Your potato crop looks healthy. No disease has been found.",
+    "description_ur": "آپ کی آلو کی فصل صحت مند نظر آتی ہے۔ کوئی بیماری نہیں پائی گئی۔",
+    "treatment": "No treatment needed at this time.",
+    "treatment_ur": "ابھی کسی علاج کی ضرورت نہیں۔",
+    "prevention": "Always use certified disease-free seed potatoes. Plan to rotate with a different crop next season. Make sure water drains well from the field.",
+    "prevention_ur": "ہمیشہ تصدیق شدہ بیماری سے پاک بیج آلو استعمال کریں۔ اگلے موسم میں کوئی اور فصل اگانے کا منصوبہ بنائیں۔ یقینی بنائیں کہ کھیت سے پانی اچھی طرح نکل جائے۔",
+    "severity": "none",
+    "severity_ur": "کوئی خطرہ نہیں",
+    "farmer_tip": "Potatoes are very sensitive to late blight. Check the undersides of leaves after any rainy or foggy spell.",
+    "farmer_tip_ur": "آلو دیر کے جھلساؤ کے لیے بہت حساس ہیں۔ کسی بھی بارش یا کوہرے کے بعد پتوں کی نچلی سطح چیک کریں۔"
+  }
+}

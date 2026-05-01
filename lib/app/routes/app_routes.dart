@@ -1,12 +1,25 @@
 class AppRoutes {
-  // Auth Routes
-  static const WELCOME = '/welcome';
-  static const LOGIN = '/login';
-  static const FORGOT_PASSWORD = '/forgot-password';
+  // Splash (initial route — checks session & role)
+  static const SPLASH = '/';
 
-  // Onboarding Routes
+  // Role Selection & Auth
+  static const WELCOME = '/welcome';
   static const ROLE_SELECTION = '/role-selection';
-  static const PROFILE_COMPLETION = '/profile-completion';
+  
+  // Farmer Auth
+  static const FARMER_SIGNUP = '/farmer/signup';
+  static const FARMER_OTP = '/farmer/otp';
+  
+  // Expert Auth
+  static const EXPERT_AUTH = '/expert-auth';
+  static const EXPERT_PROFILE_SETUP = '/expert-profile-setup';
+  
+  // Seller Auth
+  static const SELLER_AUTH = '/seller-auth';
+  static const SELLER_PROFILE_SETUP = '/seller-profile-setup';
+  
+  // Shared Auth
+  static const EMAIL_VERIFICATION_PENDING = '/email-verification';
 
   // Main Routes
   static const HOME = '/home';
@@ -23,6 +36,10 @@ class AppRoutes {
   static const MY_VISITS = '/appointments/my-visits';
   static const VISIT_DETAIL = '/appointments/visit-detail';
   static const EXPERT_DASHBOARD = '/appointments/expert-dashboard';
+  static const EXPERT_DETAIL = '/appointments/expert-detail';
+  static const APPOINTMENT_CONFIRMATION = '/appointments/confirmation';
+  static const EXPERT_APPOINTMENTS = '/appointments/expert-appointments';
+  static const FARMER_APPOINTMENTS = '/appointments/my';
 
   // Marketplace Routes
   static const MARKETPLACE = '/marketplace';
@@ -41,11 +58,10 @@ class AppRoutes {
   static const COMMUNITY = '/community';
   static const CHATBOT = '/chatbot';
   static const DISEASE_DETECTION = '/disease-detection';
+  static const DISEASE_DETECTION_HISTORY = '/disease-detection/history';
 
   // Crop Recommendation Routes
   static const CROP_RECOMMENDATION = '/crop-recommendation';
   static const CROP_RECOMMENDATION_RESULTS = '/crop-recommendation/results';
   static const CROP_RECOMMENDATION_HISTORY = '/crop-recommendation/history';
-
-
 }

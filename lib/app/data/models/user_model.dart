@@ -34,6 +34,19 @@ class UserModel {
   /// Whether expert is available for consultation
   final bool? isAvailableForConsultation;
 
+  // ========== EXPERT AVAILABILITY FIELDS ==========
+  /// Days the expert is available, e.g. ["Monday", "Wednesday"]
+  final List<String>? availableDays;
+
+  /// Time-slot blocks, e.g. ["8:00 AM – 11:00 AM"]
+  final List<String>? availableSlots;
+
+  /// Consultation fee in PKR (0 = free)
+  final int? consultationFee;
+
+  /// "In-Person" | "Online" | "Both"
+  final String? consultationMode;
+
   // ========== NEW COMPANY/SELLER FIELDS ==========
   /// Type of agricultural business
   final String? businessType;
@@ -76,6 +89,11 @@ class UserModel {
     this.certifications,
     this.bio,
     this.isAvailableForConsultation,
+    // Availability
+    this.availableDays,
+    this.availableSlots,
+    this.consultationFee,
+    this.consultationMode,
     // Company/Seller fields
     this.businessType,
     this.yearsInBusiness,
@@ -115,6 +133,14 @@ class UserModel {
       certifications: data['certifications'],
       bio: data['bio'],
       isAvailableForConsultation: data['isAvailableForConsultation'],
+      availableDays: data['availableDays'] != null
+          ? List<String>.from(data['availableDays'])
+          : null,
+      availableSlots: data['availableSlots'] != null
+          ? List<String>.from(data['availableSlots'])
+          : null,
+      consultationFee: data['consultationFee'] as int?,
+      consultationMode: data['consultationMode'],
       // New company fields
       businessType: data['businessType'],
       yearsInBusiness: data['yearsInBusiness'],
@@ -146,6 +172,10 @@ class UserModel {
       'certifications': certifications,
       'bio': bio,
       'isAvailableForConsultation': isAvailableForConsultation,
+      'availableDays': availableDays,
+      'availableSlots': availableSlots,
+      'consultationFee': consultationFee,
+      'consultationMode': consultationMode,
       // New company fields
       'businessType': businessType,
       'yearsInBusiness': yearsInBusiness,
@@ -176,6 +206,10 @@ class UserModel {
     String? certifications,
     String? bio,
     bool? isAvailableForConsultation,
+    List<String>? availableDays,
+    List<String>? availableSlots,
+    int? consultationFee,
+    String? consultationMode,
     String? businessType,
     int? yearsInBusiness,
     String? licenseNumber,
@@ -202,6 +236,10 @@ class UserModel {
       bio: bio ?? this.bio,
       isAvailableForConsultation:
           isAvailableForConsultation ?? this.isAvailableForConsultation,
+      availableDays: availableDays ?? this.availableDays,
+      availableSlots: availableSlots ?? this.availableSlots,
+      consultationFee: consultationFee ?? this.consultationFee,
+      consultationMode: consultationMode ?? this.consultationMode,
       businessType: businessType ?? this.businessType,
       yearsInBusiness: yearsInBusiness ?? this.yearsInBusiness,
       licenseNumber: licenseNumber ?? this.licenseNumber,

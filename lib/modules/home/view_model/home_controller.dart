@@ -128,7 +128,7 @@ class HomeController extends GetxController {
         confirmTextColor: Colors.white,
         onConfirm: () {
           Get.back();
-          Get.offAllNamed(AppRoutes.LOGIN);
+          Get.offAllNamed(AppRoutes.WELCOME);
         },
       );
     } else {

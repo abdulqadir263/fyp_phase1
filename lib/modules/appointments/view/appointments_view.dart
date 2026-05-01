@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../core/utils/responsive_helper.dart';
 import '../view_model/appointment_controller.dart';
@@ -70,8 +71,10 @@ class ExpertListView extends GetView<AppointmentController> {
                 return _ExpertCard(
                   expert: expert,
                   onTap: () {
-                    controller.selectExpert(expert);
-                    Get.toNamed('/appointments/expert-profile');
+                    Get.toNamed(
+                      AppRoutes.EXPERT_DETAIL,
+                      arguments: expert,
+                    );
                   },
                 );
               },

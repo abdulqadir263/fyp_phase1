@@ -1,36 +1,61 @@
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
-import '../service/disease_service.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../core/constants/app_constants.dart';
+import '../service/disease_detector.dart';
+import '../service/disease_service.dart';
+import '../view_model/disease_detection_controller.dart';
 
 class DiseaseDetectionScreen extends StatefulWidget {
   const DiseaseDetectionScreen({super.key});
 
   @override
-  State<DiseaseDetectionScreen> createState() =>
-      _DiseaseDetectionScreenState();
+  State<DiseaseDetectionScreen> createState() => _DiseaseDetectionScreenState();
 }
 
-class _DiseaseDetectionScreenState
-    extends State<DiseaseDetectionScreen> {
+class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
+    with SingleTickerProviderStateMixin {
   final DiseaseService _service = DiseaseService();
   final ImagePicker _picker = ImagePicker();
 
-  XFile? _pickedImage;
-  Map<String, dynamic>? _result;
+  // Controller for save-to-history / history navigation
+  late final DiseaseDetectionController _ctrl;
+
+  File? _pickedFile;
+  DiseaseResult? _result;
   bool _loading = false;
   bool _modelReady = false;
-  String _loadingMsg = 'Model load ho raha hai...';
+  String _loadingMsg = 'Loading AI model...';
+
+  // Language toggle — false = English, true = Urdu
+  bool _showUrdu = false;
+
+  // Animation controller for critical severity pulse
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
+    _ctrl = Get.find<DiseaseDetectionController>();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _pulseAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_pulseController);
     _initModel();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _service.dispose();
+    super.dispose();
   }
 
   Future<void> _initModel() async {
@@ -52,16 +77,16 @@ class _DiseaseDetectionScreenState
       );
       if (picked == null) return;
 
+      final file = File(picked.path);
       setState(() {
-        _pickedImage = picked;
+        _pickedFile = file;
         _loading = true;
         _result = null;
-        _loadingMsg = kIsWeb
-            ? 'Server se connect ho raha hai...'
-            : 'AI analyze kar raha hai...';
+        _showUrdu = false;
+        _loadingMsg = 'AI is analyzing...';
       });
 
-      final result = await _service.detect(picked);
+      final result = await _service.detect(file);
 
       if (mounted) {
         setState(() {
@@ -69,6 +94,8 @@ class _DiseaseDetectionScreenState
           _loading = false;
           _loadingMsg = '';
         });
+        // Sync to controller so the save button can persist this result
+        _ctrl.currentResult.value = result;
       }
     } catch (e) {
       if (mounted) {
@@ -77,8 +104,8 @@ class _DiseaseDetectionScreenState
           _loadingMsg = '';
         });
         Get.snackbar(
-          'Masla',
-          'Image nahi li ja saki: $e',
+          'Error',
+          'Could not get image: $e',
           backgroundColor: Colors.red.shade100,
           colorText: Colors.red.shade800,
           snackPosition: SnackPosition.BOTTOM,
@@ -87,25 +114,54 @@ class _DiseaseDetectionScreenState
     }
   }
 
-  // "Rice___Leaf_Blast" → "Rice — Leaf Blast"
-  String _readable(String raw) =>
-      raw.replaceAll('___', ' — ').replaceAll('_', ' ');
+  // ── Severity helpers ───────────────────────────────────────────────────────
 
-  String _cropUrdu(String disease) {
-    if (disease.startsWith('Rice')) return 'Chawal (Rice)';
-    if (disease.startsWith('Corn')) return 'Makka (Corn)';
-    if (disease.startsWith('Wheat')) return 'Gehun (Wheat)';
-    if (disease.startsWith('Potato')) return 'Aloo (Potato)';
-    return 'Fasal';
+  Color _severityColor(String severity) {
+    switch (severity) {
+      case 'none':
+        return Colors.green.shade600;
+      case 'moderate':
+        return Colors.orange.shade700;
+      case 'high':
+        return Colors.red.shade600;
+      case 'critical':
+        return Colors.red.shade800;
+      default:
+        return Colors.grey.shade600;
+    }
   }
 
-  Color _cropColor(String disease) {
-    if (disease.startsWith('Rice')) return Colors.amber.shade700;
-    if (disease.startsWith('Corn')) return Colors.yellow.shade800;
-    if (disease.startsWith('Wheat')) return Colors.orange.shade700;
-    if (disease.startsWith('Potato')) return Colors.brown.shade400;
-    return AppConstants.primaryGreen;
+  String _severityLabel(String severity) {
+    switch (severity) {
+      case 'none':
+        return 'No Risk';
+      case 'moderate':
+        return 'Moderate';
+      case 'high':
+        return 'High Risk';
+      case 'critical':
+        return 'Critical';
+      default:
+        return severity;
+    }
   }
+
+  IconData _severityIcon(String severity) {
+    switch (severity) {
+      case 'none':
+        return Icons.check_circle_rounded;
+      case 'moderate':
+        return Icons.warning_amber_rounded;
+      case 'high':
+        return Icons.dangerous_rounded;
+      case 'critical':
+        return Icons.emergency_rounded;
+      default:
+        return Icons.info_rounded;
+    }
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -115,40 +171,33 @@ class _DiseaseDetectionScreenState
         backgroundColor: AppConstants.primaryGreen,
         title: const Text(
           'Disease Detection',
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded, color: Colors.white),
+            tooltip: 'Detection History',
+            onPressed: () => Get.toNamed(AppRoutes.DISEASE_DETECTION_HISTORY),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Model loading
             if (!_modelReady) _buildStatusBar(),
-
-            // Info card
             _buildInfoCard(),
             const SizedBox(height: 16),
-
-            // Image preview
             _buildImagePreview(),
             const SizedBox(height: 16),
-
-            // Buttons
-            kIsWeb ? _buildWebButton() : _buildMobileButtons(),
+            _buildMobileButtons(),
             const SizedBox(height: 20),
-
-            // Loading
             if (_loading) _buildLoadingWidget(),
-
-            // Result
-            if (_result != null && !_loading)
-              _buildResultCard(_result!),
-
+            if (_result != null && !_loading) _buildResultCard(_result!),
             const SizedBox(height: 40),
           ],
         ),
@@ -156,12 +205,11 @@ class _DiseaseDetectionScreenState
     );
   }
 
-  // ── Status Bar ──
+  // ── Status bar ───────────────────────
   Widget _buildStatusBar() {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.orange.shade50,
         borderRadius: BorderRadius.circular(8),
@@ -169,22 +217,22 @@ class _DiseaseDetectionScreenState
       ),
       child: Row(children: [
         SizedBox(
-          width: 16, height: 16,
+          width: 16,
+          height: 16,
           child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.orange.shade700),
+              strokeWidth: 2, color: Colors.orange.shade700),
         ),
         const SizedBox(width: 10),
         Text(
           _loadingMsg,
-          style: TextStyle(
-              color: Colors.orange.shade800, fontSize: 13),
+          style: TextStyle(color: Colors.orange.shade800, fontSize: 13),
         ),
       ]),
     );
   }
 
-  // ── Info Card ──
+  // ── Info card ──────────────────────────────────────────────────────────────
+
   Widget _buildInfoCard() {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -200,20 +248,17 @@ class _DiseaseDetectionScreenState
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            kIsWeb
-                ? 'Laptop se fasal ki saaf image upload karein (Rice, Corn, Wheat, Potato)'
-                : 'Camera se patte ki photo lo — Rice, Makka, Gehun, Aloo detect hogi',
+            'Take a photo of a leaf — supports Rice, Corn, Wheat, and Potato.',
             style: TextStyle(
-                color: AppConstants.primaryGreen,
-                fontSize: 13,
-                height: 1.4),
+                color: AppConstants.primaryGreen, fontSize: 13, height: 1.4),
           ),
         ),
       ]),
     );
   }
 
-  // ── Image Preview ──
+  // ── Image preview ──────────────────────────────────────────────────────────
+
   Widget _buildImagePreview() {
     return Container(
       height: 260,
@@ -223,94 +268,59 @@ class _DiseaseDetectionScreenState
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
       ),
-      child: _pickedImage == null
+      child: _pickedFile == null
           ? Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.eco_outlined,
-              size: 70,
-              color: AppConstants.primaryGreen
-                  .withValues(alpha: 0.2)),
-          const SizedBox(height: 12),
-          Text(
-            kIsWeb
-                ? 'Upload ki image yahan dikhegi'
-                : 'Li hui photo yahan dikhegi',
-            style: TextStyle(
-                color: Colors.grey.shade400, fontSize: 14),
-          ),
-        ],
-      )
-          : Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: kIsWeb
-                ? Image.network(
-              _pickedImage!.path,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            )
-                : Image.file(
-              File(_pickedImage!.path),
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-          ),
-          // Retake button
-          Positioned(
-            top: 8, right: 8,
-            child: GestureDetector(
-              onTap: () => setState(() {
-                _pickedImage = null;
-                _result = null;
-              }),
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(20),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.eco_outlined,
+                    size: 70,
+                    color:
+                        AppConstants.primaryGreen.withValues(alpha: 0.2)),
+                const SizedBox(height: 12),
+                Text(
+                  'Captured photo will appear here',
+                  style:
+                      TextStyle(color: Colors.grey.shade400, fontSize: 14),
                 ),
-                child: const Icon(Icons.close,
-                    color: Colors.white, size: 18),
-              ),
+              ],
+            )
+          : Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.file(
+                    _pickedFile!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => setState(() {
+                      _pickedFile = null;
+                      _result = null;
+                    }),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child:
+                          const Icon(Icons.close, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
-  // ── Web Button ──
-  Widget _buildWebButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppConstants.primaryGreen,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey.shade300,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
-          elevation: 0,
-        ),
-        onPressed: _modelReady
-            ? () => _pickImage(ImageSource.gallery)
-            : null,
-        icon: const Icon(Icons.upload_file),
-        label: Text(
-          _modelReady ? 'Image Upload karein' : 'Loading...',
-          style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
+  // ── Mobile buttons ─────────────────────────────────────────────────────────
 
-  // ── Mobile Buttons ──
   Widget _buildMobileButtons() {
     return Row(children: [
       Expanded(
@@ -324,9 +334,8 @@ class _DiseaseDetectionScreenState
                 borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
-          onPressed: _modelReady
-              ? () => _pickImage(ImageSource.camera)
-              : null,
+          onPressed:
+              _modelReady ? () => _pickImage(ImageSource.camera) : null,
           icon: const Icon(Icons.camera_alt, size: 20),
           label: const Text('Camera',
               style: TextStyle(fontWeight: FontWeight.w600)),
@@ -348,9 +357,8 @@ class _DiseaseDetectionScreenState
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12)),
           ),
-          onPressed: _modelReady
-              ? () => _pickImage(ImageSource.gallery)
-              : null,
+          onPressed:
+              _modelReady ? () => _pickImage(ImageSource.gallery) : null,
           icon: const Icon(Icons.photo_library, size: 20),
           label: const Text('Gallery',
               style: TextStyle(fontWeight: FontWeight.w600)),
@@ -359,139 +367,143 @@ class _DiseaseDetectionScreenState
     ]);
   }
 
-  // ── Loading Widget ──
+  // ── Loading widget ─────────────────────────────────────────────────────────
+
   Widget _buildLoadingWidget() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(children: [
-          CircularProgressIndicator(
-              color: AppConstants.primaryGreen),
+          CircularProgressIndicator(color: AppConstants.primaryGreen),
           const SizedBox(height: 10),
           Text(
             _loadingMsg,
-            style: TextStyle(
-                color: Colors.grey.shade600, fontSize: 13),
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
             textAlign: TextAlign.center,
           ),
-          if (kIsWeb) ...[
-            const SizedBox(height: 4),
-            Text(
-              '(Pehli baar 30-50 seconds lag sakti hai)',
-              style: TextStyle(
-                  color: Colors.grey.shade400, fontSize: 11),
-            ),
-          ],
           const SizedBox(height: 16),
         ]),
       ),
     );
   }
 
-  // ── Result Card ──
-  Widget _buildResultCard(Map<String, dynamic> result) {
-    // Error
-    if (result.containsKey('error')) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.red.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red.shade200),
-        ),
-        child: Row(children: [
-          Icon(Icons.error_outline, color: Colors.red.shade400),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(result['error'].toString(),
-                style: TextStyle(color: Colors.red.shade700)),
-          ),
-        ]),
-      );
-    }
+  // ── Result card ────────────────────────────────────────────────────────────
 
-    final String disease = result['disease'] ?? 'Unknown';
-    final double confidence =
-        double.tryParse(result['confidence'].toString()) ?? 0;
-    final bool isHealthy = disease.contains('Healthy');
-    final List top3 = result['top3'] ?? [];
+  Widget _buildResultCard(DiseaseResult result) {
+    final isUrdu = _showUrdu;
+    final isHealthy = result.severity == 'none';
+    final isHighRisk =
+        result.severity == 'high' || result.severity == 'critical';
+    final isCritical = result.severity == 'critical';
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color:
-          isHealthy ? Colors.green.shade200 : Colors.red.shade200,
+          color: isHealthy ? Colors.green.shade200 : Colors.red.shade200,
           width: 1.5,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──
+          // ── Language toggle ─────────────────────────────────────────────
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => setState(() => _showUrdu = !_showUrdu),
+                  icon: Icon(
+                    Icons.translate_rounded,
+                    size: 16,
+                    color: AppConstants.primaryGreen,
+                  ),
+                  label: Text(
+                    isUrdu
+                        ? 'View in English'
+                        : 'اردو میں دیکھیں',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppConstants.primaryGreen,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppConstants.primaryGreen),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Header: disease name ────────────────────────────────────────
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             decoration: BoxDecoration(
-              color: isHealthy
-                  ? Colors.green.shade50
-                  : Colors.red.shade50,
+              color: isHealthy ? Colors.green.shade50 : Colors.red.shade50,
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(14)),
             ),
-            child: Row(children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isHealthy ? Colors.green : Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isHealthy
-                      ? Icons.check_rounded
-                      : Icons.bug_report_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Crop badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: _cropColor(disease)
-                            .withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        _cropUrdu(disease),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _cropColor(disease),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isHealthy ? Colors.green : Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _readable(disease),
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: isHealthy
-                            ? Colors.green.shade800
-                            : Colors.red.shade800,
-                      ),
+                    child: Icon(
+                      isHealthy
+                          ? Icons.check_rounded
+                          : Icons.bug_report_rounded,
+                      color: Colors.white,
+                      size: 22,
                     ),
-                  ],
-                ),
-              ),
-            ]),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: isUrdu
+                        ? Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: Text(
+                              result.diseaseNameUr,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: isHealthy
+                                    ? Colors.green.shade800
+                                    : Colors.red.shade800,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            result.diseaseName,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: isHealthy
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
+                            ),
+                          ),
+                  ),
+                ]),
+                const SizedBox(height: 10),
+
+                // ── Severity badge ──────────────────────────────────────
+                _buildSeverityBadge(result.severity, result.severityUr,
+                    isCritical, isUrdu),
+              ],
+            ),
           ),
 
           Padding(
@@ -499,22 +511,19 @@ class _DiseaseDetectionScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Confidence bar ──
+                // ── Confidence bar ────────────────────────────────────
                 Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Confidence',
                         style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13)),
+                            color: Colors.grey.shade600, fontSize: 13)),
                     Text(
-                      '${result['confidence']}%',
+                      '${result.confidence.toStringAsFixed(1)}%',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color:
-                        isHealthy ? Colors.green : Colors.red,
+                        color: isHealthy ? Colors.green : Colors.red,
                       ),
                     ),
                   ],
@@ -523,122 +532,75 @@ class _DiseaseDetectionScreenState
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    value: confidence / 100,
+                    value: result.confidence / 100,
                     backgroundColor: Colors.grey.shade200,
                     color: isHealthy ? Colors.green : Colors.red,
                     minHeight: 8,
                   ),
                 ),
 
-                // ── Top 3 results ──
-                if (top3.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text('Doosri possibilities:',
-                      style: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 12)),
-                  const SizedBox(height: 6),
-                  ...top3.skip(1).map((item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(children: [
-                      Expanded(
-                        child: Text(
-                          _readable(item['disease'] ?? ''),
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600),
-                        ),
-                      ),
-                      Text(
-                        '${item['confidence']}%',
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade500),
-                      ),
-                    ]),
-                  )),
-                ],
+                const SizedBox(height: 20),
+                const Divider(),
+                const SizedBox(height: 12),
 
-                // ── Treatment ──
-                if (!isHealthy) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Row(children: [
-                    Icon(Icons.healing,
-                        color: AppConstants.primaryGreen,
-                        size: 18),
-                    const SizedBox(width: 6),
-                    Text('Ilaaj ki Tavsiya',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
-                          fontSize: 15,
-                        )),
-                  ]),
-                  const SizedBox(height: 10),
-                  ..._getTreatment(disease).map(
-                        (step) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            width: 6, height: 6,
-                            decoration: BoxDecoration(
-                              color: AppConstants.primaryGreen,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(step,
-                                style: TextStyle(
-                                    color: Colors.grey.shade700,
-                                    height: 1.5,
-                                    fontSize: 14)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                // ── Description ───────────────────────────────────────
+                _buildSection(
+                  icon: Icons.info_outline_rounded,
+                  title: 'Description',
+                  titleUr: 'تفصیل',
+                  body: result.description,
+                  bodyUr: result.descriptionUr,
+                  isUrdu: isUrdu,
+                ),
+                const SizedBox(height: 14),
 
-                  const SizedBox(height: 12),
+                // ── Treatment ─────────────────────────────────────────
+                _buildSection(
+                  icon: Icons.healing_rounded,
+                  title: 'Treatment',
+                  titleUr: 'علاج',
+                  body: result.treatment,
+                  bodyUr: result.treatmentUr,
+                  isUrdu: isUrdu,
+                ),
+                const SizedBox(height: 14),
 
-                  // Appointment button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppConstants.primaryGreen,
-                        side: BorderSide(
-                            color: AppConstants.primaryGreen),
-                        shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12),
-                      ),
-                      onPressed: () =>
-                          Get.toNamed(AppRoutes.APPOINTMENTS),
-                      icon: const Icon(Icons.calendar_today,
-                          size: 18),
-                      label: const Text(
-                          'Expert se Appointment Lo'),
-                    ),
-                  ),
-                ],
+                // ── Prevention ────────────────────────────────────────
+                _buildSection(
+                  icon: Icons.shield_rounded,
+                  title: 'Prevention',
+                  titleUr: 'احتیاط',
+                  body: result.prevention,
+                  bodyUr: result.preventionUr,
+                  isUrdu: isUrdu,
+                ),
+                const SizedBox(height: 14),
+
+                // ── Farmer tip ────────────────────────────────────────
+                _buildTipBox(
+                  tip: result.farmerTip,
+                  tipUr: result.farmerTipUr,
+                  isUrdu: isUrdu,
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Save to history ───────────────────────────────────
+                _buildSaveButton(),
+
+                const SizedBox(height: 10),
+
+                // ── Consult Expert (only for high / critical) ─────────
+                if (isHighRisk) _buildConsultExpertButton(),
 
                 const SizedBox(height: 8),
 
-                // Retry
+                // ── Retry ─────────────────────────────────────────────
                 SizedBox(
                   width: double.infinity,
                   child: TextButton.icon(
                     onPressed: () => setState(() {
-                      _pickedImage = null;
+                      _pickedFile = null;
                       _result = null;
                     }),
                     icon: const Icon(Icons.refresh, size: 18),
@@ -655,63 +617,245 @@ class _DiseaseDetectionScreenState
     );
   }
 
-  List<String> _getTreatment(String disease) {
-    const map = {
-      'Corn___Common_Rust': [
-        'Mancozeb ya Azoxystrobin spray karein',
-        'Infected patte hata dein',
-        'Resistant hybrid agle season lagayen',
+  // ── Severity badge ─────────────────────────────────────────────────────────
+
+  Widget _buildSeverityBadge(
+    String severity,
+    String severityUr,
+    bool isCritical,
+    bool isUrdu,
+  ) {
+    final color = _severityColor(severity);
+    final label = isUrdu ? severityUr : _severityLabel(severity);
+    final icon = _severityIcon(severity);
+
+    final badge = AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        final pulse =
+            isCritical ? _pulseAnimation.value * 0.4 : 0.0;
+        return Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12 + pulse),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: color.withValues(
+                  alpha: isCritical ? 0.6 + pulse * 0.4 : 0.5),
+              width: isCritical ? 2.0 : 1.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 15),
+              const SizedBox(width: 5),
+              isUrdu
+                  ? Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      label,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return badge;
+  }
+
+  // ── Section helper ─────────────────────────────────────────────────────────
+
+  Widget _buildSection({
+    required IconData icon,
+    required String title,
+    required String titleUr,
+    required String body,
+    required String bodyUr,
+    required bool isUrdu,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          Icon(icon, color: AppConstants.primaryGreen, size: 18),
+          const SizedBox(width: 6),
+          isUrdu
+              ? Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    titleUr,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                      fontSize: 15,
+                    ),
+                  ),
+                )
+              : Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                    fontSize: 15,
+                  ),
+                ),
+        ]),
+        const SizedBox(height: 6),
+        isUrdu
+            ? Directionality(
+                textDirection: TextDirection.rtl,
+                child: Text(
+                  bodyUr,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    height: 1.5,
+                    fontSize: 14,
+                  ),
+                ),
+              )
+            : Text(
+                body,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  height: 1.5,
+                  fontSize: 14,
+                ),
+              ),
       ],
-      'Corn___Gray_Leaf_Spot': [
-        'Propiconazole fungicide use karein',
-        'Fasal rotation apnayen',
-        'Purani fasal ke baqi hisse hata dein',
-      ],
-      'Corn___Northern_Leaf_Blight': [
-        'Tebuconazole spray karein',
-        'Nitrogen fertilizer balance karein',
-        'Resistant seed agle season use karein',
-      ],
-      'Potato___Early_Blight': [
-        'Chlorothalonil ya Mancozeb spray karein',
-        'Pani seedha jad pe dein paton pe na',
-        'Infected patte foran hatayen',
-      ],
-      'Potato___Late_Blight': [
-        'Metalaxyl + Mancozeb FORAN spray karein',
-        'Infected plants nikaal kar jalayen',
-        'Barish ke mausam mein zyada dhyan rakhein',
-      ],
-      'Rice___Brown_Spot': [
-        'Mancozeb ya Tricyclazole spray karein',
-        'Potassium fertilizer barhayen',
-        'Agle season seed treatment karein',
-      ],
-      'Rice___Leaf_Blast': [
-        'Tricyclazole FORAN spray karein',
-        'Nitrogen fertilizer abhi band karein',
-        'Khet mein pani level check karein',
-      ],
-      'Rice___Neck_Blast': [
-        'Isoprothiolane ya Tricyclazole karein',
-        'Nitrogen bilkul kam karein',
-        'Resistant variety agle season lagayen',
-      ],
-      'Wheat___Brown_Rust': [
-        'Propiconazole ya Tebuconazole spray karein',
-        'Jaldi spray zaroori hai tezi se phailti hai',
-        'Certified disease-free seed use karein',
-      ],
-      'Wheat___Yellow_Rust': [
-        'Propiconazole immediately spray karein',
-        'Neighbors ko bhi inform karein',
-        'Resistant wheat variety lagayen',
-      ],
-    };
-    return map[disease] ??
-        [
-          'Nezdiki Zari Taraqiati Bank se rabta karein',
-          'Agricultural helpline: 0800-KISAAN',
-        ];
+    );
+  }
+
+  // ── Farmer tip box ─────────────────────────────────────────────────────────
+
+  Widget _buildTipBox({
+    required String tip,
+    required String tipUr,
+    required bool isUrdu,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.amber.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.lightbulb_rounded,
+                color: Colors.amber.shade700, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              isUrdu ? 'کسان ٹپ' : 'Farmer Tip',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.amber.shade900,
+                fontSize: 13,
+              ),
+            ),
+          ]),
+          const SizedBox(height: 6),
+          isUrdu
+              ? Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    tipUr,
+                    style: TextStyle(
+                      color: Colors.amber.shade900,
+                      height: 1.4,
+                      fontSize: 13,
+                    ),
+                  ),
+                )
+              : Text(
+                  tip,
+                  style: TextStyle(
+                    color: Colors.amber.shade900,
+                    height: 1.4,
+                    fontSize: 13,
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+
+  // ── Save result button ─────────────────────────────────────────────────────
+
+  Widget _buildSaveButton() {
+    return Obx(() {
+      final isSaving = _ctrl.isSaving.value;
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppConstants.primaryGreen,
+            side: BorderSide(
+              color: isSaving ? Colors.grey.shade300 : AppConstants.primaryGreen,
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: isSaving ? null : _ctrl.saveCurrentResult,
+          icon: isSaving
+              ? SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppConstants.primaryGreen),
+                )
+              : const Icon(Icons.save_rounded, size: 20),
+          label: Text(
+            isSaving ? 'Saving…' : 'Save Result',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+        ),
+      );
+    });
+  }
+
+  // ── Consult Expert button ──────────────────────────────────────────────────
+
+  Widget _buildConsultExpertButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red.shade600,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)),
+          elevation: 0,
+        ),
+        onPressed: () => Get.toNamed(AppRoutes.APPOINTMENTS),
+        icon: const Icon(Icons.medical_services_rounded, size: 18),
+        label: const Text(
+          'Consult Expert',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        ),
+      ),
+    );
   }
 }

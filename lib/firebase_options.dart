@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -40,49 +41,49 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyANQLGhAUWDqMoFFEUZNyY3GjqstmIVmjU',
-    appId: '1:445095313817:web:96c2433db2669877dcd308',
-    messagingSenderId: '445095313817',
-    projectId: 'fyp-phase1',
-    authDomain: 'fyp-phase1.firebaseapp.com',
-    storageBucket: 'fyp-phase1.firebasestorage.app',
-    measurementId: 'G-T5MJHK8ND7',
-  );
+  static FirebaseOptions get web => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY_WEB'] ?? '',
+        appId: '1:536136113610:web:9f8e4c73ae0ed5448373af',
+        messagingSenderId: '536136113610',
+        projectId: 'fyp-phase1',
+        authDomain: 'fyp-phase1.firebaseapp.com',
+        storageBucket: 'fyp-phase1.firebasestorage.app',
+        measurementId: 'G-T5MJHK8ND7',
+      );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCBiKsrh4ULXVi14sEAIESeMZM0pZ42aZg',
-    appId: '1:445095313817:android:0a03cae7bd51019fdcd308',
-    messagingSenderId: '445095313817',
-    projectId: 'fyp-phase1',
-    storageBucket: 'fyp-phase1.firebasestorage.app',
-  );
+  static FirebaseOptions get android => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY_ANDROID'] ?? '',
+        appId: '1:536136113610:android:3a5fe612fd2af9fd8373af',
+        messagingSenderId: '536136113610',
+        projectId: 'fyp-phase1',
+        storageBucket: 'fyp-phase1.firebasestorage.app',
+      );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyALRhQr-C_X15GP9CNQOCtruG7KAuFgYMY',
-    appId: '1:445095313817:ios:a4fd4590d9080630dcd308',
-    messagingSenderId: '445095313817',
-    projectId: 'fyp-phase1',
-    storageBucket: 'fyp-phase1.firebasestorage.app',
-    iosBundleId: 'com.example.fypPhase1',
-  );
+  static FirebaseOptions get ios => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? '',
+        appId: '1:536136113610:ios:db62dff7d45c5ab48373af',
+        messagingSenderId: '536136113610',
+        projectId: 'fyp-phase1',
+        storageBucket: 'fyp-phase1.firebasestorage.app',
+        iosBundleId: 'com.example.fypPhase1',
+      );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyALRhQr-C_X15GP9CNQOCtruG7KAuFgYMY',
-    appId: '1:445095313817:ios:a4fd4590d9080630dcd308',
-    messagingSenderId: '445095313817',
-    projectId: 'fyp-phase1',
-    storageBucket: 'fyp-phase1.firebasestorage.app',
-    iosBundleId: 'com.example.fypPhase1',
-  );
+  static FirebaseOptions get macos => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY_MACOS'] ?? '',
+        appId: '1:536136113610:ios:db62dff7d45c5ab48373af',
+        messagingSenderId: '536136113610',
+        projectId: 'fyp-phase1',
+        storageBucket: 'fyp-phase1.firebasestorage.app',
+        iosBundleId: 'com.example.fypPhase1',
+      );
 
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyANQLGhAUWDqMoFFEUZNyY3GjqstmIVmjU',
-    appId: '1:445095313817:web:f77cfb5eb7704bd4dcd308',
-    messagingSenderId: '445095313817',
-    projectId: 'fyp-phase1',
-    authDomain: 'fyp-phase1.firebaseapp.com',
-    storageBucket: 'fyp-phase1.firebasestorage.app',
-    measurementId: 'G-5QXK1126HF',
-  );
+  static FirebaseOptions get windows => FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY_WINDOWS'] ?? '',
+        appId: '1:536136113610:web:13010461bd2dccdc8373af',
+        messagingSenderId: '536136113610',
+        projectId: 'fyp-phase1',
+        authDomain: 'fyp-phase1.firebaseapp.com',
+        storageBucket: 'fyp-phase1.firebasestorage.app',
+        measurementId: 'G-5QXK1126HF',
+      );
 }

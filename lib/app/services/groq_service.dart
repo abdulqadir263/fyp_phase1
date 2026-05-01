@@ -12,7 +12,7 @@ class GroqService extends GetxService {
       'https://api.groq.com/openai/v1/chat/completions';
 
   /// The Groq model to use
-  static const String _model = 'llama-3.3-70b-versatile';
+  static const String _model = 'llama-3.1-8b-instant';
 
   late final String _apiKey;
   bool _isInitialized = false;

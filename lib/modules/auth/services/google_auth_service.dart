@@ -11,6 +11,24 @@ class GoogleAuthService {
 
   // ── Google OAuth ──────────────────────────────────────────────────────────
 
+  /// Signs in with Google. For brand-new accounts, sends an email verification
+  /// link if Firebase considers the address unverified (safety net — Google
+  /// accounts arrive pre-verified; this gate fires only in edge cases).
+  /// Returns null if the user cancelled.
+  Future<UserCredential?> signInWithGoogleAndVerify() async {
+    final result = await signInWithGoogle();
+    if (result == null) return null;
+
+    final user = result.user!;
+    final isNew = result.additionalUserInfo?.isNewUser ?? false;
+
+    if (isNew && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+
+    return result;
+  }
+
   /// Returns [UserCredential] on success, null if the user cancelled.
   Future<UserCredential?> signInWithGoogle() async {
     final account = await _googleSignIn.signIn();

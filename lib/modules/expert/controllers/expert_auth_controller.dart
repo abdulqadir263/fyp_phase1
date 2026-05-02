@@ -189,7 +189,7 @@ class ExpertAuthController extends GetxController {
     errorMessage.value = '';
     isLoading.value = true;
     try {
-      final uc = await _googleService.signInWithGoogle();
+      final uc = await _googleService.signInWithGoogleAndVerify();
       if (uc == null) {
         // User cancelled — silent return
         isLoading.value = false;
@@ -198,9 +198,18 @@ class ExpertAuthController extends GetxController {
 
       final uid = uc.user!.uid;
       final email = uc.user?.email ?? '';
+      final isNew = uc.additionalUserInfo?.isNewUser ?? false;
 
-      // Google verifies email — no sendEmailVerification() needed
       await _googleService.upsertUserDoc(uid: uid, email: email, role: 'expert');
+
+      // Edge case: new Google account that somehow isn't pre-verified
+      if (isNew && !(uc.user?.emailVerified ?? false)) {
+        Get.toNamed(
+          AppRoutes.EMAIL_VERIFICATION_PENDING,
+          arguments: {'email': email, 'role': 'expert', 'uid': uid},
+        );
+        return;
+      }
 
       // Pre-populate email field so profile setup form has it
       emailCtrl.text = email;

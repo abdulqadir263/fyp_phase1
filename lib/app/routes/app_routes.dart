@@ -7,6 +7,7 @@ class AppRoutes {
   static const ROLE_SELECTION = '/role-selection';
   
   // Farmer Auth
+  static const FARMER_AUTH = '/farmer/auth';
   static const FARMER_SIGNUP = '/farmer/signup';
   static const FARMER_OTP = '/farmer/otp';
   

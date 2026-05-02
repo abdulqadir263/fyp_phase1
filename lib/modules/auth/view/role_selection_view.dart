@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../farmer/farmer_session_controller.dart';
 import '../repository/auth_repository.dart';
 
 /// RoleSelectionView - First screen after welcome
@@ -92,10 +91,8 @@ class RoleSelectionView extends StatelessWidget {
           icon: Icons.grass,
           color: AppConstants.primaryGreen,
           onTap: () {
-            // MIGRATION: link to phone credential when Firebase Blaze plan is enabled
-            // await FirebaseAuth.instance.currentUser?.linkWithCredential(phoneCredential)
-            final controller = Get.put(FarmerSessionController());
-            controller.signInAnonymously();
+            Get.find<AuthRepository>().setRole('farmer');
+            Get.toNamed(AppRoutes.FARMER_AUTH);
           },
         ),
         const SizedBox(height: 12),

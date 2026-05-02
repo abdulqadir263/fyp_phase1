@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/widgets/custom_text_field.dart';
+import '../../../app/widgets/google_sign_in_icon.dart';
 import '../controllers/seller_auth_controller.dart';
 
 /// Seller Auth Screen (Login / Signup toggle)
@@ -48,6 +49,10 @@ class SellerAuthView extends GetView<SellerAuthController> {
                           _buildErrorText(),
                           const SizedBox(height: 8),
                           _buildSubmitButton(),
+                          const SizedBox(height: 16),
+                          _buildDivider(),
+                          const SizedBox(height: 16),
+                          _buildGoogleButton(),
                           const SizedBox(height: 20),
                           _buildToggleMode(),
                         ],
@@ -90,12 +95,14 @@ class SellerAuthView extends GetView<SellerAuthController> {
               ),
               const SizedBox(width: 10),
               Obx(() => Text(
-                controller.isLogin.value ? 'Login to your store' : 'Create a Store Account',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800]),
-              )),
+                    controller.isLogin.value
+                        ? 'Login to your store'
+                        : 'Create a Store Account',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800]),
+                  )),
             ],
           ),
           const SizedBox(height: 24),
@@ -204,11 +211,56 @@ class SellerAuthView extends GetView<SellerAuthController> {
             ),
             child: Text(
               controller.isLogin.value ? 'Login' : 'Create Account',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ));
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: Colors.grey.shade300)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text('or',
+              style: TextStyle(fontSize: 13, color: Colors.grey[400])),
+        ),
+        Expanded(child: Divider(color: Colors.grey.shade300)),
+      ],
+    );
+  }
+
+  Widget _buildGoogleButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        onPressed: controller.isLoading.value
+            ? null
+            : controller.signInWithGoogle,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.grey.shade300),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const GoogleSignInIcon(),
+            const SizedBox(width: 10),
+            const Text(
+              'Continue with Google',
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF3C4043)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildToggleMode() {
@@ -229,7 +281,9 @@ class SellerAuthView extends GetView<SellerAuthController> {
               child: Text(
                 controller.isLogin.value ? 'Sign up' : 'Login',
                 style: const TextStyle(
-                    color: _orange, fontWeight: FontWeight.w600, fontSize: 13),
+                    color: _orange,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13),
               ),
             ),
           ],

@@ -8,10 +8,12 @@ import '../../../app/data/models/user_model.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 import '../../../modules/auth/repository/auth_repository.dart';
+import '../../../modules/auth/services/google_auth_service.dart';
 import '../services/expert_auth_service.dart';
 
 class ExpertAuthController extends GetxController {
   final ExpertAuthService _service = ExpertAuthService();
+  final GoogleAuthService _googleService = GoogleAuthService();
   final AuthRepository _authRepo = Get.find<AuthRepository>();
 
   // ── Form controllers ───────────────────────────────────────────────────────
@@ -19,7 +21,7 @@ class ExpertAuthController extends GetxController {
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
   final confirmPasswordCtrl = TextEditingController();
-  final phoneCtrl = TextEditingController(); // optional, contact only
+  final phoneCtrl = TextEditingController();
   final locationCtrl = TextEditingController();
   final yearsExpCtrl = TextEditingController();
   final certificationsCtrl = TextEditingController();
@@ -86,7 +88,7 @@ class ExpertAuthController extends GetxController {
     return null;
   }
 
-  // ── Signup (Auth only) ─────────────────────────────────────────────────────
+  // ── Signup (Email + Password) ──────────────────────────────────────────────
 
   Future<void> submitSignup() async {
     errorMessage.value = '';
@@ -110,7 +112,14 @@ class ExpertAuthController extends GetxController {
         password: passwordCtrl.text,
       );
       await _service.sendEmailVerification();
-      
+
+      // Create canonical users/{uid} document
+      await _googleService.upsertUserDoc(
+        uid: uc.user!.uid,
+        email: emailCtrl.text.trim(),
+        role: 'expert',
+      );
+
       Get.toNamed(
         AppRoutes.EMAIL_VERIFICATION_PENDING,
         arguments: {
@@ -126,7 +135,7 @@ class ExpertAuthController extends GetxController {
     }
   }
 
-  // ── Login ──────────────────────────────────────────────────────────────────
+  // ── Login (Email + Password) ───────────────────────────────────────────────
 
   Future<void> submitLogin() async {
     errorMessage.value = '';
@@ -158,10 +167,10 @@ class ExpertAuthController extends GetxController {
         );
         return;
       }
-      
-      // Email is verified, check if profile exists
+
+      // Email verified — check profile
       final data = await _service.getExpertProfile(uc.user!.uid);
-      if (data != null) {
+      if (data != null && data['isProfileComplete'] == true) {
         _populateAuthRepoFromMap(uc.user!.uid, data);
         Get.offAllNamed(AppRoutes.HOME);
       } else {
@@ -169,6 +178,44 @@ class ExpertAuthController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = _localizeError(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Google Sign-In ─────────────────────────────────────────────────────────
+
+  Future<void> signInWithGoogle() async {
+    errorMessage.value = '';
+    isLoading.value = true;
+    try {
+      final uc = await _googleService.signInWithGoogle();
+      if (uc == null) {
+        // User cancelled — silent return
+        isLoading.value = false;
+        return;
+      }
+
+      final uid = uc.user!.uid;
+      final email = uc.user?.email ?? '';
+
+      // Google verifies email — no sendEmailVerification() needed
+      await _googleService.upsertUserDoc(uid: uid, email: email, role: 'expert');
+
+      // Pre-populate email field so profile setup form has it
+      emailCtrl.text = email;
+      _authRepo.setRole('expert');
+
+      final data = await _service.getExpertProfile(uid);
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uid, data);
+        Get.offAllNamed(AppRoutes.HOME);
+      } else {
+        Get.offAllNamed(AppRoutes.EXPERT_PROFILE_SETUP);
+      }
+    } catch (e) {
+      final msg = _googleService.mapError(e);
+      if (msg.isNotEmpty) errorMessage.value = msg;
     } finally {
       isLoading.value = false;
     }
@@ -202,7 +249,7 @@ class ExpertAuthController extends GetxController {
     isLoading.value = true;
     try {
       final uid = _authRepo.currentUser.value?.uid ??
-                  FirebaseAuth.instance.currentUser?.uid;
+          FirebaseAuth.instance.currentUser?.uid;
 
       if (uid == null) {
         errorMessage.value = 'Session lost. Please log in again.';
@@ -210,6 +257,7 @@ class ExpertAuthController extends GetxController {
       }
 
       await _saveExpertDoc(uid, emailVerified: true);
+      await _googleService.markProfileComplete(uid);
       _populateAuthRepo(uid);
       Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
@@ -221,16 +269,19 @@ class ExpertAuthController extends GetxController {
 
   // ── Email verification check ───────────────────────────────────────────────
 
+  /// Called from EmailVerificationPendingView.
+  /// FIXED: navigates to EXPERT_PROFILE_SETUP if profile is not yet complete.
   Future<bool> checkEmailVerified(String uid) async {
     final verified = await _service.reloadAndCheckVerification();
     if (verified) {
-      await _service.saveExpertProfile(
-        uid: uid,
-        data: {'emailVerified': true},
-      );
       final data = await _service.getExpertProfile(uid);
-      if (data != null) _populateAuthRepoFromMap(uid, data);
-      Get.offAllNamed(AppRoutes.HOME);
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uid, data);
+        Get.offAllNamed(AppRoutes.HOME);
+      } else {
+        // Profile not completed yet — go to setup
+        Get.offAllNamed(AppRoutes.EXPERT_PROFILE_SETUP);
+      }
     }
     return verified;
   }
@@ -257,9 +308,14 @@ class ExpertAuthController extends GetxController {
   // ── Internals ──────────────────────────────────────────────────────────────
 
   Future<void> _saveExpertDoc(String uid, {required bool emailVerified}) async {
+    // Use Firebase Auth email as fallback for Google Sign-In users
+    final email = emailCtrl.text.trim().isNotEmpty
+        ? emailCtrl.text.trim()
+        : (FirebaseAuth.instance.currentUser?.email ?? '');
+
     await _service.saveExpertProfile(uid: uid, data: {
       'name': nameCtrl.text.trim(),
-      'email': emailCtrl.text.trim(),
+      'email': email,
       'phone': phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
       'location': locationCtrl.text.trim().isEmpty ? null : locationCtrl.text.trim(),
       'specialization': selectedSpecialization.value,
@@ -279,10 +335,13 @@ class ExpertAuthController extends GetxController {
   }
 
   void _populateAuthRepo(String uid) {
+    final email = emailCtrl.text.trim().isNotEmpty
+        ? emailCtrl.text.trim()
+        : (FirebaseAuth.instance.currentUser?.email ?? '');
     _authRepo.currentUser.value = UserModel(
       uid: uid,
       name: nameCtrl.text.trim(),
-      email: emailCtrl.text.trim(),
+      email: email,
       phone: phoneCtrl.text.trim(),
       userType: 'expert',
       specialization: selectedSpecialization.value,

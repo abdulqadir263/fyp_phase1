@@ -5,8 +5,10 @@ import '../../modules/auth/view/welcome_view.dart';
 import '../../modules/auth/view/role_selection_view.dart';
 
 // ========== NEW ROLE AUTH IMPORTS ==========
+import '../../modules/farmer/view/farmer_auth_view.dart';
 import '../../modules/farmer/view/farmer_signup_view.dart';
 import '../../modules/farmer/binding/farmer_auth_binding.dart';
+import '../../modules/farmer/binding/farmer_login_binding.dart';
 
 import '../../modules/expert/view/expert_auth_view.dart';
 import '../../modules/expert/view/expert_profile_setup_view.dart';
@@ -83,6 +85,11 @@ class AppPages {
     GetPage(name: AppRoutes.ROLE_SELECTION, page: () => const RoleSelectionView()),
     
     // Farmer Auth
+    GetPage(
+      name: AppRoutes.FARMER_AUTH,
+      page: () => const FarmerAuthView(),
+      binding: FarmerLoginBinding(),
+    ),
     GetPage(
       name: AppRoutes.FARMER_SIGNUP,
       page: () => const FarmerSignupView(),

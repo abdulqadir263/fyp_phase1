@@ -8,10 +8,12 @@ import '../../../app/data/models/user_model.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/app_snackbar.dart';
 import '../../../modules/auth/repository/auth_repository.dart';
+import '../../../modules/auth/services/google_auth_service.dart';
 import '../services/seller_auth_service.dart';
 
 class SellerAuthController extends GetxController {
   final SellerAuthService _service = SellerAuthService();
+  final GoogleAuthService _googleService = GoogleAuthService();
   final AuthRepository _authRepo = Get.find<AuthRepository>();
 
   // ── Form controllers ───────────────────────────────────────────────────────
@@ -67,7 +69,7 @@ class SellerAuthController extends GetxController {
     }
   }
 
-  // ── Signup (Auth only) ─────────────────────────────────────────────────────
+  // ── Signup (Email + Password) ──────────────────────────────────────────────
 
   Future<void> submitSignup() async {
     errorMessage.value = '';
@@ -91,7 +93,14 @@ class SellerAuthController extends GetxController {
         password: passwordCtrl.text,
       );
       await _service.sendEmailVerification();
-      
+
+      // Create canonical users/{uid} document
+      await _googleService.upsertUserDoc(
+        uid: uc.user!.uid,
+        email: emailCtrl.text.trim(),
+        role: 'seller',
+      );
+
       Get.toNamed(
         AppRoutes.EMAIL_VERIFICATION_PENDING,
         arguments: {
@@ -107,7 +116,7 @@ class SellerAuthController extends GetxController {
     }
   }
 
-  // ── Login ──────────────────────────────────────────────────────────────────
+  // ── Login (Email + Password) ───────────────────────────────────────────────
 
   Future<void> submitLogin() async {
     errorMessage.value = '';
@@ -139,10 +148,10 @@ class SellerAuthController extends GetxController {
         );
         return;
       }
-      
-      // Email is verified, check if profile exists
+
+      // Email verified — check profile
       final data = await _service.getSellerProfile(uc.user!.uid);
-      if (data != null) {
+      if (data != null && data['isProfileComplete'] == true) {
         _populateAuthRepoFromMap(uc.user!.uid, data);
         Get.offAllNamed(AppRoutes.HOME);
       } else {
@@ -150,6 +159,44 @@ class SellerAuthController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = _localizeError(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Google Sign-In ─────────────────────────────────────────────────────────
+
+  Future<void> signInWithGoogle() async {
+    errorMessage.value = '';
+    isLoading.value = true;
+    try {
+      final uc = await _googleService.signInWithGoogle();
+      if (uc == null) {
+        // User cancelled — silent return
+        isLoading.value = false;
+        return;
+      }
+
+      final uid = uc.user!.uid;
+      final email = uc.user?.email ?? '';
+
+      // Google verifies email — no sendEmailVerification() needed
+      await _googleService.upsertUserDoc(uid: uid, email: email, role: 'seller');
+
+      // Pre-populate email field for profile setup
+      emailCtrl.text = email;
+      _authRepo.setRole('seller');
+
+      final data = await _service.getSellerProfile(uid);
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uid, data);
+        Get.offAllNamed(AppRoutes.HOME);
+      } else {
+        Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
+      }
+    } catch (e) {
+      final msg = _googleService.mapError(e);
+      if (msg.isNotEmpty) errorMessage.value = msg;
     } finally {
       isLoading.value = false;
     }
@@ -166,15 +213,16 @@ class SellerAuthController extends GetxController {
 
     isLoading.value = true;
     try {
-      final uid = _authRepo.currentUser.value?.uid ?? 
-                  FirebaseAuth.instance.currentUser?.uid;
-      
+      final uid = _authRepo.currentUser.value?.uid ??
+          FirebaseAuth.instance.currentUser?.uid;
+
       if (uid == null) {
         errorMessage.value = 'Session lost. Please log in again.';
         return;
       }
 
       await _saveSellerDoc(uid, emailVerified: true);
+      await _googleService.markProfileComplete(uid);
       _populateAuthRepo(uid);
       Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
@@ -186,13 +234,19 @@ class SellerAuthController extends GetxController {
 
   // ── Email verification check ───────────────────────────────────────────────
 
+  /// Called from EmailVerificationPendingView.
+  /// FIXED: navigates to SELLER_PROFILE_SETUP if profile is not yet complete.
   Future<bool> checkEmailVerified(String uid) async {
     final verified = await _service.reloadAndCheckVerification();
     if (verified) {
-      await _service.saveSellerProfile(uid: uid, data: {'emailVerified': true});
       final data = await _service.getSellerProfile(uid);
-      if (data != null) _populateAuthRepoFromMap(uid, data);
-      Get.offAllNamed(AppRoutes.HOME);
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uid, data);
+        Get.offAllNamed(AppRoutes.HOME);
+      } else {
+        // Profile not completed yet — go to setup
+        Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
+      }
     }
     return verified;
   }
@@ -219,9 +273,13 @@ class SellerAuthController extends GetxController {
   // ── Internals ──────────────────────────────────────────────────────────────
 
   Future<void> _saveSellerDoc(String uid, {required bool emailVerified}) async {
+    final email = emailCtrl.text.trim().isNotEmpty
+        ? emailCtrl.text.trim()
+        : (FirebaseAuth.instance.currentUser?.email ?? '');
+
     await _service.saveSellerProfile(uid: uid, data: {
       'name': nameCtrl.text.trim(),
-      'email': emailCtrl.text.trim(),
+      'email': email,
       'phone': phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
       'shopName': shopNameCtrl.text.trim(),
       'shopLocation': shopLocationCtrl.text.trim().isEmpty ? null : shopLocationCtrl.text.trim(),
@@ -234,10 +292,13 @@ class SellerAuthController extends GetxController {
   }
 
   void _populateAuthRepo(String uid) {
+    final email = emailCtrl.text.trim().isNotEmpty
+        ? emailCtrl.text.trim()
+        : (FirebaseAuth.instance.currentUser?.email ?? '');
     _authRepo.currentUser.value = UserModel(
       uid: uid,
       name: nameCtrl.text.trim(),
-      email: emailCtrl.text.trim(),
+      email: email,
       phone: phoneCtrl.text.trim(),
       userType: 'company',
       companyName: shopNameCtrl.text.trim(),

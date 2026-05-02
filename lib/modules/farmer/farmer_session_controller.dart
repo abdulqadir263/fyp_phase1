@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../app/data/models/user_model.dart';
+import '../../app/data/services/farmer_auth_service.dart';
 import '../../app/routes/app_routes.dart';
 import '../../app/utils/app_snackbar.dart';
-import '../../app/data/services/farmer_auth_service.dart';
+import '../../modules/auth/repository/auth_repository.dart';
+import '../../modules/auth/services/google_auth_service.dart';
 
 class FarmerSessionController extends GetxController {
   final FarmerAuthService _service = FarmerAuthService();
+  final GoogleAuthService _googleService = GoogleAuthService();
+  final AuthRepository _authRepo = Get.find<AuthRepository>();
 
   // Profile fields
   final nameCtrl = TextEditingController();
   final locationCtrl = TextEditingController();
   final farmSizeCtrl = TextEditingController();
-  
+
   final selectedCrops = <String>[].obs;
   static const availableCrops = [
     'Wheat', 'Rice', 'Potatoes', 'Maize',
@@ -29,33 +33,6 @@ class FarmerSessionController extends GetxController {
       selectedCrops.remove(crop);
     } else {
       selectedCrops.add(crop);
-    }
-  }
-
-  Future<void> signInAnonymously() async {
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      final userCredential = await FirebaseAuth.instance.signInAnonymously();
-      final uid = userCredential.user!.uid;
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('farmer_anonymous_uid', uid);
-
-      // Check if profile exists
-      final existingProfile = await _service.getFarmerProfile(uid);
-      if (existingProfile != null) {
-        // Go to home
-        Get.offAllNamed(AppRoutes.HOME);
-      } else {
-        // Go to profile form
-        Get.toNamed(AppRoutes.FARMER_SIGNUP); // We'll rename this to FARMER_PROFILE later, or just keep route name to avoid changing too much
-      }
-    } catch (e) {
-      errorMessage.value = e.toString();
-      AppSnackbar.error('Failed to sign in anonymously: $e');
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -85,19 +62,41 @@ class FarmerSessionController extends GetxController {
       final doc = <String, dynamic>{
         'name': nameCtrl.text.trim(),
         'farmLocation': locationCtrl.text.trim(),
-        'farmSize': farmSizeCtrl.text.trim().isEmpty ? null : farmSizeCtrl.text.trim(),
+        'farmSize': farmSizeCtrl.text.trim().isEmpty
+            ? null
+            : farmSizeCtrl.text.trim(),
         'cropsGrown': selectedCrops.toList(),
         'userType': 'farmer',
         'isProfileComplete': true,
         'createdAt': FieldValue.serverTimestamp(),
       };
-      
-      // saveFarmerProfile must be awaited and wrapped in try/catch
+
       await _service.saveFarmerProfile(uid: user.uid, data: doc);
-      
+
+      // Mark canonical users/{uid} as profileComplete
+      await _googleService.markProfileComplete(user.uid);
+
+      // Populate AuthRepository so the home screen has the user model
+      _authRepo.currentUser.value = UserModel(
+        uid: user.uid,
+        name: nameCtrl.text.trim(),
+        email: user.email ?? '',
+        phone: '',
+        userType: 'farmer',
+        location: locationCtrl.text.trim(),
+        farmSize: farmSizeCtrl.text.trim().isEmpty
+            ? null
+            : farmSizeCtrl.text.trim(),
+        cropsGrown: selectedCrops.toList(),
+        isProfileComplete: true,
+        createdAt: DateTime.now(),
+      );
+      _authRepo.isAuthenticated.value = true;
+
       Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
       errorMessage.value = 'Failed to save profile: $e';
+      AppSnackbar.error(errorMessage.value);
     } finally {
       isLoading.value = false;
     }

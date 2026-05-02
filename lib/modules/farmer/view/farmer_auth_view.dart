@@ -3,13 +3,17 @@ import 'package:get/get.dart';
 
 import '../../../app/widgets/custom_text_field.dart';
 import '../../../app/widgets/google_sign_in_icon.dart';
-import '../controllers/expert_auth_controller.dart';
+import '../../../core/constants/app_constants.dart';
+import '../controllers/farmer_auth_controller.dart';
 
-/// Expert Auth Screen (Login / Signup toggle)
-class ExpertAuthView extends GetView<ExpertAuthController> {
-  const ExpertAuthView({super.key});
+/// Farmer auth screen — three paths:
+///   • Email / Password (signup or login, no email verification)
+///   • Continue with Google
+///   • Continue as Guest (anonymous)
+class FarmerAuthView extends GetView<FarmerAuthController> {
+  const FarmerAuthView({super.key});
 
-  static const _blue = Color(0xFF1565C0);
+  static const _green = AppConstants.primaryGreen;
 
   @override
   Widget build(BuildContext context) {
@@ -19,59 +23,65 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _blue),
+          icon: const Icon(Icons.arrow_back, color: _green),
           onPressed: () => Get.back(),
         ),
         title: Obx(() => Text(
-              controller.isLogin.value ? 'Expert Login' : 'Expert Signup',
-              style: const TextStyle(color: _blue),
+              controller.isLogin.value ? 'Farmer Login' : 'Farmer Signup',
+              style: const TextStyle(color: _green),
             )),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Obx(() => Stack(
-              children: [
-                SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    20,
-                    20,
-                    MediaQuery.of(context).viewInsets.bottom + 24,
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildCredentialsCard(context),
-                          const SizedBox(height: 16),
-                          _buildErrorText(),
-                          const SizedBox(height: 8),
-                          _buildSubmitButton(),
-                          const SizedBox(height: 16),
-                          _buildDivider(),
-                          const SizedBox(height: 16),
-                          _buildGoogleButton(),
-                          const SizedBox(height: 20),
-                          _buildToggleMode(),
-                        ],
-                      ),
+        child: Obx(
+          () => Stack(
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  20,
+                  20,
+                  MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildCredentialsCard(),
+                        const SizedBox(height: 16),
+                        _buildErrorText(),
+                        const SizedBox(height: 8),
+                        _buildEmailSubmitButton(),
+                        const SizedBox(height: 16),
+                        _buildDivider(),
+                        const SizedBox(height: 16),
+                        _buildGoogleButton(),
+                        const SizedBox(height: 12),
+                        _buildGuestButton(),
+                        const SizedBox(height: 20),
+                        _buildToggleMode(),
+                      ],
                     ),
                   ),
                 ),
-                if (controller.isLoading.value)
-                  Container(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-              ],
-            )),
+              ),
+              if (controller.isLoading.value)
+                Container(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildCredentialsCard(BuildContext context) {
+  // ── Email / Password card ──────────────────────────────────────────────────
+
+  Widget _buildCredentialsCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -88,10 +98,10 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _blue.withValues(alpha: 0.1),
+                  color: _green.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.school, color: _blue, size: 20),
+                child: const Icon(Icons.grass, color: _green, size: 20),
               ),
               const SizedBox(width: 10),
               Obx(() => Text(
@@ -107,7 +117,6 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
           ),
           const SizedBox(height: 24),
 
-          // Email
           CustomTextField(
             controller: controller.emailCtrl,
             labelText: 'Email Address *',
@@ -118,7 +127,6 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
           ),
           const SizedBox(height: 14),
 
-          // Password
           Obx(() => CustomTextField(
                 controller: controller.passwordCtrl,
                 labelText: 'Password *',
@@ -137,27 +145,32 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
                 ),
               )),
 
-          if (!controller.isLogin.value) ...[
-            const SizedBox(height: 14),
-            Obx(() => CustomTextField(
-                  controller: controller.confirmPasswordCtrl,
-                  labelText: 'Confirm Password *',
-                  hintText: 'Re-enter password',
-                  prefixIcon: Icons.lock_outline,
-                  obscureText: !controller.isConfirmPasswordVisible.value,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isConfirmPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
-                      color: Colors.grey[500],
-                    ),
-                    onPressed: () =>
-                        controller.isConfirmPasswordVisible.toggle(),
-                  ),
-                )),
-          ],
+          Obx(() {
+            if (controller.isLogin.value) return const SizedBox.shrink();
+            return Column(
+              children: [
+                const SizedBox(height: 14),
+                Obx(() => CustomTextField(
+                      controller: controller.confirmPasswordCtrl,
+                      labelText: 'Confirm Password *',
+                      hintText: 'Re-enter password',
+                      prefixIcon: Icons.lock_outline,
+                      obscureText: !controller.isConfirmPasswordVisible.value,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.isConfirmPasswordVisible.value
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          size: 20,
+                          color: Colors.grey[500],
+                        ),
+                        onPressed: () =>
+                            controller.isConfirmPasswordVisible.toggle(),
+                      ),
+                    )),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -180,10 +193,9 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
             Icon(Icons.error_outline, color: Colors.red.shade700, size: 18),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                err,
-                style: TextStyle(color: Colors.red.shade700, fontSize: 13),
-              ),
+              child: Text(err,
+                  style:
+                      TextStyle(color: Colors.red.shade700, fontSize: 13)),
             ),
           ],
         ),
@@ -191,28 +203,27 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
     });
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildEmailSubmitButton() {
     return Obx(() => SizedBox(
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
             onPressed: controller.isLoading.value
                 ? null
-                : () => controller.isLogin.value
-                    ? controller.submitLogin()
-                    : controller.submitSignup(),
+                : controller.submitEmailAuth,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _blue,
+              backgroundColor: _green,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: _blue.withValues(alpha: 0.5),
+              disabledBackgroundColor: _green.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
-            child: Text(
-              controller.isLogin.value ? 'Login' : 'Create Account',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            child: Obx(() => Text(
+                  controller.isLogin.value ? 'Login' : 'Create Account',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                )),
           ),
         ));
   }
@@ -236,9 +247,8 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
       width: double.infinity,
       height: 52,
       child: OutlinedButton(
-        onPressed: controller.isLoading.value
-            ? null
-            : controller.signInWithGoogle,
+        onPressed:
+            controller.isLoading.value ? null : controller.signInWithGoogle,
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: Colors.grey.shade300),
           shape:
@@ -263,6 +273,31 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
     );
   }
 
+  Widget _buildGuestButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed:
+            controller.isLoading.value ? null : controller.signInAnonymously,
+        icon: Icon(Icons.person_outline, color: Colors.grey[600], size: 20),
+        label: Text(
+          'Continue as Guest (no account needed)',
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700]),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.grey.shade300),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.grey.shade50,
+        ),
+      ),
+    );
+  }
+
   Widget _buildToggleMode() {
     return Obx(() => Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -281,7 +316,7 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
               child: Text(
                 controller.isLogin.value ? 'Sign up' : 'Login',
                 style: const TextStyle(
-                    color: _blue,
+                    color: _green,
                     fontWeight: FontWeight.w600,
                     fontSize: 13),
               ),
@@ -290,4 +325,3 @@ class ExpertAuthView extends GetView<ExpertAuthController> {
         ));
   }
 }
-

@@ -18,15 +18,15 @@ import '../../modules/crop_tracker/view/crop_tracker_view.dart';
 class RoleGuard {
   RoleGuard._();
 
-  static const String marketplace       = 'marketplace';
-  static const String sellerPanel       = 'seller_panel';
-  static const String cart              = 'cart';
-  static const String appointments      = 'appointments';
-  static const String community         = 'community';
-  static const String weather           = 'weather';
-  static const String chatbot           = 'chatbot';
-  static const String profile           = 'profile';
-  static const String cropTracker       = 'crop_tracker';
+  static const String marketplace        = 'marketplace';
+  static const String sellerPanel        = 'seller_panel';
+  static const String cart               = 'cart';
+  static const String appointments       = 'appointments';
+  static const String community          = 'community';
+  static const String weather            = 'weather';
+  static const String chatbot            = 'chatbot';
+  static const String profile            = 'profile';
+  static const String cropTracker        = 'crop_tracker';
   static const String cropRecommendation = 'crop_recommendation';
 
   static const Map<String, Set<String>> _accessMatrix = {
@@ -118,7 +118,6 @@ class RoleGuard {
 
   static List<String> get bottomNavTabs {
     final type = currentUserType;
-    final allowed = _accessMatrix[type] ?? {};
     final tabs = <String>['home'];
 
     if (type == 'company') {
@@ -127,9 +126,9 @@ class RoleGuard {
       tabs.add('appointments');
       tabs.add('community');
     } else {
+      // farmer (and any other role)
       tabs.add('marketplace');
-      tabs.add('weather');
-      if (allowed.contains(cropTracker)) tabs.add('crop_tracker');
+      tabs.add('appointments');
       tabs.add('community');
     }
     return tabs;
@@ -142,14 +141,9 @@ class RoleGuard {
       case 'home':
         return const HomeView();
       case 'marketplace':
-      // Company ko seller dashboard, farmer ko marketplace
         return currentUserType == 'company'
             ? const SellerDashboardView()
             : const MarketplaceHomeView();
-      case 'weather':
-        return const WeatherView();
-      case 'crop_tracker':
-        return const CropTrackerView();
       case 'community':
         return const CommunityView();
       case 'appointments':

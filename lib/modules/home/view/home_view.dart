@@ -156,10 +156,10 @@ class _HomeViewState extends State<HomeView> {
                     ? const Color(0xFF1565C0)
                     : AppConstants.primaryGreen,
               ),
-              title: Text('my_appointments'.tr),
+              title: Text('My Appointments'.tr),
               onTap: () {
                 _closeDrawer();
-                controller.navigateToFeature('my_appointments');
+                controller.navigateToFeature('My Appointments');
               },
             );
           }),
@@ -233,19 +233,14 @@ class _HomeViewState extends State<HomeView> {
       case 'marketplace':
         return BottomNavigationBarItem(
             icon: const Icon(Icons.store), label: 'marketplace'.tr);
-      case 'weather':
-        return BottomNavigationBarItem(
-            icon: const Icon(Icons.cloud), label: 'weather_forecast'.tr);
-      case 'crop_tracker':
-        return BottomNavigationBarItem(
-            icon: const Icon(Icons.agriculture), label: 'crop_tracker'.tr);
       case 'community':
         return BottomNavigationBarItem(
             icon: const Icon(Icons.people), label: 'community'.tr);
       case 'appointments':
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.calendar_today),
-            label: 'appointments'.tr);
+            icon: const Icon(Icons.calendar_month_outlined),
+            activeIcon: const Icon(Icons.calendar_month),
+            label: 'My Appointments'.tr);
       default:
         return const BottomNavigationBarItem(
             icon: Icon(Icons.circle), label: '');
@@ -261,16 +256,6 @@ class _HomeViewState extends State<HomeView> {
             icon: Icons.store,
             label: 'marketplace'.tr,
             color: Colors.grey);
-      case 'weather':
-        return _buildPlaceholderContent(
-            icon: Icons.cloud,
-            label: 'weather_forecast'.tr,
-            color: Colors.blue);
-      case 'crop_tracker':
-        return _buildPlaceholderContent(
-            icon: Icons.agriculture,
-            label: 'crop_tracker'.tr,
-            color: Colors.green);
       case 'community':
         return _buildPlaceholderContent(
             icon: Icons.people,
@@ -278,8 +263,8 @@ class _HomeViewState extends State<HomeView> {
             color: Colors.purple);
       case 'appointments':
         return _buildPlaceholderContent(
-            icon: Icons.calendar_today,
-            label: 'appointments'.tr,
+            icon: Icons.calendar_month,
+            label: 'My Appointments'.tr,
             color: Colors.blue);
       default:
         return _buildHomeContent(context);
@@ -640,12 +625,12 @@ class _HomeViewState extends State<HomeView> {
     // ── My Appointments card (farmer + expert) ────────────────────────────
     // if (role == 'farmer' || role == 'expert') {
     //   cards.add(_buildFeatureCard(
-    //     title: 'my_appointments'.tr,
+    //     title: 'My Appointments'.tr,
     //     icon: Icons.history,
     //     color: role == 'expert'
     //         ? const Color(0xFF1565C0)
     //         : AppConstants.primaryGreen,
-    //     onTap: () => controller.navigateToFeature('my_appointments'),
+    //     onTap: () => controller.navigateToFeature('My Appointments'),
     //   ));
     // }
     // ─────────────────────────────────────────────────────────────────────

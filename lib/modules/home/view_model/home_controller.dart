@@ -60,20 +60,14 @@ class HomeController extends GetxController {
       case 'disease_detection':
         Get.toNamed(AppRoutes.DISEASE_DETECTION);
         break;
-      case 'weather':
-        Get.toNamed(AppRoutes.WEATHER);
-        break;
-      case 'crop_tracker':
-        currentIndex.value = index;
-        break;
       case 'community':
         Get.toNamed(AppRoutes.COMMUNITY);
         break;
       case 'appointments':
         if (user.value?.userType == 'expert') {
-          Get.toNamed(AppRoutes.EXPERT_DASHBOARD);
+          Get.toNamed(AppRoutes.EXPERT_APPOINTMENTS);
         } else {
-          Get.toNamed(AppRoutes.APPOINTMENTS);
+          Get.toNamed(AppRoutes.FARMER_APPOINTMENTS);
         }
         break;
       default:
@@ -138,7 +132,7 @@ class HomeController extends GetxController {
   void navigateToFeature(String feature) {
     final List<String> restrictedFeatures = [
       'appointments',
-      'my_appointments',
+      'My Appointments',
       'marketplace',
       'crop_tracker',
       'crop_recommendation',
@@ -152,7 +146,7 @@ class HomeController extends GetxController {
 
     final moduleMap = {
       'appointments': RoleGuard.appointments,
-      'my_appointments': RoleGuard.appointments,
+      'My Appointments': RoleGuard.appointments,
       'my_visits': RoleGuard.appointments,
       'marketplace': RoleGuard.marketplace,
       'weather': RoleGuard.weather,
@@ -187,7 +181,7 @@ class HomeController extends GetxController {
         break;
 
     // ── NEW: My Appointments history ──────────────────────────────────────
-      case 'my_appointments':
+      case 'My Appointments':
         if (user.value?.userType == 'expert') {
           Get.toNamed(AppRoutes.EXPERT_APPOINTMENTS);
         } else {

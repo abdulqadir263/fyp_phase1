@@ -60,12 +60,6 @@ class HomeController extends GetxController {
       case 'disease_detection':
         Get.toNamed(AppRoutes.DISEASE_DETECTION);
         break;
-      case 'weather':
-        Get.toNamed(AppRoutes.WEATHER);
-        break;
-      case 'crop_tracker':
-        currentIndex.value = index;
-        break;
       case 'community':
         Get.toNamed(AppRoutes.COMMUNITY);
         break;

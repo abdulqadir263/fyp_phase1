@@ -162,7 +162,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               title: Text(role == 'expert'
                   ? 'appointments'.tr
-                  : 'my_appointments'.tr),
+                  : 'Appointments'.tr),
               onTap: () {
                 _closeDrawer();
                 if (role == 'expert') {

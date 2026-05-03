@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // dart:io File removed — not supported on Flutter Web
@@ -27,10 +28,14 @@ class CloudinaryService extends GetxService {
       request.fields['upload_preset'] = uploadPreset;
       request.fields['folder'] = folder;
 
+      final ext = fileName.split('.').last.toLowerCase();
+      final mimeSubtype = (ext == 'png') ? 'png' : 'jpeg';
+
       request.files.add(http.MultipartFile.fromBytes(
         'file',
         imageBytes,
         filename: fileName,
+        contentType: MediaType('image', mimeSubtype),
       ));
 
       final response = await request.send();

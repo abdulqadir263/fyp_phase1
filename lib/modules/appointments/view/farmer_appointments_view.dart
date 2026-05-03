@@ -52,6 +52,40 @@ class FarmerAppointmentsView
               child: CircularProgressIndicator(color: _green),
             );
           }
+          if (controller.hasError.value) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_off,
+                        size: 64, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text(
+                      controller.errorMessage.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.grey.shade600),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: controller.retry,
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      label: const Text('Retry',
+                          style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _green,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
           return TabBarView(
             children: [
               _buildList(controller.active, showRebook: false),
@@ -64,9 +98,9 @@ class FarmerAppointmentsView
   }
 
   Widget _buildList(
-    List<AppointmentModel> items, {
-    required bool showRebook,
-  }) {
+      List<AppointmentModel> items, {
+        required bool showRebook,
+      }) {
     if (items.isEmpty) {
       return _buildEmptyState(showRebook);
     }

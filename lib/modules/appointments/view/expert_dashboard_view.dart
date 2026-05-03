@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../app/themes/app_colors.dart';
 import '../view_model/expert_dashboard_controller.dart';
 import '../models/field_visit_model.dart';
 
 /// ExpertDashboardView — Expert's main screen for managing field visits
 /// Tabs: New Requests | Upcoming | Completed
+///
+/// Use the calendar icon in the AppBar to view slot-based consultation
+/// appointments (ExpertAppointmentsView).
 class ExpertDashboardView extends GetView<ExpertDashboardController> {
   const ExpertDashboardView({super.key});
 
@@ -19,6 +23,16 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
         appBar: AppBar(
           title: Text('seller_dashboard'.tr),
           centerTitle: true,
+          actions: [
+            Tooltip(
+              message: 'My Consultations',
+              child: IconButton(
+                icon: const Icon(Icons.calendar_month),
+                onPressed: () =>
+                    Get.toNamed(AppRoutes.EXPERT_APPOINTMENTS),
+              ),
+            ),
+          ],
           bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
@@ -27,19 +41,19 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
             indicatorColor: AppColors.primaryGreen,
             tabs: [
               Obx(
-                () => Tab(
+                    () => Tab(
                   text: 'New (${controller.pendingVisits.length})',
                   icon: const Icon(Icons.notification_important_outlined),
                 ),
               ),
               Obx(
-                () => Tab(
+                    () => Tab(
                   text: 'Upcoming (${controller.upcomingVisits.length})',
                   icon: const Icon(Icons.calendar_today),
                 ),
               ),
               Obx(
-                () => Tab(
+                    () => Tab(
                   text: 'Done (${controller.completedVisits.length})',
                   icon: const Icon(Icons.check_circle_outline),
                 ),

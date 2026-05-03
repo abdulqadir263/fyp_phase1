@@ -20,7 +20,8 @@ class HomeController extends GetxController {
       case 'farmer':
         return userData.location == null || userData.location!.isEmpty;
       case 'expert':
-        return userData.specialization == null || userData.specialization!.isEmpty;
+        return userData.specialization == null ||
+            userData.specialization!.isEmpty;
       case 'company':
         return userData.companyName == null || userData.companyName!.isEmpty;
       default:
@@ -98,13 +99,11 @@ class HomeController extends GetxController {
       titleStyle: const TextStyle(fontSize: 18),
       middleText: 'logout_confirm'.tr,
       textCancel: 'no'.tr,
-      // ✅ onCancel removed — Get.back() snackbar se conflict karta tha → crash
-      // GetX dialog automatically closes on textCancel tap
       textConfirm: 'yes'.tr,
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
       onConfirm: () {
-        Get.back(); // dialog close
+        Get.back();
         _authRepository.signOut();
       },
     );
@@ -138,8 +137,12 @@ class HomeController extends GetxController {
 
   void navigateToFeature(String feature) {
     final List<String> restrictedFeatures = [
-      'appointments', 'marketplace', 'crop_tracker',
-      'crop_recommendation', 'community',
+      'appointments',
+      'my_appointments',
+      'marketplace',
+      'crop_tracker',
+      'crop_recommendation',
+      'community',
     ];
 
     if (isGuestUser && restrictedFeatures.contains(feature)) {
@@ -149,6 +152,7 @@ class HomeController extends GetxController {
 
     final moduleMap = {
       'appointments': RoleGuard.appointments,
+      'my_appointments': RoleGuard.appointments,
       'my_visits': RoleGuard.appointments,
       'marketplace': RoleGuard.marketplace,
       'weather': RoleGuard.weather,
@@ -174,12 +178,24 @@ class HomeController extends GetxController {
 
     switch (feature) {
       case 'appointments':
+      // "Book" — goes to expert list (farmer) or field visits (expert)
         if (user.value?.userType == 'expert') {
           Get.toNamed(AppRoutes.EXPERT_DASHBOARD);
         } else {
           Get.toNamed(AppRoutes.APPOINTMENTS);
         }
         break;
+
+    // ── NEW: My Appointments history ──────────────────────────────────────
+      case 'my_appointments':
+        if (user.value?.userType == 'expert') {
+          Get.toNamed(AppRoutes.EXPERT_APPOINTMENTS);
+        } else {
+          Get.toNamed(AppRoutes.FARMER_APPOINTMENTS);
+        }
+        break;
+    // ─────────────────────────────────────────────────────────────────────
+
       case 'my_visits':
         Get.toNamed(AppRoutes.MY_VISITS);
         break;
@@ -190,12 +206,24 @@ class HomeController extends GetxController {
           Get.toNamed(AppRoutes.MARKETPLACE);
         }
         break;
-      case 'weather':       Get.toNamed(AppRoutes.WEATHER); break;
-      case 'crop_tracker':  Get.toNamed(AppRoutes.CROP_TRACKER); break;
-      case 'community':     Get.toNamed(AppRoutes.COMMUNITY); break;
-      case 'chatbot':       Get.toNamed(AppRoutes.CHATBOT); break;
-      case 'disease_detection': Get.toNamed(AppRoutes.DISEASE_DETECTION); break;
-      case 'crop_recommendation': Get.toNamed(AppRoutes.CROP_RECOMMENDATION); break;
+      case 'weather':
+        Get.toNamed(AppRoutes.WEATHER);
+        break;
+      case 'crop_tracker':
+        Get.toNamed(AppRoutes.CROP_TRACKER);
+        break;
+      case 'community':
+        Get.toNamed(AppRoutes.COMMUNITY);
+        break;
+      case 'chatbot':
+        Get.toNamed(AppRoutes.CHATBOT);
+        break;
+      case 'disease_detection':
+        Get.toNamed(AppRoutes.DISEASE_DETECTION);
+        break;
+      case 'crop_recommendation':
+        Get.toNamed(AppRoutes.CROP_RECOMMENDATION);
+        break;
       default:
         Get.snackbar('error'.tr, 'feature_not_available'.tr);
     }

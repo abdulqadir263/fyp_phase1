@@ -16,6 +16,10 @@ import '../models/appointment_model.dart';
 ///  • _historyStream — cancelled + completed, ordered by bookedAt DESC
 ///                     (for the "Past" tab)
 ///
+/// NOTE: Requires two Firestore composite indexes:
+///   1. appointments → expertUid ASC, status ASC, bookedAt ASC
+///   2. appointments → expertUid ASC, status ASC, bookedAt DESC
+///
 /// All subscriptions are cancelled in onClose().
 class ExpertAppointmentController extends GetxController {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -24,6 +28,8 @@ class ExpertAppointmentController extends GetxController {
   final activeAppointments = <AppointmentModel>[].obs;
   final pastAppointments = <AppointmentModel>[].obs;
   final isLoading = true.obs;
+  final hasError = false.obs;
+  final errorMessage = ''.obs;
 
   StreamSubscription<QuerySnapshot>? _activeStream;
   StreamSubscription<QuerySnapshot>? _historyStream;
@@ -41,6 +47,8 @@ class ExpertAppointmentController extends GetxController {
       return;
     }
 
+    hasError.value = false;
+
     // ── Active appointments stream (pending + confirmed) ───────────────────
     _activeStream = _db
         .collection('appointments')
@@ -49,13 +57,16 @@ class ExpertAppointmentController extends GetxController {
         .orderBy('bookedAt', descending: false) // chronological for expert
         .snapshots()
         .listen(
-      (snap) {
+          (snap) {
         activeAppointments.assignAll(_parseSnap(snap));
         isLoading.value = false;
+        hasError.value = false;
       },
       onError: (e) {
         debugPrint('[ExpertAppointmentController] active stream error: $e');
         isLoading.value = false;
+        _handleStreamError(e,
+            indexHint: 'appointments → expertUid ASC + status ASC + bookedAt ASC');
       },
     );
 
@@ -67,27 +78,57 @@ class ExpertAppointmentController extends GetxController {
         .orderBy('bookedAt', descending: true)
         .snapshots()
         .listen(
-      (snap) {
+          (snap) {
         pastAppointments.assignAll(_parseSnap(snap));
       },
       onError: (e) {
         debugPrint('[ExpertAppointmentController] history stream error: $e');
+        _handleStreamError(e,
+            indexHint: 'appointments → expertUid ASC + status ASC + bookedAt DESC');
       },
     );
+  }
+
+  void _handleStreamError(Object e, {required String indexHint}) {
+    hasError.value = true;
+    if (e is FirebaseException && e.code == 'failed-precondition') {
+      errorMessage.value =
+      'Database index missing. Please contact support or run:\n'
+          'firebase deploy --only firestore:indexes';
+      debugPrint(
+        '⚠️ [ExpertAppointmentController] Missing Firestore composite index.\n'
+            'Create index for: $indexHint\n'
+            'Details: ${(e as FirebaseException).message}',
+      );
+    } else {
+      errorMessage.value = 'Failed to load appointments. Tap to retry.';
+      AppSnackbar.error('Could not load appointments. Please try again.');
+    }
+  }
+
+  /// Manual retry — cancels streams and re-subscribes.
+  void retry() {
+    _activeStream?.cancel();
+    _historyStream?.cancel();
+    isLoading.value = true;
+    hasError.value = false;
+    activeAppointments.clear();
+    pastAppointments.clear();
+    _startListening();
   }
 
   List<AppointmentModel> _parseSnap(QuerySnapshot snap) {
     return snap.docs
         .map((d) {
-          try {
-            return AppointmentModel.fromFirestore(d);
-          } catch (e) {
-            debugPrint(
-              '[ExpertAppointmentController] parse error ${d.id}: $e',
-            );
-            return null;
-          }
-        })
+      try {
+        return AppointmentModel.fromFirestore(d);
+      } catch (e) {
+        debugPrint(
+          '[ExpertAppointmentController] parse error ${d.id}: $e',
+        );
+        return null;
+      }
+    })
         .whereType<AppointmentModel>()
         .toList();
   }

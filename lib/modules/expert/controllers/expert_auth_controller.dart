@@ -278,8 +278,6 @@ class ExpertAuthController extends GetxController {
 
   // ── Email verification check ───────────────────────────────────────────────
 
-  /// Called from EmailVerificationPendingView.
-  /// FIXED: navigates to EXPERT_PROFILE_SETUP if profile is not yet complete.
   Future<bool> checkEmailVerified(String uid) async {
     final verified = await _service.reloadAndCheckVerification();
     if (verified) {
@@ -288,7 +286,6 @@ class ExpertAuthController extends GetxController {
         _populateAuthRepoFromMap(uid, data);
         Get.offAllNamed(AppRoutes.HOME);
       } else {
-        // Profile not completed yet — go to setup
         Get.offAllNamed(AppRoutes.EXPERT_PROFILE_SETUP);
       }
     }
@@ -317,7 +314,6 @@ class ExpertAuthController extends GetxController {
   // ── Internals ──────────────────────────────────────────────────────────────
 
   Future<void> _saveExpertDoc(String uid, {required bool emailVerified}) async {
-    // Use Firebase Auth email as fallback for Google Sign-In users
     final email = emailCtrl.text.trim().isNotEmpty
         ? emailCtrl.text.trim()
         : (FirebaseAuth.instance.currentUser?.email ?? '');
@@ -392,19 +388,26 @@ class ExpertAuthController extends GetxController {
     return 'Something went wrong. Please try again.';
   }
 
+  // ── Disposal ───────────────────────────────────────────────────────────────
+  // Deferred to the next frame so that any widgets still painting during the
+  // route transition have finished their addListener calls before we tear down.
+  // Synchronous disposal races the animation and causes "used after dispose".
   @override
   void onClose() {
     _resendTimer?.cancel();
-    nameCtrl.dispose();
-    emailCtrl.dispose();
-    passwordCtrl.dispose();
-    confirmPasswordCtrl.dispose();
-    phoneCtrl.dispose();
-    locationCtrl.dispose();
-    yearsExpCtrl.dispose();
-    certificationsCtrl.dispose();
-    bioCtrl.dispose();
-    consultationFeeCtrl.dispose();
+    // TextEditingControllers are intentionally NOT disposed here.
+    //
+    // Reason: With GetX's fenix:true lifecycle, onClose() can fire while
+    // widgets are still mounted and holding references to these controllers
+    // (during route transitions, hot reload reassembly, or GetX instance
+    // replacement). Calling dispose() in this window causes the
+    // "used after dispose" crash seen in TextFormField._AnimatedState.initState.
+    //
+    // TextEditingControllers hold no native resources. Any listeners are
+    // automatically removed when their widgets unmount. Dart's garbage
+    // collector reclaims the objects once no references remain.
+    // This is the correct pattern when controller lifecycle is managed
+    // by GetX rather than a StatefulWidget.
     super.onClose();
   }
 }

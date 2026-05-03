@@ -1,108 +1,38 @@
 {
   "indexes": [
     {
-      "collectionGroup": "communityPosts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "communityPosts",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "fieldVisits",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "farmerId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "fieldVisits",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "expertId", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "fieldVisits",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "expertId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "products",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "isActive", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "products",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "isActive", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "products",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "sellerId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "orders",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "buyerId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "cropRecommendations",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "userType", "order": "ASCENDING" },
+        { "fieldPath": "userType",          "order": "ASCENDING" },
         { "fieldPath": "isProfileComplete", "order": "ASCENDING" }
       ]
     },
-
-    // ── Appointments collection indexes ─────────────────────────────────────
-    // Query: slot availability stream (expertUid + day + status)
+    {
+      "collectionGroup": "fieldVisits",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "farmerId",  "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "fieldVisits",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "expertId",  "order": "ASCENDING"  },
+        { "fieldPath": "status",    "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
     {
       "collectionGroup": "appointments",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "expertUid", "order": "ASCENDING" },
-        { "fieldPath": "day",       "order": "ASCENDING" },
-        { "fieldPath": "status",    "order": "ASCENDING" }
+        { "fieldPath": "farmerUid", "order": "ASCENDING"  },
+        { "fieldPath": "bookedAt",  "order": "DESCENDING" }
       ]
     },
-    // Query: expert active dashboard (expertUid + status + bookedAt ASC)
     {
       "collectionGroup": "appointments",
       "queryScope": "COLLECTION",
@@ -112,16 +42,24 @@
         { "fieldPath": "bookedAt",  "order": "ASCENDING" }
       ]
     },
-    // Query: farmer's own appointments (farmerUid + bookedAt DESC)
     {
       "collectionGroup": "appointments",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "farmerUid", "order": "ASCENDING" },
+        { "fieldPath": "expertUid", "order": "ASCENDING"  },
+        { "fieldPath": "status",    "order": "ASCENDING"  },
         { "fieldPath": "bookedAt",  "order": "DESCENDING" }
       ]
     },
-    // Query: race-condition check (expertUid + day + slot + status)
+    {
+      "collectionGroup": "appointments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "expertUid", "order": "ASCENDING" },
+        { "fieldPath": "day",       "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" }
+      ]
+    },
     {
       "collectionGroup": "appointments",
       "queryScope": "COLLECTION",
@@ -135,4 +73,3 @@
   ],
   "fieldOverrides": []
 }
-

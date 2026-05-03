@@ -106,6 +106,15 @@ class ProfileController extends GetxController {
       final url = await _profileRepository.uploadProfileImage(picked);
       if (url != null) {
         profileImageUrl.value = url;
+
+        // Persist to Firestore immediately so the URL isn't lost
+        final updated = user.value!.copyWith(
+          profileImage: url,
+          updatedAt: DateTime.now(),
+        );
+        await _profileRepository.saveProfile(updated);
+        _authRepository.currentUser.value = updated;
+
         AppSnackbar.success('Profile photo updated!');
       }
     } catch (e) {

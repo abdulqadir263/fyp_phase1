@@ -15,7 +15,11 @@ class DiseaseHistoryScreen extends GetView<DiseaseDetectionController> {
 
   @override
   Widget build(BuildContext context) {
-    controller.loadHistory();
+    // Trigger a single load when the screen first appears.
+    // WidgetsBinding ensures it runs after the initial build frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadHistory();
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F5),
@@ -92,7 +96,7 @@ class DiseaseHistoryScreen extends GetView<DiseaseDetectionController> {
               foregroundColor: AppColors.primaryGreen,
               side: const BorderSide(color: AppColors.primaryGreen),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
@@ -135,7 +139,7 @@ class DiseaseHistoryScreen extends GetView<DiseaseDetectionController> {
               foregroundColor: Colors.red.shade700,
               side: BorderSide(color: Colors.red.shade300),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
@@ -149,7 +153,7 @@ class DiseaseHistoryScreen extends GetView<DiseaseDetectionController> {
 
   Widget _buildHistoryCard(BuildContext context, DiseaseHistoryRecord record) {
     final dateStr =
-        DateFormat('MMM dd, yyyy • hh:mm a').format(record.createdAt);
+    DateFormat('MMM dd, yyyy • hh:mm a').format(record.createdAt);
     final severityColor = _severityColor(record.severity);
     final severityLabel = _severityLabel(record.severity);
     final isHealthy = record.severity == 'none';
@@ -275,20 +279,20 @@ class DiseaseHistoryScreen extends GetView<DiseaseDetectionController> {
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   Color _severityColor(String severity) => switch (severity) {
-        'none' => Colors.green.shade600,
-        'moderate' => Colors.orange.shade700,
-        'high' => Colors.red.shade600,
-        'critical' => Colors.red.shade800,
-        _ => Colors.grey.shade600,
-      };
+    'none' => Colors.green.shade600,
+    'moderate' => Colors.orange.shade700,
+    'high' => Colors.red.shade600,
+    'critical' => Colors.red.shade800,
+    _ => Colors.grey.shade600,
+  };
 
   String _severityLabel(String severity) => switch (severity) {
-        'none' => 'No Risk',
-        'moderate' => 'Moderate',
-        'high' => 'High Risk',
-        'critical' => 'Critical',
-        _ => severity,
-      };
+    'none' => 'No Risk',
+    'moderate' => 'Moderate',
+    'high' => 'High Risk',
+    'critical' => 'Critical',
+    _ => severity,
+  };
 }
 
 // ── Bottom sheet detail view ───────────────────────────────────────────────
@@ -339,24 +343,24 @@ class _DetailContentState extends State<_DetailContent> {
               Expanded(
                 child: isUrdu
                     ? Directionality(
-                        textDirection: ui.TextDirection.rtl,
-                        child: Text(
-                          r.diseaseNameUr,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      )
+                  textDirection: ui.TextDirection.rtl,
+                  child: Text(
+                    r.diseaseNameUr,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                )
                     : Text(
-                        r.diseaseName,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                  r.diseaseName,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
               OutlinedButton(
                 onPressed: () => setState(() => _showUrdu = !_showUrdu),
                 style: OutlinedButton.styleFrom(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   side: const BorderSide(color: AppColors.primaryGreen),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20)),
@@ -374,7 +378,7 @@ class _DetailContentState extends State<_DetailContent> {
           // Confidence + date
           Text(
             'Confidence: ${r.confidence.toStringAsFixed(1)}%  •  '
-            '${DateFormat('MMM dd, yyyy').format(r.createdAt)}',
+                '${DateFormat('MMM dd, yyyy').format(r.createdAt)}',
             style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
           ),
           const SizedBox(height: 16),
@@ -420,14 +424,14 @@ class _DetailContentState extends State<_DetailContent> {
                 const SizedBox(height: 6),
                 isUrdu
                     ? Directionality(
-                        textDirection: ui.TextDirection.rtl,
-                        child: Text(r.farmerTipUr,
-                            style: TextStyle(
-                                color: Colors.amber.shade900, height: 1.4)),
-                      )
+                  textDirection: ui.TextDirection.rtl,
+                  child: Text(r.farmerTipUr,
+                      style: TextStyle(
+                          color: Colors.amber.shade900, height: 1.4)),
+                )
                     : Text(r.farmerTip,
-                        style: TextStyle(
-                            color: Colors.amber.shade900, height: 1.4)),
+                    style: TextStyle(
+                        color: Colors.amber.shade900, height: 1.4)),
               ],
             ),
           ),
@@ -463,24 +467,24 @@ class _DetailContentState extends State<_DetailContent> {
   }
 
   Widget _sectionTitle(String label, IconData icon) => Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Row(children: [
-          Icon(icon, color: AppColors.primaryGreen, size: 18),
-          const SizedBox(width: 6),
-          Text(label,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 15)),
-        ]),
-      );
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Row(children: [
+      Icon(icon, color: AppColors.primaryGreen, size: 18),
+      const SizedBox(width: 6),
+      Text(label,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 15)),
+    ]),
+  );
 
   Widget _sectionBody(String text, bool isUrdu) => isUrdu
       ? Directionality(
-          textDirection: ui.TextDirection.rtl,
-          child: Text(text,
-              style: TextStyle(
-                  color: Colors.grey.shade700, height: 1.5, fontSize: 14)),
-        )
+    textDirection: ui.TextDirection.rtl,
+    child: Text(text,
+        style: TextStyle(
+            color: Colors.grey.shade700, height: 1.5, fontSize: 14)),
+  )
       : Text(text,
-          style: TextStyle(
-              color: Colors.grey.shade700, height: 1.5, fontSize: 14));
+      style: TextStyle(
+          color: Colors.grey.shade700, height: 1.5, fontSize: 14));
 }

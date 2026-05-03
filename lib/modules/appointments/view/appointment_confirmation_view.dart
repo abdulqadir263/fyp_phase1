@@ -83,12 +83,13 @@ class AppointmentConfirmationView extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              // Home button
+              // View My Appointments button
               SizedBox(
                 width: double.infinity,
                 height: 52,
-                child: ElevatedButton(
-                  onPressed: () => Get.offAllNamed(AppRoutes.HOME),
+                child: ElevatedButton.icon(
+                  onPressed: () => Get.offAllNamed(AppRoutes.FARMER_APPOINTMENTS),
+                  icon: const Icon(Icons.calendar_month, color: Colors.white),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _green,
                     foregroundColor: Colors.white,
@@ -96,10 +97,31 @@ class AppointmentConfirmationView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Back to Home',
+                  label: const Text(
+                    'View My Appointments',
                     style: TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Back to Home (secondary)
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: () => Get.offAllNamed(AppRoutes.HOME),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey.shade300),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    'Back to Home',
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
               ),

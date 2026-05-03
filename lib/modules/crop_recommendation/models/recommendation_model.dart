@@ -17,7 +17,7 @@ class CropResult {
       cropName: json['cropName'] ?? '',
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
       suitabilityPercentage:
-          (json['suitabilityPercentage'] as num?)?.toDouble() ?? 0.0,
+      (json['suitabilityPercentage'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -93,17 +93,17 @@ class RecommendationModel {
 
   /// Create from Firestore document.
   factory RecommendationModel.fromJson(
-    Map<String, dynamic> json, {
-    String? docId,
-  }) {
+      Map<String, dynamic> json, {
+        String? docId,
+      }) {
     return RecommendationModel(
       id: docId ?? json['id'] ?? '',
       userId: json['userId'] ?? '',
       input: CropInput.fromJson(Map<String, dynamic>.from(json['input'] ?? {})),
       results:
-          (json['results'] as List<dynamic>?)
-              ?.map((e) => CropResult.fromJson(Map<String, dynamic>.from(e)))
-              .toList() ??
+      (json['results'] as List<dynamic>?)
+          ?.map((e) => CropResult.fromJson(Map<String, dynamic>.from(e)))
+          .toList() ??
           [],
       createdAt: json['createdAt'] is Timestamp
           ? (json['createdAt'] as Timestamp).toDate()

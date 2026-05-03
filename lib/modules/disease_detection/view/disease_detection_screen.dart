@@ -86,6 +86,9 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
         _loadingMsg = 'AI is analyzing...';
       });
 
+      // Reset the saved flag for the new detection
+      _ctrl.hasSaved.value = false;
+
       final result = await _service.detect(file);
 
       if (mounted) {
@@ -270,52 +273,53 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
       ),
       child: _pickedFile == null
           ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.eco_outlined,
-                    size: 70,
-                    color:
-                        AppConstants.primaryGreen.withValues(alpha: 0.2)),
-                const SizedBox(height: 12),
-                Text(
-                  'Captured photo will appear here',
-                  style:
-                      TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                ),
-              ],
-            )
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.eco_outlined,
+              size: 70,
+              color:
+              AppConstants.primaryGreen.withValues(alpha: 0.2)),
+          const SizedBox(height: 12),
+          Text(
+            'Captured photo will appear here',
+            style:
+            TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          ),
+        ],
+      )
           : Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
-                    _pickedFile!,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () => setState(() {
-                      _pickedFile = null;
-                      _result = null;
-                    }),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child:
-                          const Icon(Icons.close, color: Colors.white, size: 18),
-                    ),
-                  ),
-                ),
-              ],
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(
+              _pickedFile!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
             ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: () => setState(() {
+                _pickedFile = null;
+                _result = null;
+                _ctrl.clearResult();
+              }),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child:
+                const Icon(Icons.close, color: Colors.white, size: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -335,7 +339,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
             elevation: 0,
           ),
           onPressed:
-              _modelReady ? () => _pickImage(ImageSource.camera) : null,
+          _modelReady ? () => _pickImage(ImageSource.camera) : null,
           icon: const Icon(Icons.camera_alt, size: 20),
           label: const Text('Camera',
               style: TextStyle(fontWeight: FontWeight.w600)),
@@ -358,7 +362,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
                 borderRadius: BorderRadius.circular(12)),
           ),
           onPressed:
-              _modelReady ? () => _pickImage(ImageSource.gallery) : null,
+          _modelReady ? () => _pickImage(ImageSource.gallery) : null,
           icon: const Icon(Icons.photo_library, size: 20),
           label: const Text('Gallery',
               style: TextStyle(fontWeight: FontWeight.w600)),
@@ -411,7 +415,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
           // ── Language toggle ─────────────────────────────────────────────
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -473,28 +477,28 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
                   Expanded(
                     child: isUrdu
                         ? Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: Text(
-                              result.diseaseNameUr,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: isHealthy
-                                    ? Colors.green.shade800
-                                    : Colors.red.shade800,
-                              ),
-                            ),
-                          )
+                      textDirection: TextDirection.rtl,
+                      child: Text(
+                        result.diseaseNameUr,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: isHealthy
+                              ? Colors.green.shade800
+                              : Colors.red.shade800,
+                        ),
+                      ),
+                    )
                         : Text(
-                            result.diseaseName,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: isHealthy
-                                  ? Colors.green.shade800
-                                  : Colors.red.shade800,
-                            ),
-                          ),
+                      result.diseaseName,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: isHealthy
+                            ? Colors.green.shade800
+                            : Colors.red.shade800,
+                      ),
+                    ),
                   ),
                 ]),
                 const SizedBox(height: 10),
@@ -602,6 +606,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
                     onPressed: () => setState(() {
                       _pickedFile = null;
                       _result = null;
+                      _ctrl.clearResult();
                     }),
                     icon: const Icon(Icons.refresh, size: 18),
                     label: const Text('Dobara Try Karein'),
@@ -620,11 +625,11 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
   // ── Severity badge ─────────────────────────────────────────────────────────
 
   Widget _buildSeverityBadge(
-    String severity,
-    String severityUr,
-    bool isCritical,
-    bool isUrdu,
-  ) {
+      String severity,
+      String severityUr,
+      bool isCritical,
+      bool isUrdu,
+      ) {
     final color = _severityColor(severity);
     final label = isUrdu ? severityUr : _severityLabel(severity);
     final icon = _severityIcon(severity);
@@ -633,10 +638,10 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
       animation: _pulseAnimation,
       builder: (context, child) {
         final pulse =
-            isCritical ? _pulseAnimation.value * 0.4 : 0.0;
+        isCritical ? _pulseAnimation.value * 0.4 : 0.0;
         return Container(
           padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12 + pulse),
             borderRadius: BorderRadius.circular(20),
@@ -653,24 +658,24 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
               const SizedBox(width: 5),
               isUrdu
                   ? Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    )
+                textDirection: TextDirection.rtl,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              )
                   : Text(
-                      label,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
             ],
           ),
         );
@@ -698,46 +703,46 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
           const SizedBox(width: 6),
           isUrdu
               ? Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Text(
-                    titleUr,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                      fontSize: 15,
-                    ),
-                  ),
-                )
+            textDirection: TextDirection.rtl,
+            child: Text(
+              titleUr,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+                fontSize: 15,
+              ),
+            ),
+          )
               : Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
-                    fontSize: 15,
-                  ),
-                ),
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+              fontSize: 15,
+            ),
+          ),
         ]),
         const SizedBox(height: 6),
         isUrdu
             ? Directionality(
-                textDirection: TextDirection.rtl,
-                child: Text(
-                  bodyUr,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    height: 1.5,
-                    fontSize: 14,
-                  ),
-                ),
-              )
+          textDirection: TextDirection.rtl,
+          child: Text(
+            bodyUr,
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              height: 1.5,
+              fontSize: 14,
+            ),
+          ),
+        )
             : Text(
-                body,
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  height: 1.5,
-                  fontSize: 14,
-                ),
-              ),
+          body,
+          style: TextStyle(
+            color: Colors.grey.shade700,
+            height: 1.5,
+            fontSize: 14,
+          ),
+        ),
       ],
     );
   }
@@ -775,24 +780,24 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
           const SizedBox(height: 6),
           isUrdu
               ? Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Text(
-                    tipUr,
-                    style: TextStyle(
-                      color: Colors.amber.shade900,
-                      height: 1.4,
-                      fontSize: 13,
-                    ),
-                  ),
-                )
+            textDirection: TextDirection.rtl,
+            child: Text(
+              tipUr,
+              style: TextStyle(
+                color: Colors.amber.shade900,
+                height: 1.4,
+                fontSize: 13,
+              ),
+            ),
+          )
               : Text(
-                  tip,
-                  style: TextStyle(
-                    color: Colors.amber.shade900,
-                    height: 1.4,
-                    fontSize: 13,
-                  ),
-                ),
+            tip,
+            style: TextStyle(
+              color: Colors.amber.shade900,
+              height: 1.4,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     );
@@ -803,31 +808,47 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
   Widget _buildSaveButton() {
     return Obx(() {
       final isSaving = _ctrl.isSaving.value;
+      final alreadySaved = _ctrl.hasSaved.value;
+
       return SizedBox(
         width: double.infinity,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppConstants.primaryGreen,
+            foregroundColor: alreadySaved
+                ? Colors.green.shade700
+                : AppConstants.primaryGreen,
             side: BorderSide(
-              color: isSaving ? Colors.grey.shade300 : AppConstants.primaryGreen,
+              color: alreadySaved
+                  ? Colors.green.shade300
+                  : (isSaving ? Colors.grey.shade300 : AppConstants.primaryGreen),
               width: 1.5,
             ),
+            backgroundColor: alreadySaved
+                ? Colors.green.shade50
+                : null,
             padding: const EdgeInsets.symmetric(vertical: 13),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10)),
           ),
-          onPressed: isSaving ? null : _ctrl.saveCurrentResult,
+          onPressed: (isSaving || alreadySaved) ? null : _ctrl.saveCurrentResult,
           icon: isSaving
               ? SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppConstants.primaryGreen),
-                )
-              : const Icon(Icons.save_rounded, size: 20),
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppConstants.primaryGreen),
+          )
+              : Icon(
+            alreadySaved ? Icons.check_circle_rounded : Icons.save_rounded,
+            size: 20,
+          ),
           label: Text(
-            isSaving ? 'Saving…' : 'Save Result',
+            isSaving
+                ? 'Saving…'
+                : alreadySaved
+                ? 'Saved'
+                : 'Save Result',
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
           ),
         ),

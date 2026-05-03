@@ -28,6 +28,9 @@ class DiseaseDetectionController extends GetxController {
   final isHistoryLoading = false.obs;
   final historyError = ''.obs;
 
+  /// True after the current result has been persisted — prevents duplicate saves.
+  final hasSaved = false.obs;
+
   final Rx<DiseaseResult?> currentResult = Rx<DiseaseResult?>(null);
   final Rx<File?> currentImage = Rx<File?>(null);
   final RxList<DiseaseHistoryRecord> history = <DiseaseHistoryRecord>[].obs;
@@ -69,18 +72,19 @@ class DiseaseDetectionController extends GetxController {
   // ── Detection ──────────────────────────────────────────────────────────────
 
   /// Run on-device inference on [imageFile] and update [currentResult].
+  ///
+  /// Does NOT auto-save. The UI exposes a manual "Save Result" button so
+  /// the user can decide whether to persist each detection.
   Future<void> detect(File imageFile) async {
     isDetecting.value = true;
     currentResult.value = null;
     currentImage.value = imageFile;
     showUrdu.value = false;
+    hasSaved.value = false; // reset for new detection
 
     try {
       final result = await _service.detect(imageFile);
       currentResult.value = result;
-      
-      // Auto-save history after successful detection
-      await saveCurrentResult();
     } catch (e) {
       Get.snackbar(
         'Detection Error',
@@ -97,9 +101,15 @@ class DiseaseDetectionController extends GetxController {
   // ── Save to history ────────────────────────────────────────────────────────
 
   /// Persist [currentResult] to Firestore and prepend it to [history].
+  ///
+  /// Guarded by [hasSaved] — calling this twice for the same result is a no-op.
   Future<void> saveCurrentResult() async {
     final result = currentResult.value;
     if (result == null) return;
+
+    // Prevent duplicate saves
+    if (hasSaved.value) return;
+
     if (_userId.isEmpty) {
       Get.snackbar(
         'Not signed in',
@@ -131,6 +141,9 @@ class DiseaseDetectionController extends GetxController {
       );
 
       final docId = await _repo.saveRecord(record);
+
+      // Mark as saved so the button disables
+      hasSaved.value = true;
 
       // Prepend to local history list so the UI updates immediately
       history.insert(
@@ -206,6 +219,7 @@ class DiseaseDetectionController extends GetxController {
     currentResult.value = null;
     currentImage.value = null;
     showUrdu.value = false;
+    hasSaved.value = false;
   }
 
   void toggleLanguage() => showUrdu.value = !showUrdu.value;

@@ -15,7 +15,6 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  // ✅ Fix 1: scaffoldKey — Get.back() ki jagah drawer close
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final HomeController controller;
 
@@ -44,7 +43,8 @@ class _HomeViewState extends State<HomeView> {
                 tooltip: 'notifications'.tr,
               ),
               Positioned(
-                right: 8, top: 8,
+                right: 8,
+                top: 8,
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
@@ -66,8 +66,6 @@ class _HomeViewState extends State<HomeView> {
       body: Obx(() {
         final tabs = controller.bottomNavTabs;
         final idx = controller.currentIndex.value.clamp(0, tabs.length - 1);
-        // ✅ Fix 2: IndexedStack hata diya — sirf active tab render
-        // IndexedStack sab tabs ek saath mount karta tha → stack overflow
         return _contentForTab(tabs[idx], context);
       }),
       floatingActionButton: FloatingActionButton(
@@ -95,8 +93,7 @@ class _HomeViewState extends State<HomeView> {
             final userEmail =
                 controller.user.value?.email ?? 'guest@example.com';
             final isGuest = controller.isGuestUser;
-            final profileImageUrl =controller.profileImageUrl;
-                // controller.user.value?.profileImage ?? '';
+            final profileImageUrl = controller.profileImageUrl;
             return UserAccountsDrawerHeader(
               accountName: Text(userName,
                   style: const TextStyle(color: Colors.white, fontSize: 18)),
@@ -108,7 +105,9 @@ class _HomeViewState extends State<HomeView> {
                     ? ClipOval(
                   child: CachedNetworkImage(
                     imageUrl: profileImageUrl,
-                    width: 80, height: 80, fit: BoxFit.cover,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
                     placeholder: (context, url) =>
                         _buildProfilePlaceholder(isGuest),
                     errorWidget: (context, url, error) =>
@@ -121,21 +120,21 @@ class _HomeViewState extends State<HomeView> {
               const BoxDecoration(color: AppConstants.primaryGreen),
             );
           }),
-
           ListTile(
             leading: const Icon(Icons.home),
             title: Text('home'.tr),
             onTap: () {
-              _closeDrawer(); // ✅ Fix 1: scaffoldKey — no Get.back()
+              _closeDrawer();
               controller.changePage(0);
             },
           ),
           Obx(() => ListTile(
             leading: const Icon(Icons.person),
             title: Text(controller.isGuestUser
-                ? 'create_account'.tr : 'profile'.tr),
+                ? 'create_account'.tr
+                : 'profile'.tr),
             onTap: () {
-              _closeDrawer(); // ✅
+              _closeDrawer();
               if (controller.isGuestUser) {
                 Get.offAllNamed(AppRoutes.WELCOME);
               } else {
@@ -143,30 +142,62 @@ class _HomeViewState extends State<HomeView> {
               }
             },
           )),
+
+          // ── My Appointments drawer entry (farmer + expert only) ───────────
+          Obx(() {
+            final role = controller.user.value?.userType;
+            if (role != 'farmer' && role != 'expert') {
+              return const SizedBox.shrink();
+            }
+            return ListTile(
+              leading: Icon(
+                Icons.calendar_month,
+                color: role == 'expert'
+                    ? const Color(0xFF1565C0)
+                    : AppConstants.primaryGreen,
+              ),
+              title: Text('my_appointments'.tr),
+              onTap: () {
+                _closeDrawer();
+                controller.navigateToFeature('my_appointments');
+              },
+            );
+          }),
+          // ─────────────────────────────────────────────────────────────────
+
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
             title: Text('settings'.tr),
-            onTap: () { _closeDrawer(); controller.goToSettings(); },
+            onTap: () {
+              _closeDrawer();
+              controller.goToSettings();
+            },
           ),
           ListTile(
             leading: const Icon(Icons.info),
             title: Text('about'.tr),
-            onTap: () { _closeDrawer(); controller.goToAbout(); },
+            onTap: () {
+              _closeDrawer();
+              controller.goToAbout();
+            },
           ),
           const Divider(),
           Obx(() => ListTile(
             leading: Icon(
               controller.isGuestUser ? Icons.login : Icons.logout,
-              color: controller.isGuestUser ? Colors.green : Colors.red,
+              color:
+              controller.isGuestUser ? Colors.green : Colors.red,
             ),
             title: Text(
               controller.isGuestUser ? 'login_signup'.tr : 'logout'.tr,
               style: TextStyle(
-                  color: controller.isGuestUser ? Colors.green : Colors.red),
+                  color: controller.isGuestUser
+                      ? Colors.green
+                      : Colors.red),
             ),
             onTap: () {
-              _closeDrawer(); // ✅
+              _closeDrawer();
               if (controller.isGuestUser) {
                 Get.offAllNamed(AppRoutes.WELCOME);
               } else {
@@ -187,7 +218,6 @@ class _HomeViewState extends State<HomeView> {
         currentIndex: idx,
         onTap: controller.changePage,
         type: BottomNavigationBarType.fixed,
-        // ✅ Fix 3: Theme.of(Get.context!) → Theme.of(context) — no stale context
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         items: tabs.map((tab) => _navItemForTab(tab)).toList(),
@@ -300,7 +330,8 @@ class _HomeViewState extends State<HomeView> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              constraints:
+              BoxConstraints(minHeight: constraints.maxHeight),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -313,14 +344,12 @@ class _HomeViewState extends State<HomeView> {
                   )),
                   const SizedBox(height: 16),
                   _buildWeatherWidget(isLargeScreen),
-
                   Obx(() => controller.isGuestUser
                       ? _buildBanner(
                       isLargeScreen: isLargeScreen,
                       color: Colors.orange.shade800,
                       text: 'browsing_as_guest'.tr)
                       : const SizedBox.shrink()),
-
                   Obx(() => controller.isProfileIncomplete &&
                       !controller.isGuestUser
                       ? _buildBanner(
@@ -330,12 +359,14 @@ class _HomeViewState extends State<HomeView> {
                       onAction: controller.goToProfile,
                       actionLabel: 'complete_now'.tr)
                       : const SizedBox.shrink()),
-
                   SizedBox(height: isLargeScreen ? 8 : 4),
                   _buildSectionTitle('quick_actions'.tr, context),
                   const SizedBox(height: 12),
                   Text('what_to_do_today'.tr,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(
                           color: Colors.grey[600],
                           fontSize: isLargeScreen ? 18 : 16)),
                   SizedBox(height: isLargeScreen ? 32 : 24),
@@ -411,15 +442,15 @@ class _HomeViewState extends State<HomeView> {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child:
-              const Icon(Icons.wb_sunny, color: Colors.white, size: 32),
+              child: const Icon(Icons.wb_sunny,
+                  color: Colors.white, size: 32),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Today\'s Weather',
+                  const Text("Today's Weather",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -442,10 +473,8 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildSectionTitle(String title, BuildContext context) {
     return Text(title,
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey[800]));
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold, color: Colors.grey[800]));
   }
 
   Widget _buildFarmerTipsCarousel(bool isLargeScreen, BuildContext context) {
@@ -472,10 +501,12 @@ class _HomeViewState extends State<HomeView> {
                 margin: const EdgeInsets.only(right: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: (tip['color'] as Color).withValues(alpha: 0.1),
+                  color:
+                  (tip['color'] as Color).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: (tip['color'] as Color).withValues(alpha: 0.3)),
+                      color: (tip['color'] as Color)
+                          .withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -535,6 +566,8 @@ class _HomeViewState extends State<HomeView> {
 
   List<Widget> _buildRoleAwareFeatureCards() {
     final allowed = RoleGuard.allowedFeatures;
+    final role = RoleGuard.currentUserType;
+
     final allCards = {
       'appointments': {
         'title': 'book_appointment',
@@ -593,7 +626,9 @@ class _HomeViewState extends State<HomeView> {
         ));
       }
     }
-    if (RoleGuard.currentUserType == 'farmer') {
+
+    // Disease detection for farmers
+    if (role == 'farmer') {
       cards.add(_buildFeatureCard(
         title: 'disease_detection'.tr,
         icon: Icons.bug_report,
@@ -601,6 +636,20 @@ class _HomeViewState extends State<HomeView> {
         onTap: () => controller.navigateToFeature('disease_detection'),
       ));
     }
+
+    // ── My Appointments card (farmer + expert) ────────────────────────────
+    if (role == 'farmer' || role == 'expert') {
+      cards.add(_buildFeatureCard(
+        title: 'my_appointments'.tr,
+        icon: Icons.history,
+        color: role == 'expert'
+            ? const Color(0xFF1565C0)
+            : AppConstants.primaryGreen,
+        onTap: () => controller.navigateToFeature('my_appointments'),
+      ));
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     return cards;
   }
 

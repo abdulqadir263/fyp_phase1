@@ -55,7 +55,41 @@ class ExpertAppointmentsView
           if (controller.isLoading.value) {
             return const Center(
               child:
-                  CircularProgressIndicator(color: AppColors.primaryGreen),
+              CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
+          }
+          if (controller.hasError.value) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cloud_off,
+                        size: 64, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text(
+                      controller.errorMessage.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.grey.shade600),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: controller.retry,
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      label: const Text('Retry',
+                          style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _blue,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           }
           return TabBarView(
@@ -71,11 +105,11 @@ class ExpertAppointmentsView
   }
 
   Widget _buildList(
-    List<AppointmentModel> items, {
-    bool showPending = false,
-    bool showConfirmed = false,
-    bool isPast = false,
-  }) {
+      List<AppointmentModel> items, {
+        bool showPending = false,
+        bool showConfirmed = false,
+        bool isPast = false,
+      }) {
     if (items.isEmpty) {
       return Center(
         child: Column(
@@ -123,7 +157,7 @@ class ExpertAppointmentsView
         title: const Text('Cancel Appointment'),
         content: Text(
           'Cancel ${appt.farmerName}\'s appointment on '
-          '${appt.day} at ${appt.slot}?',
+              '${appt.day} at ${appt.slot}?',
         ),
         actions: [
           TextButton(

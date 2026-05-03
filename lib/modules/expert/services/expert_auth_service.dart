@@ -48,14 +48,17 @@ class ExpertAuthService {
     required String uid,
     required Map<String, dynamic> data,
   }) async {
+    // Save to 'users' collection — this is where fetchExperts() queries.
+    // Previously this wrote to 'experts', which made experts invisible to farmers.
     await _db
-        .collection('experts')
+        .collection('users')
         .doc(uid)
         .set(data, SetOptions(merge: true));
   }
 
   Future<Map<String, dynamic>?> getExpertProfile(String uid) async {
-    final doc = await _db.collection('experts').doc(uid).get();
+    // Read from 'users' collection to match where profiles are now saved.
+    final doc = await _db.collection('users').doc(uid).get();
     return doc.exists ? doc.data() : null;
   }
 

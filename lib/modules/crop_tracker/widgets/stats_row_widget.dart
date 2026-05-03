@@ -21,7 +21,7 @@ class StatsRowWidget extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.agriculture,
-            label: 'Active Fasal',
+            label: 'Active Crops',
             value: activeCrops.toString(),
             color: AppConstants.primaryGreen,
           ),
@@ -30,7 +30,7 @@ class StatsRowWidget extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.attach_money,
-            label: 'Kul Amdani',
+            label: 'Total Income',
             value: _fmt(totalIncome),
             color: Colors.blue.shade600,
           ),
@@ -41,7 +41,7 @@ class StatsRowWidget extends StatelessWidget {
             icon: isProfit
                 ? Icons.trending_up
                 : Icons.trending_down,
-            label: isProfit ? 'Munafa' : 'Nuqsan',
+            label: isProfit ? 'Profit' : 'Loss',
             value: _fmt(totalProfit.abs()),
             color: isProfit
                 ? Colors.green.shade600

@@ -40,7 +40,7 @@ class _HarvestViewState extends State<HarvestView> {
       appBar: AppBar(
         backgroundColor: Colors.amber.shade700,
         title: const Text(
-          'Katai Record Karo',
+          'Record Harvest',
           style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold),
@@ -74,7 +74,7 @@ class _HarvestViewState extends State<HarvestView> {
                       CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Mubarak ho! 🎉',
+                          'Congratulations! 🎉',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -82,7 +82,7 @@ class _HarvestViewState extends State<HarvestView> {
                               Colors.amber.shade800),
                         ),
                         Text(
-                          'Katai ki tafseelaat darj karein',
+                          'Enter harvest details',
                           style: TextStyle(
                               color: Colors.amber.shade700,
                               fontSize: 13),
@@ -96,7 +96,7 @@ class _HarvestViewState extends State<HarvestView> {
               const SizedBox(height: 20),
 
               // ── Yield ──
-              _label('Paidawar (KG mein)'),
+              _label('Yield (in KG)'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _yieldCtrl,
@@ -105,17 +105,17 @@ class _HarvestViewState extends State<HarvestView> {
                     decimal: true),
                 onChanged: (_) => setState(() {}),
                 decoration: _inputDecor(
-                  'Jaise: 1500',
+                  'E.g: 1500',
                   Icons.scale,
                   Colors.amber.shade700,
                 ),
                 validator: (v) {
                   if (v!.trim().isEmpty)
-                    return 'Paidawar zaroori hai';
+                    return 'Yield is required';
                   if (double.tryParse(v) == null)
-                    return 'Sahi number likhein';
+                    return 'Enter a valid number';
                   if (double.parse(v) <= 0)
-                    return 'Zero se zyada hona chahiye';
+                    return 'Must be greater than zero';
                   return null;
                 },
               ),
@@ -123,7 +123,7 @@ class _HarvestViewState extends State<HarvestView> {
               const SizedBox(height: 16),
 
               // ── Price ──
-              _label('Bhaao (Rs per KG)'),
+              _label('Price (Rs per KG)'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _priceCtrl,
@@ -132,17 +132,17 @@ class _HarvestViewState extends State<HarvestView> {
                     decimal: true),
                 onChanged: (_) => setState(() {}),
                 decoration: _inputDecor(
-                  'Jaise: 80',
+                  'E.g: 80',
                   Icons.currency_rupee,
                   Colors.amber.shade700,
                 ),
                 validator: (v) {
                   if (v!.trim().isEmpty)
-                    return 'Bhaao zaroori hai';
+                    return 'Price is required';
                   if (double.tryParse(v) == null)
-                    return 'Sahi number likhein';
+                    return 'Enter a valid number';
                   if (double.parse(v) <= 0)
-                    return 'Zero se zyada hona chahiye';
+                    return 'Must be greater than zero';
                   return null;
                 },
               ),
@@ -168,7 +168,7 @@ class _HarvestViewState extends State<HarvestView> {
                             TextStyle(fontSize: 18)),
                         const SizedBox(width: 8),
                         Text(
-                          'Kul Amdani:',
+                          'Total Income:',
                           style: TextStyle(
                               color: Colors.green.shade700,
                               fontWeight: FontWeight.w500),
@@ -190,7 +190,7 @@ class _HarvestViewState extends State<HarvestView> {
               const SizedBox(height: 16),
 
               // ── Harvest Date ──
-              _label('Katai ki Tarikh'),
+              _label('Harvest Date'),
               const SizedBox(height: 8),
               DatePickerField(
                 value: _harvestDate,
@@ -220,13 +220,13 @@ class _HarvestViewState extends State<HarvestView> {
               const SizedBox(height: 16),
 
               // ── Notes ──
-              _label('Notez (Optional)'),
+              _label('Notes (Optional)'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _notesCtrl,
                 maxLines: 3,
                 decoration: _inputDecor(
-                  'Jaise: Acha fasal hua, barish ki wajah se naqsan...',
+                  'E.g: Good harvest, loss due to rain...',
                   Icons.note_outlined,
                   Colors.amber.shade700,
                 ),
@@ -260,7 +260,7 @@ class _HarvestViewState extends State<HarvestView> {
                           color: Colors.white,
                           strokeWidth: 2))
                       : const Text(
-                    '🌾 Katai Save Karo',
+                    '🌾 Save Harvest',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold),

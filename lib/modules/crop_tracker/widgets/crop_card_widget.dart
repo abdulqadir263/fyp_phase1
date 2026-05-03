@@ -85,7 +85,7 @@ class CropCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      '${crop.areaAcres} Acres  •  ${crop.daysInField} din se khet mein',
+                      '${crop.areaAcres} Acres  •  ${crop.daysInField} days in field',
                       style: TextStyle(
                           color: Colors.grey.shade500,
                           fontSize: 12),
@@ -102,8 +102,8 @@ class CropCardWidget extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         daysLeft > 0
-                            ? '$daysLeft din baqi'
-                            : 'Katai ka waqt!',
+                            ? '$daysLeft days left'
+                            : 'Harvest time!',
                         style: TextStyle(
                           fontSize: 11,
                           color: daysLeft > 0
@@ -128,7 +128,7 @@ class CropCardWidget extends StatelessWidget {
             Row(children: [
               _MiniStat(
                 icon: Icons.money_off,
-                label: 'Kharcha',
+                label: 'Expenses',
                 value:
                 'Rs ${_fmt(crop.totalExpenses)}',
                 color: Colors.red.shade400,
@@ -137,7 +137,7 @@ class CropCardWidget extends StatelessWidget {
               if (crop.harvest != null)
                 _MiniStat(
                   icon: Icons.attach_money,
-                  label: 'Amdani',
+                  label: 'Income',
                   value: 'Rs ${_fmt(crop.harvest!.totalIncome)}',
                   color: Colors.green.shade500,
                 ),
@@ -148,8 +148,8 @@ class CropCardWidget extends StatelessWidget {
                     ? Icons.trending_up
                     : Icons.trending_down,
                 label: crop.netProfit >= 0
-                    ? 'Munafa'
-                    : 'Nuqsan',
+                    ? 'Profit'
+                    : 'Loss',
                 value:
                 'Rs ${_fmt(crop.netProfit.abs())}',
                 color: crop.netProfit >= 0
@@ -173,7 +173,7 @@ class CropCardWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
     ),
     child: Text(
-      isHarvested ? '✅ Kati' : '🌱 Active',
+      isHarvested ? '✅ Harvested' : '🌱 Active',
       style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.bold,

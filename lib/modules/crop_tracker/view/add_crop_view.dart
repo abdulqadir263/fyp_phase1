@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../view_model/crop_tracker_view_model.dart';
@@ -23,13 +22,13 @@ class _AddCropViewState extends State<AddCropView> {
   DateTime? _harvestDate;
 
   final _cropTypes = [
-    {'key': 'rice',      'label': 'Chawal (Rice)',   'icon': '🌾'},
-    {'key': 'corn',      'label': 'Makka (Corn)',    'icon': '🌽'},
-    {'key': 'wheat',     'label': 'Gehun (Wheat)',   'icon': '🌿'},
-    {'key': 'potato',    'label': 'Aloo (Potato)',   'icon': '🥔'},
-    {'key': 'sugarcane', 'label': 'Ganna',           'icon': '🎋'},
-    {'key': 'cotton',    'label': 'Kapas',           'icon': '☁️'},
-    {'key': 'other',     'label': 'Doosri Fasal',    'icon': '🌱'},
+    {'key': 'rice',      'label': 'Rice',       'icon': '🌾'},
+    {'key': 'corn',      'label': 'Corn',       'icon': '🌽'},
+    {'key': 'wheat',     'label': 'Wheat',      'icon': '🌿'},
+    {'key': 'potato',    'label': 'Potato',     'icon': '🥔'},
+    {'key': 'sugarcane', 'label': 'Sugarcane',  'icon': '🎋'},
+    {'key': 'cotton',    'label': 'Cotton',     'icon': '☁️'},
+    {'key': 'other',     'label': 'Other Crop', 'icon': '🌱'},
   ];
 
   @override
@@ -46,7 +45,7 @@ class _AddCropViewState extends State<AddCropView> {
       appBar: AppBar(
         backgroundColor: AppConstants.primaryGreen,
         title: const Text(
-          'Nai Fasal Add Karo',
+          'Add New Crop',
           style: TextStyle(
               color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -61,7 +60,7 @@ class _AddCropViewState extends State<AddCropView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Crop Type ──
-              _sectionLabel('Fasal ki Qisam'),
+              _sectionLabel('Crop Type'),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
@@ -121,24 +120,24 @@ class _AddCropViewState extends State<AddCropView> {
               const SizedBox(height: 20),
 
               // ── Crop Name ──
-              _sectionLabel('Fasal ka Naam'),
+              _sectionLabel('Crop Name'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _nameCtrl,
                 textCapitalization:
                 TextCapitalization.words,
                 decoration: _inputDecor(
-                  'Jaise: Basmati 385, Hybrid Corn...',
+                  'E.g: Basmati 385, Hybrid Corn...',
                   Icons.eco_outlined,
                 ),
                 validator: (v) =>
-                v!.trim().isEmpty ? 'Naam zaroori hai' : null,
+                v!.trim().isEmpty ? 'Name is required' : null,
               ),
 
               const SizedBox(height: 16),
 
               // ── Area ──
-              _sectionLabel('Rukba (Acres mein)'),
+              _sectionLabel('Area (in Acres)'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _areaCtrl,
@@ -146,14 +145,14 @@ class _AddCropViewState extends State<AddCropView> {
                 const TextInputType.numberWithOptions(
                     decimal: true),
                 decoration: _inputDecor(
-                    'Jaise: 2.5', Icons.crop_square),
+                    'E.g: 2.5', Icons.crop_square),
                 validator: (v) {
                   if (v!.trim().isEmpty)
-                    return 'Rukba zaroori hai';
+                    return 'Area is required';
                   if (double.tryParse(v) == null)
-                    return 'Sahi number likhein';
+                    return 'Enter a valid number';
                   if (double.parse(v) <= 0)
-                    return 'Rukba zero se zyada hona chahiye';
+                    return 'Area must be greater than zero';
                   return null;
                 },
               ),
@@ -161,7 +160,7 @@ class _AddCropViewState extends State<AddCropView> {
               const SizedBox(height: 16),
 
               // ── Sowing Date ──
-              _sectionLabel('Bai ki Tarikh'),
+              _sectionLabel('Sowing Date'),
               const SizedBox(height: 8),
               DatePickerField(
                 value: _sowingDate,
@@ -180,11 +179,11 @@ class _AddCropViewState extends State<AddCropView> {
               const SizedBox(height: 16),
 
               // ── Expected Harvest ──
-              _sectionLabel('Mutawaqqa Katai (Optional)'),
+              _sectionLabel('Expected Harvest (Optional)'),
               const SizedBox(height: 8),
               DatePickerField(
                 value: _harvestDate,
-                hint: 'Tarikh select karein',
+                hint: 'Select Date',
                 icon: Icons.event,
                 onTap: () async {
                   final d = await _pickDate(
@@ -238,7 +237,7 @@ class _AddCropViewState extends State<AddCropView> {
                           color: Colors.white,
                           strokeWidth: 2))
                       : const Text(
-                    'Fasal Add Karo',
+                    'Add Crop',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold),

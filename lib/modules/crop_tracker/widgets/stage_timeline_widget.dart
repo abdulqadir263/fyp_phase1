@@ -135,7 +135,7 @@ class StageTimelineWidget extends StatelessWidget {
                           BorderRadius.circular(10),
                         ),
                         child: Text(
-                          'Abhi',
+                          'Now',
                           style: TextStyle(
                             fontSize: 11,
                             color: AppConstants.primaryGreen,
@@ -161,14 +161,14 @@ class StageTimelineWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Stage Update Karein?'),
+        title: const Text('Update Stage?'),
         content: Text(
-          '${stage.emoji} ${stage.nameEn} (${stage.nameUr})\nmein move karein?',
+          '${stage.emoji} ${stage.nameEn} (${stage.nameUr})\nMove to this stage?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Nahi'),
+            child: const Text('No'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -178,7 +178,7 @@ class StageTimelineWidget extends StatelessWidget {
               Navigator.pop(context);
               onStageTap!(stage);
             },
-            child: const Text('Haan',
+            child: const Text('Yes',
                 style: TextStyle(color: Colors.white)),
           ),
         ],

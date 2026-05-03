@@ -638,16 +638,16 @@ class _HomeViewState extends State<HomeView> {
     }
 
     // ── My Appointments card (farmer + expert) ────────────────────────────
-    if (role == 'farmer' || role == 'expert') {
-      cards.add(_buildFeatureCard(
-        title: 'my_appointments'.tr,
-        icon: Icons.history,
-        color: role == 'expert'
-            ? const Color(0xFF1565C0)
-            : AppConstants.primaryGreen,
-        onTap: () => controller.navigateToFeature('my_appointments'),
-      ));
-    }
+    // if (role == 'farmer' || role == 'expert') {
+    //   cards.add(_buildFeatureCard(
+    //     title: 'my_appointments'.tr,
+    //     icon: Icons.history,
+    //     color: role == 'expert'
+    //         ? const Color(0xFF1565C0)
+    //         : AppConstants.primaryGreen,
+    //     onTap: () => controller.navigateToFeature('my_appointments'),
+    //   ));
+    // }
     // ─────────────────────────────────────────────────────────────────────
 
     return cards;

@@ -41,11 +41,11 @@ class ExpenseCardWidget extends StatelessWidget {
     switch (expense.category) {
       case 'fertilizer': return 'Fertilizer';
       case 'pesticide': return 'Pesticide';
-      case 'labor': return 'Mazdoori';
-      case 'water': return 'Aabpashi';
-      case 'seed': return 'Beej';
+      case 'labor': return 'Labor';
+      case 'water': return 'Irrigation';
+      case 'seed': return 'Seeds';
       case 'machinery': return 'Machinery';
-      default: return 'Doosra';
+      default: return 'Other';
     }
   }
 
@@ -221,7 +221,7 @@ class ExpenseCardWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             const Text(
-              'Kharcha Edit Karo',
+              'Edit Expense',
               style: TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold),
             ),
@@ -231,7 +231,7 @@ class ExpenseCardWidget extends StatelessWidget {
             TextField(
               controller: descCtrl,
               decoration: InputDecoration(
-                labelText: 'Tafseelaat',
+                labelText: 'Description',
                 prefixIcon: Icon(Icons.description_outlined,
                     color: Colors.green.shade600),
                 border: OutlineInputBorder(
@@ -251,7 +251,7 @@ class ExpenseCardWidget extends StatelessWidget {
               controller: amountCtrl,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Raqam (Rs)',
+                labelText: 'Amount (Rs)',
                 prefixIcon: const Icon(
                     Icons.currency_rupee,
                     color: Colors.red),
@@ -296,7 +296,7 @@ class ExpenseCardWidget extends StatelessWidget {
                   );
                   Navigator.pop(context);
                 },
-                child: const Text('Save Karo',
+                child: const Text('Save',
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold)),
@@ -312,20 +312,20 @@ class ExpenseCardWidget extends StatelessWidget {
       showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Hata Dein?'),
+          title: const Text('Delete?'),
           content: Text(
-              '"${expense.description}" ka kharcha hata dein?'),
+              'Delete expense "${expense.description}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Nahi'),
+              child: const Text('No'),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red),
               onPressed: () =>
                   Navigator.pop(context, true),
-              child: const Text('Haan Hata Do',
+              child: const Text('Yes, Delete',
                   style: TextStyle(color: Colors.white)),
             ),
           ],

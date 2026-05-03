@@ -64,7 +64,7 @@ class HomeController extends GetxController {
         Get.toNamed(AppRoutes.WEATHER);
         break;
       case 'crop_tracker':
-        currentIndex.value = index;
+        Get.toNamed(AppRoutes.CROP_TRACKER);
         break;
       case 'community':
         Get.toNamed(AppRoutes.COMMUNITY);

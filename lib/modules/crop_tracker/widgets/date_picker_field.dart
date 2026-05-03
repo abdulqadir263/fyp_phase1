@@ -39,7 +39,7 @@ class DatePickerField extends StatelessWidget {
             child: Text(
               value != null
                   ? '${value!.day}/${value!.month}/${value!.year}'
-                  : (hint ?? 'Tarikh select karein'),
+                  : (hint ?? 'Select date'),
               style: TextStyle(
                 color: value != null
                     ? Colors.black87

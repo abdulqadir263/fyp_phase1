@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../view_model/crop_tracker_view_model.dart';
@@ -39,19 +38,19 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     },
     {
       'key': 'labor',
-      'label': 'Mazdoori',
+      'label': 'Labor',
       'icon': '👷',
       'color': Colors.blue
     },
     {
       'key': 'water',
-      'label': 'Aabpashi',
+      'label': 'Irrigation',
       'icon': '💧',
       'color': Colors.lightBlue
     },
     {
       'key': 'seed',
-      'label': 'Beej',
+      'label': 'Seed',
       'icon': '🌱',
       'color': Colors.teal
     },
@@ -63,7 +62,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
     },
     {
       'key': 'other',
-      'label': 'Doosra',
+      'label': 'Other',
       'icon': '📦',
       'color': Colors.grey
     },
@@ -83,7 +82,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       appBar: AppBar(
         backgroundColor: AppConstants.primaryGreen,
         title: const Text(
-          'Kharcha Add Karo',
+          'Add Expense',
           style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold),
@@ -99,7 +98,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Category ──
-              _label('Kharche ki Qisam'),
+              _label('Expense Category'),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 8,
@@ -149,23 +148,23 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               const SizedBox(height: 20),
 
               // ── Description ──
-              _label('Tafseelaat'),
+              _label('Description'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _descCtrl,
                 decoration: _inputDecor(
-                  'Jaise: DAP 1 bag, Spray 2 litre...',
+                  'E.g: DAP 1 bag, Spray 2 litre...',
                   Icons.description_outlined,
                 ),
                 validator: (v) => v!.trim().isEmpty
-                    ? 'Tafseelaat zaroori hain'
+                    ? 'Description is required'
                     : null,
               ),
 
               const SizedBox(height: 16),
 
               // ── Amount ──
-              _label('Raqam (Rupees mein)'),
+              _label('Amount (in Rupees)'),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _amountCtrl,
@@ -173,15 +172,15 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                 const TextInputType.numberWithOptions(
                     decimal: true),
                 decoration: _inputDecor(
-                    'Jaise: 2500', Icons.money_outlined),
+                    'E.g: 2500', Icons.money_outlined),
                 validator: (v) {
                   if (v!.trim().isEmpty)
-                    return 'Raqam zaroori hai';
+                    return 'Amount is required';
                   final n = double.tryParse(v);
                   if (n == null)
-                    return 'Sahi number likhein';
+                    return 'Enter a valid number';
                   if (n <= 0)
-                    return 'Raqam zero se zyada honi chahiye';
+                    return 'Amount must be greater than zero';
                   return null;
                 },
               ),
@@ -189,7 +188,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
               const SizedBox(height: 16),
 
               // ── Date ──
-              _label('Tarikh'),
+              _label('Date'),
               const SizedBox(height: 8),
               DatePickerField(
                 value: _date,
@@ -243,7 +242,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                           color: Colors.white,
                           strokeWidth: 2))
                       : const Text(
-                    'Kharcha Save Karo',
+                    'Save Expense',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold),

@@ -124,6 +124,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.EMAIL_VERIFICATION_PENDING,
       page: () => const EmailVerificationPendingView(),
+      binding: SellerAuthBinding()
     ),
 
     // ── Feature Pages ───────────────────────────────────────────────────────

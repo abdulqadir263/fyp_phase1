@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../view_model/crop_tracker_view_model.dart';
@@ -23,7 +22,7 @@ class CropDetailView extends StatelessWidget {
         final crop =
         vm.crops.firstWhereOrNull((c) => c.id == cropId);
         if (crop == null) {
-          return const Center(child: Text('Fasal nahi mili'));
+          return const Center(child: Text('Crop not found'));
         }
 
         return CustomScrollView(
@@ -78,7 +77,7 @@ class CropDetailView extends StatelessWidget {
                         Icon(Icons.delete,
                             color: Colors.red, size: 18),
                         SizedBox(width: 8),
-                        Text('Hata Do',
+                        Text('Delete',
                             style:
                             TextStyle(color: Colors.red)),
                       ]),
@@ -97,7 +96,7 @@ class CropDetailView extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Stage
-                  _sectionTitle('Fasal ki Progress'),
+                  _sectionTitle('Crop Progress'),
                   const SizedBox(height: 10),
                   StageTimelineWidget(
                     currentStage: crop.currentStage,
@@ -112,7 +111,7 @@ class CropDetailView extends StatelessWidget {
                     mainAxisAlignment:
                     MainAxisAlignment.spaceBetween,
                     children: [
-                      _sectionTitle('Kharchay'),
+                      _sectionTitle('Expenses'),
                       if (!crop.isHarvested)
                         TextButton.icon(
                           onPressed: () => Get.to(
@@ -134,7 +133,7 @@ class CropDetailView extends StatelessWidget {
 
                   // Expenses list
                   if (crop.expenses.isEmpty)
-                    _emptyBox('Abhi koi kharcha nahi')
+                    _emptyBox('No expenses yet')
                   else
                     ...crop.expenses.map(
                             (e) => ExpenseCardWidget(expense: e,cropId: crop.id,)),
@@ -148,10 +147,10 @@ class CropDetailView extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // Harvest
-                  _sectionTitle('Katai ka Hisab'),
+                  _sectionTitle('Harvest Details'),
                   const SizedBox(height: 10),
                   if (crop.harvest == null) ...[
-                    _emptyBox('Abhi katai nahi hui'),
+                    _emptyBox('No harvest recorded yet'),
                     if (!crop.isHarvested) ...[
                       const SizedBox(height: 10),
                       _harvestButton(crop.id),
@@ -201,14 +200,14 @@ class CropDetailView extends StatelessWidget {
         ]),
         const Divider(height: 20),
         Row(children: [
-          _infoTile(Icons.crop_square, 'Rukba',
+          _infoTile(Icons.crop_square, 'Area',
               '${crop.areaAcres} Acres'),
-          _infoTile(Icons.calendar_today, 'Bai',
+          _infoTile(Icons.calendar_today, 'Sowing',
               _fmtDate(crop.sowingDate)),
           _infoTile(
-              Icons.timer, 'Din', '${crop.daysInField} din'),
+              Icons.timer, 'Days', '${crop.daysInField} days'),
           if (crop.expectedHarvestDate != null)
-            _infoTile(Icons.event, 'Katai',
+            _infoTile(Icons.event, 'Harvest',
                 _fmtDate(crop.expectedHarvestDate!)),
         ]),
       ]),
@@ -229,10 +228,10 @@ class CropDetailView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _harvestStat('🌾', 'Paidawar', '${h.yieldKg} kg'),
+            _harvestStat('🌾', 'Yield', '${h.yieldKg} kg'),
             _harvestStat(
-                '💰', 'Bhaao', 'Rs ${h.pricePerKg}/kg'),
-            _harvestStat('📦', 'Amdani',
+                '💰', 'Price', 'Rs ${h.pricePerKg}/kg'),
+            _harvestStat('📦', 'Income',
                 'Rs ${h.totalIncome.toStringAsFixed(0)}'),
           ],
         ),
@@ -243,7 +242,7 @@ class CropDetailView extends StatelessWidget {
             Column(crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      'Net ${isProfit ? "Munafa" : "Nuqsan"}',
+                      'Net ${isProfit ? "Profit" : "Loss"}',
                       style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 13)),
@@ -299,7 +298,7 @@ class CropDetailView extends StatelessWidget {
         transition: Transition.downToUp,
       ),
       icon: const Icon(Icons.agriculture),
-      label: const Text('Katai Record Karo',
+      label: const Text('Record Harvest',
           style: TextStyle(
               fontSize: 15, fontWeight: FontWeight.bold)),
     ),
@@ -315,7 +314,7 @@ class CropDetailView extends StatelessWidget {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text('Total Kharcha:',
+        const Text('Total Expenses:',
             style: TextStyle(fontWeight: FontWeight.bold)),
         Text('Rs ${total.toStringAsFixed(0)}',
             style: TextStyle(
@@ -336,7 +335,7 @@ class CropDetailView extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
     ),
     child: Text(
-      isHarvested ? '✅ Kati' : '🌱 Active',
+      isHarvested ? '✅ Harvested' : '🌱 Active',
       style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
@@ -411,13 +410,13 @@ class CropDetailView extends StatelessWidget {
 
   String _cropLabel(String t) {
     switch (t) {
-      case 'rice': return 'Chawal';
-      case 'corn': return 'Makka';
-      case 'wheat': return 'Gehun';
-      case 'potato': return 'Aloo';
-      case 'sugarcane': return 'Ganna';
-      case 'cotton': return 'Kapas';
-      default: return 'Fasal';
+      case 'rice': return 'Rice';
+      case 'corn': return 'Corn';
+      case 'wheat': return 'Wheat';
+      case 'potato': return 'Potato';
+      case 'sugarcane': return 'Sugarcane';
+      case 'cotton': return 'Cotton';
+      default: return 'Crop';
     }
   }
 
@@ -425,18 +424,18 @@ class CropDetailView extends StatelessWidget {
       showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Hata Dein?'),
+          title: const Text('Delete?'),
           content: const Text(
-              'Yeh record hamesha ke liye hata jayega.'),
+              'This record will be permanently deleted.'),
           actions: [
             TextButton(
                 onPressed: () => Get.back(result: false),
-                child: const Text('Nahi')),
+                child: const Text('No')),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red),
               onPressed: () => Get.back(result: true),
-              child: const Text('Haan Hata Do',
+              child: const Text('Yes, Delete',
                   style: TextStyle(color: Colors.white)),
             ),
           ],

@@ -59,7 +59,7 @@ class CropTrackerViewModel extends GetxController {
       final result = await _repo.getCrops(userId);
       crops.value = result;
     } catch (e) {
-      errorMessage.value = 'Load karne mein masla: $e';
+      errorMessage.value = 'Error loading: $e';
       _showError(errorMessage.value);
     } finally {
       isLoading.value = false;
@@ -92,9 +92,9 @@ class CropTrackerViewModel extends GetxController {
       crops.insert(0, crop);
 
       Get.back();
-      _showSuccess('${cropName} add ho gaya!');
+      _showSuccess('$cropName added successfully!');
     } catch (e) {
-      _showError('Add nahi hua: $e');
+      _showError('Could not add: $e');
     } finally {
       isSaving.value = false;
     }
@@ -147,9 +147,9 @@ class CropTrackerViewModel extends GetxController {
       await _repo.updateCrop(updated);
 
       Get.back();
-      _showSuccess('Kharcha add ho gaya!');
+      _showSuccess('Expense added successfully!');
     } catch (e) {
-      _showError('Kharcha add nahi hua: $e');
+      _showError('Could not add expense: $e');
     } finally {
       isSaving.value = false;
     }
@@ -173,8 +173,8 @@ class CropTrackerViewModel extends GetxController {
     await _repo.updateCrop(updated);
 
     Get.snackbar(
-      'Hata diya',
-      'Kharcha hata diya gaya',
+      'Deleted',
+      'Expense deleted',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.red.shade100,
       colorText: Colors.red.shade800,
@@ -212,8 +212,8 @@ class CropTrackerViewModel extends GetxController {
     await _repo.updateCrop(updated);
 
     Get.snackbar(
-      '✅ Updated',
-      'Kharcha update ho gaya',
+      ' Updated',
+      'Expense updated',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green.shade100,
       colorText: Colors.green.shade800,
@@ -252,15 +252,15 @@ class CropTrackerViewModel extends GetxController {
 
       Get.back();
       Get.snackbar(
-        '🎉 Mubarak!',
-        'Munafa: Rs ${harvest.totalIncome.toStringAsFixed(0)}',
+        ' Congratulations!',
+        'Income: Rs ${harvest.totalIncome.toStringAsFixed(0)}',
         backgroundColor: Colors.green.shade100,
         colorText: Colors.green.shade800,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 4),
       );
     } catch (e) {
-      _showError('Harvest record nahi hua: $e');
+      _showError('Could not record harvest: $e');
     } finally {
       isSaving.value = false;
     }
@@ -272,12 +272,12 @@ class CropTrackerViewModel extends GetxController {
       await _repo.deleteCrop(cropId, userId);
       crops.removeWhere((c) => c.id == cropId);
       Get.snackbar(
-        'Hata diya',
-        'Fasal ka record hata diya gaya',
+        'Deleted',
+        'Crop record deleted',
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
-      _showError('Delete nahi hua: $e');
+      _showError('Could not delete: $e');
     }
   }
 
@@ -287,14 +287,14 @@ class CropTrackerViewModel extends GetxController {
   }
 
   void _showSuccess(String msg) => Get.snackbar(
-    '✅ Kamyab', msg,
+    ' Success', msg,
     backgroundColor: Colors.green.shade100,
     colorText: Colors.green.shade800,
     snackPosition: SnackPosition.BOTTOM,
   );
 
   void _showError(String msg) => Get.snackbar(
-    'Masla', msg,
+    'Error', msg,
     backgroundColor: Colors.red.shade100,
     colorText: Colors.red.shade800,
     snackPosition: SnackPosition.BOTTOM,

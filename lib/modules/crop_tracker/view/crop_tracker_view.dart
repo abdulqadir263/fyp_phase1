@@ -97,7 +97,7 @@ class CropTrackerView extends GetView<CropTrackerViewModel> {
           transition: Transition.downToUp,
         ),
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Fasal Add Karo',
+        label: const Text('Add Crop',
             style: TextStyle(color: Colors.white)),
       ),
     );
@@ -105,9 +105,9 @@ class CropTrackerView extends GetView<CropTrackerViewModel> {
 
   Widget _buildFilters() {
     final filters = [
-      {'key': 'all', 'label': 'Sab'},
+      {'key': 'all', 'label': 'All'},
       {'key': 'active', 'label': 'Active'},
-      {'key': 'harvested', 'label': 'Kati Hui'},
+      {'key': 'harvested', 'label': 'Harvested'},
     ];
     return Obx(() => Row(
       children: filters.map((f) {
@@ -146,11 +146,11 @@ class CropTrackerView extends GetView<CropTrackerViewModel> {
             color: AppConstants.primaryGreen
                 .withValues(alpha: 0.2)),
         const SizedBox(height: 16),
-        Text('Koi fasal nahi',
+        Text('No crops found',
             style: TextStyle(
                 fontSize: 18, color: Colors.grey.shade500)),
         const SizedBox(height: 8),
-        Text('Neeche + se fasal add karein',
+        Text('Tap + to add a crop',
             style: TextStyle(color: Colors.grey.shade400)),
       ]),
     ),

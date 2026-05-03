@@ -11,7 +11,7 @@ class CustomBottomNavBar extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Container(
+          () => Container(
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -40,9 +40,9 @@ class CustomBottomNavBar extends GetView<HomeController> {
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.wb_sunny_outlined),
-                activeIcon: Icon(Icons.wb_sunny),
-                label: 'Weather',
+                icon: Icon(Icons.bug_report_outlined),
+                activeIcon: Icon(Icons.bug_report),
+                label: 'Diagnosis',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.people_outline),
@@ -69,23 +69,23 @@ class CustomBottomNavBar extends GetView<HomeController> {
   void _handleNavTap(int index) {
     switch (index) {
       case 0:
-        // Stay on home
+      // Stay on home
         controller.changePage(0);
         break;
       case 1:
-        // Navigate to weather
-        Get.toNamed(AppRoutes.WEATHER);
+      // Navigate to disease detection
+        Get.toNamed(AppRoutes.DISEASE_DETECTION);
         break;
       case 2:
-        // Navigate to community
+      // Navigate to community
         Get.toNamed(AppRoutes.COMMUNITY);
         break;
       case 3:
-        // Navigate to marketplace
+      // Navigate to marketplace
         Get.toNamed(AppRoutes.MARKETPLACE);
         break;
       case 4:
-        // Navigate to profile
+      // Navigate to profile
         controller.goToProfile();
         break;
     }

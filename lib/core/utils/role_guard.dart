@@ -34,8 +34,8 @@ class RoleGuard {
       marketplace, cart, appointments, community,
       weather, chatbot, profile, cropTracker, cropRecommendation,
     },
-    'expert':  {appointments, community, chatbot, profile},
-    'company': {marketplace, sellerPanel, chatbot, profile},
+    'expert':  {appointments, community, profile},
+    'company': {marketplace, sellerPanel, profile},
     'guest':   {weather, chatbot},
   };
 
@@ -56,7 +56,7 @@ class RoleGuard {
   static String defaultRouteFor(String userType) {
     switch (userType) {
       case 'company': return AppRoutes.SELLER_DASHBOARD;
-      case 'expert':  return AppRoutes.EXPERT_DASHBOARD;
+      case 'expert':  return AppRoutes.HOME;
       default:        return AppRoutes.HOME;
     }
   }

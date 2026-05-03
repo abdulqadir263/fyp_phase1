@@ -17,16 +17,16 @@ class SellerAuthController extends GetxController {
   final AuthRepository _authRepo = Get.find<AuthRepository>();
 
   // ── Form controllers ───────────────────────────────────────────────────────
-  late TextEditingController nameCtrl;
-  late TextEditingController emailCtrl;
-  late TextEditingController passwordCtrl;
-  late TextEditingController confirmPasswordCtrl;
-  late TextEditingController phoneCtrl;
-  late TextEditingController shopNameCtrl;
-  late TextEditingController ownerNameCtrl;
-  late TextEditingController shopLocationCtrl;
-  late TextEditingController cnicCtrl;
-  late TextEditingController addressCtrl;
+  final nameCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final passwordCtrl = TextEditingController();
+  final confirmPasswordCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final shopNameCtrl = TextEditingController();
+  final ownerNameCtrl = TextEditingController();
+  final shopLocationCtrl = TextEditingController();
+  final cnicCtrl = TextEditingController();
+  final addressCtrl = TextEditingController();
 
   final selectedCategories = <String>[].obs;
   static const productCategories = [
@@ -44,29 +44,6 @@ class SellerAuthController extends GetxController {
   // ── Resend cooldown ────────────────────────────────────────────────────────
   final resendCooldown = 0.obs;
   Timer? _resendTimer;
-
-  // ── Controller lifecycle flag ──────────────────────────────────────────────
-  bool _isDisposed = false;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _initializeControllers();
-  }
-
-  /// Initialize all TextEditingControllers
-  void _initializeControllers() {
-    nameCtrl = TextEditingController();
-    emailCtrl = TextEditingController();
-    passwordCtrl = TextEditingController();
-    confirmPasswordCtrl = TextEditingController();
-    phoneCtrl = TextEditingController();
-    shopNameCtrl = TextEditingController();
-    ownerNameCtrl = TextEditingController();
-    shopLocationCtrl = TextEditingController();
-    cnicCtrl = TextEditingController();
-    addressCtrl = TextEditingController();
-  }
 
   // ── Validation ─────────────────────────────────────────────────────────────
   String? validateRequired(String? v, String fieldName) {
@@ -95,8 +72,6 @@ class SellerAuthController extends GetxController {
   // ── Signup (Email + Password) ──────────────────────────────────────────────
 
   Future<void> submitSignup() async {
-    if (_isDisposed) return;
-
     errorMessage.value = '';
     if (!GetUtils.isEmail(emailCtrl.text.trim())) {
       errorMessage.value = 'Please enter a valid email';
@@ -126,32 +101,24 @@ class SellerAuthController extends GetxController {
         role: 'seller',
       );
 
-      if (!_isDisposed) {
-        Get.toNamed(
-          AppRoutes.EMAIL_VERIFICATION_PENDING,
-          arguments: {
-            'email': emailCtrl.text.trim(),
-            'role': 'seller',
-            'uid': uc.user!.uid,
-          },
-        );
-      }
+      Get.toNamed(
+        AppRoutes.EMAIL_VERIFICATION_PENDING,
+        arguments: {
+          'email': emailCtrl.text.trim(),
+          'role': 'seller',
+          'uid': uc.user!.uid,
+        },
+      );
     } catch (e) {
-      if (!_isDisposed) {
-        errorMessage.value = _localizeError(e.toString());
-      }
+      errorMessage.value = _localizeError(e.toString());
     } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
   }
 
   // ── Login (Email + Password) ───────────────────────────────────────────────
 
   Future<void> submitLogin() async {
-    if (_isDisposed) return;
-
     errorMessage.value = '';
     if (!GetUtils.isEmail(emailCtrl.text.trim())) {
       errorMessage.value = 'Please enter a valid email';
@@ -170,55 +137,43 @@ class SellerAuthController extends GetxController {
       );
       if (!(uc.user?.emailVerified ?? false)) {
         await _service.sendEmailVerification();
-        if (!_isDisposed) {
-          AppSnackbar.error('Please verify your email first.');
-          Get.toNamed(
-            AppRoutes.EMAIL_VERIFICATION_PENDING,
-            arguments: {
-              'email': emailCtrl.text.trim(),
-              'role': 'seller',
-              'uid': uc.user!.uid,
-            },
-          );
-        }
+        AppSnackbar.error('Please verify your email first.');
+        Get.toNamed(
+          AppRoutes.EMAIL_VERIFICATION_PENDING,
+          arguments: {
+            'email': emailCtrl.text.trim(),
+            'role': 'seller',
+            'uid': uc.user!.uid,
+          },
+        );
         return;
       }
 
       // Email verified — check profile
       final data = await _service.getSellerProfile(uc.user!.uid);
-      if (!_isDisposed) {
-        if (data != null && data['isProfileComplete'] == true) {
-          _populateAuthRepoFromMap(uc.user!.uid, data);
-          Get.offAllNamed(AppRoutes.HOME);
-        } else {
-          Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
-        }
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uc.user!.uid, data);
+        Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
+      } else {
+        Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
       }
     } catch (e) {
-      if (!_isDisposed) {
-        errorMessage.value = _localizeError(e.toString());
-      }
+      errorMessage.value = _localizeError(e.toString());
     } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
   }
 
   // ── Google Sign-In ─────────────────────────────────────────────────────────
 
   Future<void> signInWithGoogle() async {
-    if (_isDisposed) return;
-
     errorMessage.value = '';
     isLoading.value = true;
     try {
       final uc = await _googleService.signInWithGoogleAndVerify();
       if (uc == null) {
         // User cancelled — silent return
-        if (!_isDisposed) {
-          isLoading.value = false;
-        }
+        isLoading.value = false;
         return;
       }
 
@@ -227,8 +182,6 @@ class SellerAuthController extends GetxController {
       final isNew = uc.additionalUserInfo?.isNewUser ?? false;
 
       await _googleService.upsertUserDoc(uid: uid, email: email, role: 'seller');
-
-      if (_isDisposed) return;
 
       // Edge case: new Google account that somehow isn't pre-verified
       if (isNew && !(uc.user?.emailVerified ?? false)) {
@@ -240,35 +193,27 @@ class SellerAuthController extends GetxController {
       }
 
       // Pre-populate email field for profile setup
-      if (!_isDisposed) {
-        emailCtrl.text = email;
-        _authRepo.setRole('seller');
+      emailCtrl.text = email;
+      _authRepo.setRole('seller');
 
-        final data = await _service.getSellerProfile(uid);
-        if (data != null && data['isProfileComplete'] == true) {
-          _populateAuthRepoFromMap(uid, data);
-          Get.offAllNamed(AppRoutes.HOME);
-        } else {
-          Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
-        }
+      final data = await _service.getSellerProfile(uid);
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uid, data);
+        Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
+      } else {
+        Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
       }
     } catch (e) {
       final msg = _googleService.mapError(e);
-      if (!_isDisposed && msg.isNotEmpty) {
-        errorMessage.value = msg;
-      }
+      if (msg.isNotEmpty) errorMessage.value = msg;
     } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
   }
 
   // ── Profile Setup ──────────────────────────────────────────────────────────
 
   Future<void> submitProfile() async {
-    if (_isDisposed) return;
-
     errorMessage.value = '';
     if (shopNameCtrl.text.trim().isEmpty) {
       errorMessage.value = 'Please enter your shop name';
@@ -287,19 +232,12 @@ class SellerAuthController extends GetxController {
 
       await _saveSellerDoc(uid, emailVerified: true);
       await _googleService.markProfileComplete(uid);
-
-      if (!_isDisposed) {
-        _populateAuthRepo(uid);
-        Get.offAllNamed(AppRoutes.HOME);
-      }
+      _populateAuthRepo(uid);
+      Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
     } catch (e) {
-      if (!_isDisposed) {
-        errorMessage.value = _localizeError(e.toString());
-      }
+      errorMessage.value = _localizeError(e.toString());
     } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
+      isLoading.value = false;
     }
   }
 
@@ -308,40 +246,32 @@ class SellerAuthController extends GetxController {
   /// Called from EmailVerificationPendingView.
   /// FIXED: navigates to SELLER_PROFILE_SETUP if profile is not yet complete.
   Future<bool> checkEmailVerified(String uid) async {
-    if (_isDisposed) return false;
-
     final verified = await _service.reloadAndCheckVerification();
-    if (verified && !_isDisposed) {
+    if (verified) {
       final data = await _service.getSellerProfile(uid);
-      if (!_isDisposed) {
-        if (data != null && data['isProfileComplete'] == true) {
-          _populateAuthRepoFromMap(uid, data);
-          Get.offAllNamed(AppRoutes.HOME);
-        } else {
-          // Profile not completed yet — go to setup
-          Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
-        }
+      if (data != null && data['isProfileComplete'] == true) {
+        _populateAuthRepoFromMap(uid, data);
+        Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
+      } else {
+        // Profile not completed yet — go to setup
+        Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
       }
     }
     return verified;
   }
 
   Future<void> resendVerificationEmail() async {
-    if (_isDisposed) return;
     if (resendCooldown.value > 0) return;
-
     await _service.sendEmailVerification();
     _startResendCooldown();
-    if (!_isDisposed) {
-      AppSnackbar.success('Verification email sent');
-    }
+    AppSnackbar.success('Verification email sent');
   }
 
   void _startResendCooldown() {
     resendCooldown.value = 60;
     _resendTimer?.cancel();
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_isDisposed || resendCooldown.value <= 0) {
+      if (resendCooldown.value <= 0) {
         t.cancel();
       } else {
         resendCooldown.value--;
@@ -413,21 +343,13 @@ class SellerAuthController extends GetxController {
 
   @override
   void onClose() {
-    _isDisposed = true;
     _resendTimer?.cancel();
-
-    // Safely dispose all controllers
-    nameCtrl.dispose();
-    emailCtrl.dispose();
-    passwordCtrl.dispose();
-    confirmPasswordCtrl.dispose();
-    phoneCtrl.dispose();
-    shopNameCtrl.dispose();
-    ownerNameCtrl.dispose();
-    shopLocationCtrl.dispose();
-    cnicCtrl.dispose();
-    addressCtrl.dispose();
-
+    // TextEditingControllers are intentionally NOT disposed here.
+    // With GetX's fenix:true lifecycle, onClose() can fire while widgets are
+    // still mounted and holding references (during route transitions or GetX
+    // instance replacement), causing "used after dispose" crashes.
+    // TextEditingControllers hold no native resources and are GC'd once
+    // all references are released.
     super.onClose();
   }
 }

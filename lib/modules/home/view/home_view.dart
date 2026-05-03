@@ -68,12 +68,16 @@ class _HomeViewState extends State<HomeView> {
         final idx = controller.currentIndex.value.clamp(0, tabs.length - 1);
         return _contentForTab(tabs[idx], context);
       }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => controller.navigateToFeature('chatbot'),
-        backgroundColor: AppConstants.primaryGreen,
-        tooltip: 'agri_chatbot'.tr,
-        child: const Icon(Icons.chat, color: Colors.white),
-      ),
+      floatingActionButton: Obx(() {
+        final role = controller.user.value?.userType ?? '';
+        if (role == 'expert' || role == 'company') return const SizedBox.shrink();
+        return FloatingActionButton(
+          onPressed: () => controller.navigateToFeature('chatbot'),
+          backgroundColor: AppConstants.primaryGreen,
+          tooltip: 'agri_chatbot'.tr,
+          child: const Icon(Icons.chat, color: Colors.white),
+        );
+      }),
       bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
@@ -143,7 +147,7 @@ class _HomeViewState extends State<HomeView> {
             },
           )),
 
-          // ── My Appointments drawer entry (farmer + expert only) ───────────
+          // ── Appointments drawer entry (farmer + expert only) ─────────────
           Obx(() {
             final role = controller.user.value?.userType;
             if (role != 'farmer' && role != 'expert') {
@@ -156,10 +160,16 @@ class _HomeViewState extends State<HomeView> {
                     ? const Color(0xFF1565C0)
                     : AppConstants.primaryGreen,
               ),
-              title: Text('my_appointments'.tr),
+              title: Text(role == 'expert'
+                  ? 'appointments'.tr
+                  : 'my_appointments'.tr),
               onTap: () {
                 _closeDrawer();
-                controller.navigateToFeature('my_appointments');
+                if (role == 'expert') {
+                  controller.navigateToFeature('appointments');
+                } else {
+                  controller.navigateToFeature('my_appointments');
+                }
               },
             );
           }),
@@ -343,7 +353,11 @@ class _HomeViewState extends State<HomeView> {
                         ?.copyWith(fontWeight: FontWeight.bold),
                   )),
                   const SizedBox(height: 16),
-                  _buildWeatherWidget(isLargeScreen),
+                  Obx(() {
+                    final role = controller.user.value?.userType ?? '';
+                    if (role == 'expert' || role == 'company') return const SizedBox.shrink();
+                    return _buildWeatherWidget(isLargeScreen);
+                  }),
                   Obx(() => controller.isGuestUser
                       ? _buildBanner(
                       isLargeScreen: isLargeScreen,
@@ -372,7 +386,11 @@ class _HomeViewState extends State<HomeView> {
                   SizedBox(height: isLargeScreen ? 32 : 24),
                   _buildResponsiveFeatureGrid(context),
                   const SizedBox(height: 24),
-                  _buildFarmerTipsCarousel(isLargeScreen, context),
+                  Obx(() {
+                    final role = controller.user.value?.userType ?? '';
+                    if (role == 'expert' || role == 'company') return const SizedBox.shrink();
+                    return _buildFarmerTipsCarousel(isLargeScreen, context);
+                  }),
                 ],
               ),
             ),
@@ -568,6 +586,24 @@ class _HomeViewState extends State<HomeView> {
     final allowed = RoleGuard.allowedFeatures;
     final role = RoleGuard.currentUserType;
 
+    // Expert: only Appointments (→ dashboard) + Community
+    if (role == 'expert') {
+      return [
+        _buildFeatureCard(
+          title: 'appointments'.tr,
+          icon: Icons.calendar_today,
+          color: const Color(0xFF1565C0),
+          onTap: () => controller.navigateToFeature('appointments'),
+        ),
+        _buildFeatureCard(
+          title: 'community'.tr,
+          icon: Icons.people,
+          color: Colors.purple,
+          onTap: () => controller.navigateToFeature('community'),
+        ),
+      ];
+    }
+
     final allCards = {
       'appointments': {
         'title': 'book_appointment',
@@ -637,18 +673,15 @@ class _HomeViewState extends State<HomeView> {
       ));
     }
 
-    // ── My Appointments card (farmer + expert) ────────────────────────────
-    if (role == 'farmer' || role == 'expert') {
+    // My Appointments history card (farmer only)
+    if (role == 'farmer') {
       cards.add(_buildFeatureCard(
         title: 'my_appointments'.tr,
         icon: Icons.history,
-        color: role == 'expert'
-            ? const Color(0xFF1565C0)
-            : AppConstants.primaryGreen,
+        color: AppConstants.primaryGreen,
         onTap: () => controller.navigateToFeature('my_appointments'),
       ));
     }
-    // ─────────────────────────────────────────────────────────────────────
 
     return cards;
   }

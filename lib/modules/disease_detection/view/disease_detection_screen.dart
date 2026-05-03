@@ -117,6 +117,90 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
     }
   }
 
+  Widget _buildRejectionCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.shade200, width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.image_search_rounded,
+              color: Colors.orange.shade700,
+              size: 40,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Image Not Recognized',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange.shade800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'We could not identify a crop leaf in this image. '
+                'Please take a clear, close-up photo of a '
+                'Rice, Corn, Wheat, or Potato leaf and try again.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Tip: Make sure the leaf fills most of the frame '
+                'and the image is in focus.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade500,
+              fontStyle: FontStyle.italic,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.primaryGreen,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+              onPressed: () => setState(() {
+                _pickedFile = null;
+                _result = null;
+                _ctrl.clearResult();
+              }),
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text(
+                'Try Again',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Severity helpers ───────────────────────────────────────────────────────
 
   Color _severityColor(String severity) {
@@ -200,7 +284,10 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen>
             _buildMobileButtons(),
             const SizedBox(height: 20),
             if (_loading) _buildLoadingWidget(),
-            if (_result != null && !_loading) _buildResultCard(_result!),
+            if (_result != null && !_loading)
+              _result!.isRejected
+                  ? _buildRejectionCard()
+                  : _buildResultCard(_result!),
             const SizedBox(height: 40),
           ],
         ),

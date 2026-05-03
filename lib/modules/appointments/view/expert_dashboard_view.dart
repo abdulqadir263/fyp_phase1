@@ -21,7 +21,7 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('seller_dashboard'.tr),
+          title: Text('expert_dashboard'.tr),
           centerTitle: true,
           actions: [
             Tooltip(

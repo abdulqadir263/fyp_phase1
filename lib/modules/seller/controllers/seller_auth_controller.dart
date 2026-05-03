@@ -153,7 +153,7 @@ class SellerAuthController extends GetxController {
       final data = await _service.getSellerProfile(uc.user!.uid);
       if (data != null && data['isProfileComplete'] == true) {
         _populateAuthRepoFromMap(uc.user!.uid, data);
-        Get.offAllNamed(AppRoutes.HOME);
+        Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
       } else {
         Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
       }
@@ -199,7 +199,7 @@ class SellerAuthController extends GetxController {
       final data = await _service.getSellerProfile(uid);
       if (data != null && data['isProfileComplete'] == true) {
         _populateAuthRepoFromMap(uid, data);
-        Get.offAllNamed(AppRoutes.HOME);
+        Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
       } else {
         Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
       }
@@ -233,7 +233,7 @@ class SellerAuthController extends GetxController {
       await _saveSellerDoc(uid, emailVerified: true);
       await _googleService.markProfileComplete(uid);
       _populateAuthRepo(uid);
-      Get.offAllNamed(AppRoutes.HOME);
+      Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
     } catch (e) {
       errorMessage.value = _localizeError(e.toString());
     } finally {
@@ -251,7 +251,7 @@ class SellerAuthController extends GetxController {
       final data = await _service.getSellerProfile(uid);
       if (data != null && data['isProfileComplete'] == true) {
         _populateAuthRepoFromMap(uid, data);
-        Get.offAllNamed(AppRoutes.HOME);
+        Get.offAllNamed(AppRoutes.SELLER_DASHBOARD);
       } else {
         // Profile not completed yet — go to setup
         Get.offAllNamed(AppRoutes.SELLER_PROFILE_SETUP);
@@ -344,16 +344,12 @@ class SellerAuthController extends GetxController {
   @override
   void onClose() {
     _resendTimer?.cancel();
-    nameCtrl.dispose();
-    emailCtrl.dispose();
-    passwordCtrl.dispose();
-    confirmPasswordCtrl.dispose();
-    phoneCtrl.dispose();
-    shopNameCtrl.dispose();
-    ownerNameCtrl.dispose();
-    shopLocationCtrl.dispose();
-    cnicCtrl.dispose();
-    addressCtrl.dispose();
+    // TextEditingControllers are intentionally NOT disposed here.
+    // With GetX's fenix:true lifecycle, onClose() can fire while widgets are
+    // still mounted and holding references (during route transitions or GetX
+    // instance replacement), causing "used after dispose" crashes.
+    // TextEditingControllers hold no native resources and are GC'd once
+    // all references are released.
     super.onClose();
   }
 }

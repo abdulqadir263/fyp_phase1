@@ -70,6 +70,7 @@ class HomeController extends GetxController {
         Get.toNamed(AppRoutes.COMMUNITY);
         break;
       case 'appointments':
+        currentIndex.value = index;
         if (user.value?.userType == 'expert') {
           Get.toNamed(AppRoutes.EXPERT_DASHBOARD);
         } else {

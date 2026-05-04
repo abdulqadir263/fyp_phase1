@@ -70,19 +70,19 @@ const Map<String, String> enUs = {
   'reset_password': 'Reset Password',
   'reset_your_password': 'Reset Your Password',
   'enter_email_reset':
-      'Enter your email address and we will send you a link to reset your password.',
+  'Enter your email address and we will send you a link to reset your password.',
   'send_reset_link': 'Send Reset Link',
   'check_your_email': 'Check Your Email',
   'email_sent': 'Email Sent!',
   'check_inbox_spam':
-      'Please check your inbox and spam folder for the password reset link. Click the link in the email to reset your password.',
+  'Please check your inbox and spam folder for the password reset link. Click the link in the email to reset your password.',
   'back_to_login': 'Back to Login',
   'didnt_receive_email': "Didn't receive the email?",
   'resend_in': 'Resend in',
   'seconds': 'seconds',
   'resend_email': 'Resend Email',
   'same_email_info':
-      'Make sure you enter the same email address you used when creating your account.',
+  'Make sure you enter the same email address you used when creating your account.',
 
   // ======================== ROLE SELECTION ========================
   'select_your_role': 'Select Your Role',
@@ -151,9 +151,9 @@ const Map<String, String> enUs = {
   'good_evening': 'Good Evening',
   'guest_user': 'Guest User',
   'browsing_as_guest':
-      'You are browsing as a guest. Some features may be limited.',
+  'You are browsing as a guest. Some features may be limited.',
   'profile_incomplete':
-      'Your profile is incomplete. Please complete your profile to access all features.',
+  'Your profile is incomplete. Please complete your profile to access all features.',
   'complete_now': 'Complete Now',
   'quick_actions': 'Quick Actions',
   'what_to_do_today': 'What would you like to do today?',
@@ -263,6 +263,7 @@ const Map<String, String> enUs = {
   'find_expert': 'Find an Expert',
   'no_experts_available': 'No experts available right now.',
   'appointments': 'Appointments',
+  'expert_dashboard': 'Expert Dashboard',
 
   // ======================== CHATBOT ========================
   'agribot': 'AgriBot',
@@ -302,4 +303,46 @@ const Map<String, String> enUs = {
   'post': 'Post',
   'browse_posts': 'Browse Posts',
   'choose_from_gallery': 'Choose from Gallery',
+
+  // ======================== CROP TRACKER ========================
+  'add_crop': 'Add Crop',
+  'add_new_crop': 'Add New Crop',
+  'no_crops_found': 'No crops found',
+  'tap_add_crop': 'Tap + to add a crop',
+  'filter_all': 'All',
+  'filter_active': 'Active',
+  'filter_harvested': 'Harvested',
+  'add_expense': 'Add Expense',
+  'save_expense': 'Save Expense',
+  'edit_expense': 'Edit Expense',
+  'total_expenses': 'Total Expenses:',
+  'total_income': 'Total Income:',
+  'record_harvest': 'Record Harvest',
+  'save_harvest': '🌾 Save Harvest',
+  'enter_harvest_details': 'Enter harvest details',
+  'congratulations': 'Congratulations! 🎉',
+  'crop_not_found': 'Crop not found',
+  'delete_confirm': 'Delete?',
+  'yes_delete': 'Yes, Delete',
+  'delete_record_msg': 'This record will be permanently deleted.',
+  'now': 'Now',
+  'update_stage': 'Update Stage?',
+
+  // ======================== DISEASE DETECTION ========================
+  'camera': 'Camera',
+  'gallery': 'Gallery',
+  'photo_placeholder': 'Captured photo will appear here',
+  'confidence': 'Confidence',
+  'consult_expert': 'Consult Expert',
+  'image_not_recognized': 'Image Not Recognized',
+  'image_not_recognized_msg':
+  'We could not identify a crop leaf in this image. Please take a clear, close-up photo of a Rice, Corn, Wheat, or Potato leaf and try again.',
+  'disease_detection_subtitle':
+  'Take a photo of a leaf — supports Rice, Corn, Wheat, and Potato.',
+  'scan_a_crop': 'Scan a Crop',
+  'detection_history': 'Detection History',
+  'no_history_yet': 'No History Yet',
+  'history_placeholder': 'Saved disease detections will appear here.',
+  'failed_load_history': 'Failed to load history',
+  'tap_to_retry': 'Tap to retry',
 };

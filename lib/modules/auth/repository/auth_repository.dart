@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../app/data/models/user_model.dart';
 import '../../../app/data/services/session_service.dart';
+import '../../../app/data/services/firebase_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../app/routes/app_routes.dart';/// Single source of truth for the *currently active user state* in the app.
@@ -75,18 +76,33 @@ class AuthRepository extends GetxService {
   }
 
   /// Called after profile updates in edit_profile, etc.
+  /// Reads from the canonical `users` collection so all extended fields are
+  /// preserved. Falls back to role-specific data if not found there yet.
   Future<void> refreshUserData() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) return;
+
+    // Primary: read full UserModel from `users` collection
+    try {
+      final firebaseService = Get.find<FirebaseService>();
+      final fresh = await firebaseService.getUserData(firebaseUser.uid);
+      if (fresh != null) {
+        currentUser.value = fresh;
+        return;
+      }
+    } catch (_) {}
+
+    // Fallback: reconstruct from role-specific collection (first-login before
+    // any profile save)
     final role = await _session.getCurrentUserRole();
     if (role == null) return;
-    final user = _session.currentUser;
-    if (user == null) return;
-
-    final data = await _session.getUserData(role, user.uid);
+    final fbUser = _session.currentUser;
+    if (fbUser == null) return;
+    final data = await _session.getUserData(role, fbUser.uid);
     if (data == null) return;
 
-    // Use SplashController's builder logic, or just a simplified update:
     currentUser.value = UserModel(
-      uid: user.uid,
+      uid: fbUser.uid,
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       phone: data['phone'] ?? '',
@@ -97,7 +113,24 @@ class AuthRepository extends GetxService {
           ? List<String>.from(data['cropsGrown'])
           : null,
       specialization: data['specialization'],
-      companyName: data['shopName'],
+      companyName: data['shopName'] ?? data['companyName'],
+      profileImage: data['profileImage'],
+      yearsOfExperience: data['yearsOfExperience'] as int?,
+      certifications: data['certifications'],
+      bio: data['bio'],
+      isAvailableForConsultation: data['isAvailableForConsultation'] as bool?,
+      availableDays: data['availableDays'] != null
+          ? List<String>.from(data['availableDays'])
+          : null,
+      availableSlots: data['availableSlots'] != null
+          ? List<String>.from(data['availableSlots'])
+          : null,
+      consultationFee: data['consultationFee'] as int?,
+      consultationMode: data['consultationMode'],
+      businessType: data['businessType'],
+      yearsInBusiness: data['yearsInBusiness'] as int?,
+      licenseNumber: data['licenseNumber'],
+      businessDescription: data['businessDescription'],
       isProfileComplete: data['isProfileComplete'] ?? true,
       createdAt: currentUser.value?.createdAt ?? DateTime.now(),
     );

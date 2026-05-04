@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../view_model/profile_controller.dart';
-import '../../../app/widgets/custom_button.dart';
 import '../../../app/widgets/custom_text_field.dart';
 import '../../../core/utils/responsive_helper.dart';
 import '../../../core/localization/language_controller.dart';
@@ -10,6 +9,8 @@ import '../../../core/constants/app_constants.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
+
+  static const _expertBlue = Color(0xFF1565C0);
 
   @override
   Widget build(BuildContext context) {
@@ -20,14 +21,13 @@ class ProfileView extends GetView<ProfileController> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         centerTitle: true,
         actions: [
-          // Sirf edit icon — save button form ke andar hai
           Obx(() => controller.isEditing.value
               ? const SizedBox.shrink()
               : IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: controller.toggleEditMode,
-            tooltip: 'edit'.tr,
-          )),
+                  icon: const Icon(Icons.edit),
+                  onPressed: controller.toggleEditMode,
+                  tooltip: 'edit'.tr,
+                )),
         ],
       ),
       body: SafeArea(
@@ -42,15 +42,11 @@ class ProfileView extends GetView<ProfileController> {
                   children: [
                     _buildProfileHeaderCard(),
                     const SizedBox(height: 16),
-                    _buildUserInformationSection(),
+                    _buildBasicInfoSection(),
+                    const SizedBox(height: 16),
+                    _buildRoleSpecificSection(),
                     const SizedBox(height: 16),
                     _buildLanguageToggle(),
-                    Obx(() => controller.isEditing.value
-                        ? Column(children: [
-                      const SizedBox(height: 16),
-                      _buildUserTypeSection(),
-                    ])
-                        : const SizedBox.shrink()),
                     const SizedBox(height: 24),
                     _buildActionButtons(),
                     const SizedBox(height: 20),
@@ -64,52 +60,78 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildSectionCard({required Widget child}) {
+  // ── Reusable card shell ───────────────────────────────────────────────────
+
+  Widget _card({required Widget child, Color? borderColor}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: borderColor ?? Colors.grey.shade200),
       ),
       child: child,
     );
   }
 
+  Widget _sectionHeader(String title, IconData icon, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+          child: Icon(icon, color: color, size: 18),
+        ),
+        const SizedBox(width: 10),
+        Text(title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
+  // ── Profile header (photo + name + role badge) ────────────────────────────
+
   Widget _buildProfileHeaderCard() {
-    return _buildSectionCard(
+    return _card(
       child: Column(
         children: [
-          _buildProfilePictureSection(),
+          _buildAvatarStack(),
           const SizedBox(height: 14),
           Obx(() => Text(
-            controller.displayName.value.isNotEmpty
-                ? controller.displayName.value
-                : 'full_name'.tr,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700,
-                color: Colors.grey[800]),
-            textAlign: TextAlign.center,
-          )),
+                controller.displayName.value.isNotEmpty
+                    ? controller.displayName.value
+                    : 'full_name'.tr,
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey[800]),
+                textAlign: TextAlign.center,
+              )),
           const SizedBox(height: 4),
           Obx(() => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryGreen.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              controller.userType.value.toUpperCase(),
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
-                  color: AppConstants.primaryGreen, letterSpacing: 0.8),
-            ),
-          )),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppConstants.primaryGreen.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  controller.userType.value.toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppConstants.primaryGreen,
+                      letterSpacing: 0.8),
+                ),
+              )),
         ],
       ),
     );
   }
 
-  Widget _buildProfilePictureSection() {
+  Widget _buildAvatarStack() {
     return Center(
       child: Stack(
         children: [
@@ -117,15 +139,14 @@ class ProfileView extends GetView<ProfileController> {
             final hasImage = controller.profileImageUrl.value.isNotEmpty;
             return Container(
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200, width: 2),
-              ),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade200, width: 2)),
               child: CircleAvatar(
                 radius: 54,
                 backgroundColor: const Color(0xFFF1F3F5),
                 backgroundImage: hasImage
                     ? NetworkImage(controller.profileImageUrl.value)
-                as ImageProvider
+                        as ImageProvider
                     : null,
                 child: !hasImage
                     ? Icon(Icons.person, size: 48, color: Colors.grey[400])
@@ -136,16 +157,17 @@ class ProfileView extends GetView<ProfileController> {
           Obx(() {
             if (controller.isUploadingImage.value) {
               return Positioned(
-                bottom: 0, right: 0,
+                bottom: 0,
+                right: 0,
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppConstants.primaryGreen,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
+                      color: AppConstants.primaryGreen,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2)),
                   child: const SizedBox(
-                      width: 18, height: 18,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2)),
                 ),
@@ -153,16 +175,16 @@ class ProfileView extends GetView<ProfileController> {
             }
             if (controller.isEditing.value) {
               return Positioned(
-                bottom: 0, right: 0,
+                bottom: 0,
+                right: 0,
                 child: InkWell(
                   onTap: controller.pickAndUploadImage,
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppConstants.primaryGreen,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
+                        color: AppConstants.primaryGreen,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2)),
                     child: const Icon(Icons.camera_alt,
                         color: Colors.white, size: 18),
                   ),
@@ -176,22 +198,18 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildUserInformationSection() {
+  // ── Basic info (common to all roles) ─────────────────────────────────────
+
+  Widget _buildBasicInfoSection() {
     return Obx(() {
       final editing = controller.isEditing.value;
-      final type = controller.userType.value;
-      return _buildSectionCard(
+      return _card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('my_profile'.tr,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
-                    color: Colors.grey[800])),
-            const SizedBox(height: 4),
-            Text('Update your details to keep account information accurate.',
-                style: TextStyle(color: Colors.grey[500], fontSize: 13)),
-            const SizedBox(height: 20),
-
+            _sectionHeader(
+                'Basic Information', Icons.person_outline, Colors.blueGrey),
+            const SizedBox(height: 16),
             CustomTextField(
               controller: controller.nameController,
               labelText: 'full_name'.tr,
@@ -217,154 +235,552 @@ class ProfileView extends GetView<ProfileController> {
                 LengthLimitingTextInputFormatter(11),
               ],
             ),
-
-            if (type == 'farmer') ...[
-              const SizedBox(height: 14),
-              CustomTextField(
-                controller: controller.locationController,
-                labelText: 'farm_location'.tr,
-                prefixIcon: Icons.location_on_outlined,
-                enabled: editing,
-              ),
-              const SizedBox(height: 14),
-              CustomTextField(
-                controller: controller.farmSizeController,
-                labelText: 'farm_size'.tr,
-                prefixIcon: Icons.square_foot_outlined,
-                enabled: editing,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                ],
-              ),
-            ],
-
-            if (type == 'expert') ...[
-              const SizedBox(height: 14),
-              CustomTextField(
-                controller: controller.specializationController,
-                labelText: 'specialization'.tr,
-                prefixIcon: Icons.workspace_premium_outlined,
-                enabled: editing,
-              ),
-            ],
-
-            if (type == 'company') ...[
-              const SizedBox(height: 14),
-              CustomTextField(
-                controller: controller.companyNameController,
-                labelText: 'company_name'.tr,
-                prefixIcon: Icons.business_outlined,
-                enabled: editing,
-              ),
-            ],
-
-            // ✅ Save + Cancel buttons — editing mode mein fields ke neeche
-            if (editing) ...[
-              const SizedBox(height: 24),
-              Obx(() => SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : () {
-                    debugPrint(' Save button tapped'); // ← debug
-                    controller.updateProfile();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.primaryGreen,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: controller.isLoading.value
-                      ? const SizedBox(
-                      width: 20, height: 20,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                      : Text('save'.tr,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white)),
-                ),
-              )),
-            ],
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton(
-                  onPressed: controller.toggleEditMode,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey[400]!),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: Text('cancel'.tr,
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.w600)),
-                ),
-              ),
-            ],
-
+          ],
         ),
       );
     });
   }
 
-  Widget _buildUserTypeSection() {
-    return _buildSectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('user_type'.tr,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                  color: Colors.grey[700])),
-          const SizedBox(height: 8),
-          Obx(() => DropdownButtonFormField<String>(
-            value: controller.userType.value,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(
-                    color: AppConstants.primaryGreen, width: 1.5),
-              ),
-            ),
-            onChanged: controller.changeUserType,
-            items: [
-              DropdownMenuItem(value: 'farmer', child: Text('farmer'.tr)),
-              DropdownMenuItem(
-                  value: 'expert', child: Text('agricultural_expert'.tr)),
-              DropdownMenuItem(
-                  value: 'company', child: Text('company'.tr)),
+  // ── Role-specific section + Save/Cancel ──────────────────────────────────
+
+  Widget _buildRoleSpecificSection() {
+    return Obx(() {
+      final type = controller.userType.value;
+      final editing = controller.isEditing.value;
+      Widget roleContent;
+      switch (type) {
+        case 'farmer':
+          roleContent = _buildFarmerSection(editing);
+          break;
+        case 'expert':
+          roleContent = _buildExpertSection(editing);
+          break;
+        case 'company':
+          roleContent = _buildCompanySection(editing);
+          break;
+        default:
+          roleContent = const SizedBox.shrink();
+      }
+
+      return _card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            roleContent,
+            if (editing) ...[
+              const SizedBox(height: 24),
+              _buildSaveButton(),
+              const SizedBox(height: 10),
+              _buildCancelButton(),
             ],
-          )),
+          ],
+        ),
+      );
+    });
+  }
+
+  // ── Farmer fields ─────────────────────────────────────────────────────────
+
+  Widget _buildFarmerSection(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+            'Farm Details', Icons.grass, AppConstants.primaryGreen),
+        const SizedBox(height: 16),
+        CustomTextField(
+          controller: controller.locationController,
+          labelText: 'farm_location'.tr,
+          prefixIcon: Icons.location_on_outlined,
+          enabled: editing,
+        ),
+        const SizedBox(height: 14),
+        CustomTextField(
+          controller: controller.farmSizeController,
+          labelText: 'farm_size'.tr,
+          prefixIcon: Icons.square_foot_outlined,
+          enabled: editing,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+          ],
+        ),
+        const SizedBox(height: 14),
+        _buildCropsSelector(editing),
+      ],
+    );
+  }
+
+  Widget _buildCropsSelector(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Crops Grown',
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700])),
+        const SizedBox(height: 4),
+        Text('Select all that apply',
+            style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+        const SizedBox(height: 10),
+        Obx(() => Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ProfileController.crops.map((crop) {
+                final selected = controller.selectedCrops.contains(crop);
+                return GestureDetector(
+                  onTap: editing ? () => controller.toggleCrop(crop) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppConstants.primaryGreen.withValues(alpha: 0.08)
+                          : const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: selected
+                            ? AppConstants.primaryGreen
+                            : Colors.grey.shade300,
+                        width: selected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          selected
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                          size: 18,
+                          color: selected
+                              ? AppConstants.primaryGreen
+                              : Colors.grey[400],
+                        ),
+                        const SizedBox(width: 6),
+                        Text(crop,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              color: selected
+                                  ? AppConstants.darkGreen
+                                  : Colors.grey[700],
+                            )),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            )),
+      ],
+    );
+  }
+
+  // ── Expert fields ─────────────────────────────────────────────────────────
+
+  Widget _buildExpertSection(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+            'Expert Profile', Icons.workspace_premium_outlined, _expertBlue),
+        const SizedBox(height: 16),
+
+        // Specialization dropdown
+        _buildLabel('Specialization', Colors.grey[700]!),
+        const SizedBox(height: 6),
+        Obx(() => DropdownButtonFormField<String>(
+              value: controller.selectedSpecialization.value.isNotEmpty
+                  ? controller.selectedSpecialization.value
+                  : null,
+              decoration: _dropdownDec(Icons.workspace_premium_outlined),
+              hint: const Text('Select specialization'),
+              isExpanded: true,
+              items: ProfileController.specializations
+                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                  .toList(),
+              onChanged: editing
+                  ? (v) {
+                      if (v != null) {
+                        controller.selectedSpecialization.value = v;
+                      }
+                    }
+                  : null,
+            )),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.yearsOfExperienceController,
+          labelText: 'Years of Experience',
+          prefixIcon: Icons.work_history_outlined,
+          enabled: editing,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        ),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.certificationsController,
+          labelText: 'Certifications',
+          prefixIcon: Icons.card_membership_outlined,
+          enabled: editing,
+          hintText: 'e.g. MSc Agriculture, PARC certified',
+        ),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.bioController,
+          labelText: 'Short Bio',
+          prefixIcon: Icons.description_outlined,
+          enabled: editing,
+          maxLines: 3,
+          hintText: 'Briefly describe your expertise…',
+        ),
+        const SizedBox(height: 14),
+
+        _buildAvailabilityToggle(editing),
+        const SizedBox(height: 14),
+
+        _buildDaysSelector(editing),
+        const SizedBox(height: 14),
+
+        _buildTimeSlotsSelector(editing),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.consultationFeeController,
+          labelText: 'Consultation Fee (PKR)',
+          prefixIcon: Icons.currency_rupee,
+          enabled: editing,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          hintText: '0 for free',
+        ),
+        const SizedBox(height: 14),
+
+        _buildConsultationModeSelector(editing),
+      ],
+    );
+  }
+
+  Widget _buildAvailabilityToggle(bool editing) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.calendar_today, color: _expertBlue, size: 20),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Available for Consultations',
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                Text('Let farmers book consultations',
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ],
+            ),
+          ),
+          Obx(() => Switch(
+                value: controller.isAvailableForConsultation.value,
+                onChanged: editing
+                    ? (v) => controller.isAvailableForConsultation.value = v
+                    : null,
+                activeColor: _expertBlue,
+              )),
         ],
       ),
     );
   }
 
+  Widget _buildDaysSelector(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('Available Days', Colors.grey[700]!),
+        const SizedBox(height: 8),
+        Obx(() => Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: ProfileController.weekDays.map((day) {
+                final selected = controller.selectedDays.contains(day);
+                return GestureDetector(
+                  onTap: editing ? () => controller.toggleDay(day) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? _expertBlue : Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color:
+                            selected ? _expertBlue : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Text(day,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color:
+                              selected ? Colors.white : Colors.grey[700],
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        )),
+                  ),
+                );
+              }).toList(),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildTimeSlotsSelector(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('Available Time Slots', Colors.grey[700]!),
+        const SizedBox(height: 8),
+        Obx(() => Column(
+              children: ProfileController.timeSlots.map((slot) {
+                final selected = controller.selectedSlots.contains(slot);
+                return GestureDetector(
+                  onTap: editing ? () => controller.toggleSlot(slot) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? _expertBlue.withValues(alpha: 0.08)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color:
+                            selected ? _expertBlue : Colors.grey.shade300,
+                        width: selected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          selected
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          color: selected ? _expertBlue : Colors.grey[400],
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(slot,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: selected
+                                  ? _expertBlue
+                                  : Colors.grey[700],
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            )),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildConsultationModeSelector(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel('Consultation Mode', Colors.grey[700]!),
+        const SizedBox(height: 8),
+        Obx(() => Row(
+              children: ProfileController.consultationModes.map((mode) {
+                final selected = controller.consultationMode.value == mode;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: editing
+                        ? () => controller.consultationMode.value = mode
+                        : null,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: selected ? _expertBlue : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: selected
+                              ? _expertBlue
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      child: Text(mode,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: selected
+                                ? Colors.white
+                                : Colors.grey[700],
+                            fontWeight: selected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          )),
+                    ),
+                  ),
+                );
+              }).toList(),
+            )),
+      ],
+    );
+  }
+
+  // ── Company fields ────────────────────────────────────────────────────────
+
+  Widget _buildCompanySection(bool editing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader('Business Details', Icons.business_outlined, Colors.indigo),
+        const SizedBox(height: 16),
+
+        CustomTextField(
+          controller: controller.companyNameController,
+          labelText: 'company_name'.tr,
+          prefixIcon: Icons.storefront_outlined,
+          enabled: editing,
+        ),
+        const SizedBox(height: 14),
+
+        _buildLabel('Business Type', Colors.grey[700]!),
+        const SizedBox(height: 6),
+        Obx(() => DropdownButtonFormField<String>(
+              value: controller.selectedBusinessType.value.isNotEmpty
+                  ? controller.selectedBusinessType.value
+                  : null,
+              decoration: _dropdownDec(Icons.category_outlined),
+              hint: const Text('Select business type'),
+              isExpanded: true,
+              items: ProfileController.businessTypes
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .toList(),
+              onChanged: editing
+                  ? (v) {
+                      if (v != null) {
+                        controller.selectedBusinessType.value = v;
+                      }
+                    }
+                  : null,
+            )),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.yearsInBusinessController,
+          labelText: 'Years in Business',
+          prefixIcon: Icons.calendar_today_outlined,
+          enabled: editing,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        ),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.licenseNumberController,
+          labelText: 'License Number (optional)',
+          prefixIcon: Icons.badge_outlined,
+          enabled: editing,
+        ),
+        const SizedBox(height: 14),
+
+        CustomTextField(
+          controller: controller.businessDescriptionController,
+          labelText: 'Business Description',
+          prefixIcon: Icons.description_outlined,
+          enabled: editing,
+          maxLines: 3,
+          hintText: 'Describe your products/services…',
+        ),
+      ],
+    );
+  }
+
+  // ── Save / Cancel buttons ─────────────────────────────────────────────────
+
+  Widget _buildSaveButton() {
+    return Obx(() => SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: controller.isLoading.value
+                ? null
+                : controller.updateProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.primaryGreen,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: controller.isLoading.value
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2))
+                : Text('save'.tr,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white)),
+          ),
+        ));
+  }
+
+  Widget _buildCancelButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
+        onPressed: controller.toggleEditMode,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.grey[400]!),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        child: Text('cancel'.tr,
+            style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  // ── Language toggle ───────────────────────────────────────────────────────
+
   Widget _buildLanguageToggle() {
     final langController = Get.find<LanguageController>();
-    return _buildSectionCard(
+    return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('language'.tr,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   color: Colors.grey[800])),
           const SizedBox(height: 12),
           Container(
@@ -375,54 +791,57 @@ class ProfileView extends GetView<ProfileController> {
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Obx(() => Row(
-              children: [
-                Icon(Icons.language, color: Colors.grey[500], size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        langController.isUrdu ? 'اردو' : 'English',
-                        style: TextStyle(fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[800]),
+                  children: [
+                    Icon(Icons.language, color: Colors.grey[500], size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            langController.isUrdu ? 'اردو' : 'English',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[800]),
+                          ),
+                          Text(
+                            langController.isUrdu
+                                ? 'Switch to English'
+                                : 'اردو میں تبدیل کریں',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[500]),
+                          ),
+                        ],
                       ),
-                      Text(
-                        langController.isUrdu
-                            ? 'Switch to English'
-                            : 'اردو میں تبدیل کریں',
-                        style: TextStyle(
-                            fontSize: 12, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch(
-                  value: langController.isUrdu,
-                  onChanged: (_) => langController.toggleLanguage(),
-                  activeTrackColor:
-                  AppConstants.primaryGreen.withValues(alpha: 0.4),
-                  thumbColor:
-                  WidgetStateProperty.resolveWith<Color>((states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return AppConstants.primaryGreen;
-                    }
-                    return Colors.grey;
-                  }),
-                ),
-              ],
-            )),
+                    ),
+                    Switch(
+                      value: langController.isUrdu,
+                      onChanged: (_) => langController.toggleLanguage(),
+                      activeTrackColor: AppConstants.primaryGreen
+                          .withValues(alpha: 0.4),
+                      thumbColor:
+                          WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppConstants.primaryGreen;
+                        }
+                        return Colors.grey;
+                      }),
+                    ),
+                  ],
+                )),
           ),
         ],
       ),
     );
   }
 
+  // ── Action buttons (skip / delete) ────────────────────────────────────────
+
   Widget _buildActionButtons() {
     return Obx(() {
       final editing = controller.isEditing.value;
-      return _buildSectionCard(
+      return _card(
         child: Column(
           children: [
             if (!editing && controller.isProfileIncomplete) ...[
@@ -436,7 +855,8 @@ class ProfileView extends GetView<ProfileController> {
                       borderRadius: BorderRadius.circular(10)),
                 ),
                 child: Text('create_profile_later'.tr,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                    style:
+                        const TextStyle(fontWeight: FontWeight.w600)),
               ),
               const SizedBox(height: 12),
             ],
@@ -458,4 +878,35 @@ class ProfileView extends GetView<ProfileController> {
       );
     });
   }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  Widget _buildLabel(String text, Color color) {
+    return Text(text,
+        style: TextStyle(
+            fontSize: 13, fontWeight: FontWeight.w500, color: color));
+  }
+
+  InputDecoration _dropdownDec(IconData icon) => InputDecoration(
+        prefixIcon: Icon(icon, size: 20, color: Colors.grey[500]),
+        border:
+            OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide:
+              const BorderSide(color: AppConstants.primaryGreen, width: 1.5),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      );
 }

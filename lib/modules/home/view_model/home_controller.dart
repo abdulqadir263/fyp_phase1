@@ -5,6 +5,9 @@ import 'package:fyp_phase1/modules/auth/repository/auth_repository.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/utils/role_guard.dart';
 import '../../../core/localization/language_controller.dart';
+import '../../appointments/binding/appointment_binding.dart';
+import '../../marketplace/binding/marketplace_binding.dart';
+import '../../community/binding/community_binding.dart';
 
 class HomeController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
@@ -45,33 +48,21 @@ class HomeController extends GetxController {
   void changePage(int index) {
     final tabs = bottomNavTabs;
     if (index < 0 || index >= tabs.length) return;
-    final tab = tabs[index];
+    _initTabBinding(tabs[index]);
+    currentIndex.value = index;
+  }
+
+  void _initTabBinding(String tab) {
     switch (tab) {
-      case 'home':
-        currentIndex.value = index;
-        break;
       case 'marketplace':
-        if (user.value?.userType == 'company') {
-          Get.toNamed(AppRoutes.SELLER_DASHBOARD);
-        } else {
-          Get.toNamed(AppRoutes.MARKETPLACE);
-        }
-        break;
-      case 'disease_detection':
-        Get.toNamed(AppRoutes.DISEASE_DETECTION);
+        MarketplaceBinding().dependencies();
         break;
       case 'community':
-        Get.toNamed(AppRoutes.COMMUNITY);
+        CommunityBinding().dependencies();
         break;
       case 'appointments':
-        if (user.value?.userType == 'expert') {
-          Get.toNamed(AppRoutes.EXPERT_APPOINTMENTS);
-        } else {
-          Get.toNamed(AppRoutes.FARMER_APPOINTMENTS);
-        }
+        AppointmentBinding().dependencies();
         break;
-      default:
-        currentIndex.value = 0;
     }
   }
 

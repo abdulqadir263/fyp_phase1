@@ -1,13 +1,101 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/themes/app_colors.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/utils/responsive_helper.dart';
 import '../view_model/seller_controller.dart';
+import '../../auth/repository/auth_repository.dart';
 
 /// SellerDashboardView — Company landing page with summary cards + navigation
 class SellerDashboardView extends GetView<SellerController> {
   const SellerDashboardView({super.key});
+
+  Widget _buildDrawer(BuildContext context) {
+    final auth = Get.find<AuthRepository>();
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          Obx(() {
+            final user = auth.currentUser.value;
+            final userName = user?.name ?? 'guest_user'.tr;
+            final userEmail = user?.email ?? '';
+            final profileUrl = user?.profileImage ?? '';
+            return UserAccountsDrawerHeader(
+              accountName: Text(userName,
+                  style: const TextStyle(color: Colors.white, fontSize: 18)),
+              accountEmail:
+                  Text(userEmail, style: const TextStyle(color: Colors.white70)),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: profileUrl.isNotEmpty
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: profileUrl,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) =>
+                              Icon(Icons.person, size: 40, color: Colors.grey[600]),
+                          errorWidget: (_, __, ___) =>
+                              Icon(Icons.person, size: 40, color: Colors.grey[600]),
+                        ),
+                      )
+                    : Icon(Icons.person, size: 40, color: Colors.grey[600]),
+              ),
+              decoration: const BoxDecoration(color: AppColors.primaryGreen),
+            );
+          }),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: Text('profile'.tr),
+            onTap: () {
+              Get.back();
+              Get.toNamed(AppRoutes.PROFILE);
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: Text('settings'.tr),
+            onTap: () {
+              Get.back();
+              Get.snackbar('info'.tr, 'settings_coming_soon'.tr);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text('about'.tr),
+            onTap: () {
+              Get.back();
+              Get.snackbar('info'.tr, 'about_coming_soon'.tr);
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: Text('logout'.tr, style: const TextStyle(color: Colors.red)),
+            onTap: () {
+              Get.back();
+              Get.defaultDialog(
+                title: 'logout'.tr,
+                middleText: 'logout_confirm'.tr,
+                textCancel: 'no'.tr,
+                textConfirm: 'yes'.tr,
+                confirmTextColor: Colors.white,
+                buttonColor: Colors.red,
+                onConfirm: () {
+                  Get.back();
+                  auth.signOut();
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +104,18 @@ class SellerDashboardView extends GetView<SellerController> {
     controller.loadSellerOrders();
 
     return Scaffold(
-      appBar: AppBar(title: Text('seller_dashboard'.tr), centerTitle: true),
+      appBar: AppBar(
+        title: Text('seller_dashboard'.tr),
+        centerTitle: true,
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+            tooltip: MaterialLocalizations.of(ctx).openAppDrawerTooltip,
+          ),
+        ),
+      ),
+      drawer: _buildDrawer(context),
       body: Obx(() {
         final totalProducts = controller.myProducts.length;
         final activeProducts = controller.myProducts

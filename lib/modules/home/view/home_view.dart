@@ -6,6 +6,11 @@ import '../view_model/home_controller.dart';
 import '../../../app/widgets/custom_card.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/role_guard.dart';
+import '../../marketplace/view/marketplace_view.dart';
+import '../../marketplace/view/seller_dashboard_view.dart';
+import '../../community/view/community_view.dart';
+import '../../appointments/view/farmer_appointments_view.dart';
+import '../../appointments/view/expert_appointments_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -28,54 +33,60 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text('app_name'.tr),
-        centerTitle: true,
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () =>
-                    Get.snackbar('info'.tr, 'notifications_coming_soon'.tr),
-                tooltip: 'notifications'.tr,
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                      color: Colors.red, shape: BoxShape.circle),
-                  constraints:
-                  const BoxConstraints(minWidth: 8, minHeight: 8),
-                ),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.language),
-            onPressed: controller.toggleLanguage,
-            tooltip: 'change_language'.tr,
-          ),
-        ],
-      ),
-      drawer: _buildDrawer(context),
-      body: Obx(() {
-        final tabs = controller.bottomNavTabs;
-        final idx = controller.currentIndex.value.clamp(0, tabs.length - 1);
-        return _contentForTab(tabs[idx], context);
-      }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => controller.navigateToFeature('chatbot'),
-        backgroundColor: AppConstants.primaryGreen,
-        tooltip: 'agri_chatbot'.tr,
-        child: const Icon(Icons.chat, color: Colors.white),
-      ),
-      bottomNavigationBar: _buildBottomNavigationBar(context),
-    );
+    return Obx(() {
+      final tabs = controller.bottomNavTabs;
+      final idx = controller.currentIndex.value.clamp(0, tabs.length - 1);
+      final isHome = tabs[idx] == 'home';
+
+      return Scaffold(
+        key: _scaffoldKey,
+        appBar: isHome
+            ? AppBar(
+                title: Text('app_name'.tr),
+                centerTitle: true,
+                actions: [
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined),
+                        onPressed: () => Get.snackbar(
+                            'info'.tr, 'notifications_coming_soon'.tr),
+                        tooltip: 'notifications'.tr,
+                      ),
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                              color: Colors.red, shape: BoxShape.circle),
+                          constraints:
+                              const BoxConstraints(minWidth: 8, minHeight: 8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.language),
+                    onPressed: controller.toggleLanguage,
+                    tooltip: 'change_language'.tr,
+                  ),
+                ],
+              )
+            : null,
+        drawer: isHome ? _buildDrawer(context) : null,
+        body: _contentForTab(tabs[idx], context),
+        floatingActionButton: isHome && RoleGuard.currentUserType != 'expert'
+            ? FloatingActionButton(
+                onPressed: () => controller.navigateToFeature('chatbot'),
+                backgroundColor: AppConstants.primaryGreen,
+                tooltip: 'agri_chatbot'.tr,
+                child: const Icon(Icons.chat, color: Colors.white),
+              )
+            : null,
+        bottomNavigationBar: _buildBottomNavigationBar(context),
+      );
+    });
   }
 
   Widget _buildProfilePlaceholder(bool isGuest) {
@@ -252,56 +263,18 @@ class _HomeViewState extends State<HomeView> {
       case 'home':
         return _buildHomeContent(context);
       case 'marketplace':
-        return _buildPlaceholderContent(
-            icon: Icons.store,
-            label: 'marketplace'.tr,
-            color: Colors.grey);
+        return controller.user.value?.userType == 'company'
+            ? const SellerDashboardView()
+            : const MarketplaceHomeView();
       case 'community':
-        return _buildPlaceholderContent(
-            icon: Icons.people,
-            label: 'community'.tr,
-            color: Colors.purple);
+        return const CommunityView();
       case 'appointments':
-        return _buildPlaceholderContent(
-            icon: Icons.calendar_month,
-            label: 'My Appointments'.tr,
-            color: Colors.blue);
+        return controller.user.value?.userType == 'expert'
+            ? const ExpertAppointmentsView()
+            : const FarmerAppointmentsView();
       default:
         return _buildHomeContent(context);
     }
-  }
-
-  Widget _buildPlaceholderContent({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool isLargeScreen = constraints.maxWidth > 600;
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.all(isLargeScreen ? 32.0 : 16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: isLargeScreen ? 80 : 60, color: color),
-                SizedBox(height: isLargeScreen ? 24 : 16),
-                Text(label,
-                    style: TextStyle(
-                        fontSize: isLargeScreen ? 32 : 24,
-                        fontWeight: FontWeight.bold)),
-                SizedBox(height: isLargeScreen ? 16 : 12),
-                Text('coming_soon'.tr,
-                    style: TextStyle(
-                        fontSize: isLargeScreen ? 18 : 16,
-                        color: Colors.grey)),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildHomeContent(BuildContext context) {
@@ -328,7 +301,8 @@ class _HomeViewState extends State<HomeView> {
                         ?.copyWith(fontWeight: FontWeight.bold),
                   )),
                   const SizedBox(height: 16),
-                  _buildWeatherWidget(isLargeScreen),
+                  if (RoleGuard.currentUserType != 'expert')
+                    _buildWeatherWidget(isLargeScreen),
                   Obx(() => controller.isGuestUser
                       ? _buildBanner(
                       isLargeScreen: isLargeScreen,
@@ -356,8 +330,10 @@ class _HomeViewState extends State<HomeView> {
                           fontSize: isLargeScreen ? 18 : 16)),
                   SizedBox(height: isLargeScreen ? 32 : 24),
                   _buildResponsiveFeatureGrid(context),
-                  const SizedBox(height: 24),
-                  _buildFarmerTipsCarousel(isLargeScreen, context),
+                  if (RoleGuard.currentUserType != 'expert') ...[
+                    const SizedBox(height: 24),
+                    _buildFarmerTipsCarousel(isLargeScreen, context),
+                  ],
                 ],
               ),
             ),
@@ -600,6 +576,16 @@ class _HomeViewState extends State<HomeView> {
 
     final cards = <Widget>[];
     for (final id in allowed) {
+      // Expert sees "View Appointments" instead of "Book Appointment"
+      if (id == 'appointments' && role == 'expert') {
+        cards.add(_buildFeatureCard(
+          title: 'View Appointments',
+          icon: Icons.calendar_month,
+          color: const Color(0xFF1565C0),
+          onTap: () => Get.toNamed(AppRoutes.EXPERT_APPOINTMENTS),
+        ));
+        continue;
+      }
       final cfg = allCards[id];
       if (cfg != null) {
         cards.add(_buildFeatureCard(

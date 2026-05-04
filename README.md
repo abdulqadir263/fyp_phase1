@@ -5,19 +5,21 @@ A comprehensive Flutter application integrating Firebase backend services, AI-po
 ## 🚀 Features
 
 ### Core Functionality
-- **Firebase Integration**: Real-time database operations with Cloud Firestore
-- **Authentication System**: Secure user authentication via Firebase Auth
-- **AI-Powered Features**: Integration with Google Generative AI for intelligent functionalities
-- **Image Management**: Cloud-based image storage and optimization using Cloudinary
-- **Location Services**: Geolocation tracking and location-based features
+- **Firebase Integration**: Real-time database operations, App Check, and Cloud Firestore
+- **Authentication System**: Secure user authentication via Firebase Auth & Google Sign-In with Role-based Access (Role Guards)
+- **AI & ML Features**: Integration with Google Generative AI (Gemini) and On-device Machine Learning (TFLite) for Crop Recommendation & Disease Detection
+- **Community & Marketplace**: Built-in agricultural marketplace and community discussion forums
+- **Field Visits**: Tooling for agricultural field visits and analysis
+- **Image Management**: Cloud-based image storage (Cloudinary) and Local processing (`image` package)
+- **Location Services**: Geolocation tracking via `geolocator`
 - **State Management**: Efficient state management using GetX architecture
 
 ### User Experience
-- **Modern UI**: Custom fonts using Google Fonts
-- **Image Handling**: Pick, upload, and cache images efficiently
+- **Modern UI**: Custom fonts using Google Fonts & Cupertino Icons
+- **Offline Support**: Local data persistence with SharedPreferences and SQLite (`sqflite`), plus offline state monitoring via `connectivity_plus`
+- **Image Handling**: Pick, upload, cache (`cached_network_image`), and label images efficiently
 - **Loading States**: Beautiful loading indicators with Flutter SpinKit
 - **User Feedback**: Toast notifications for user interactions
-- **Offline Support**: Local data persistence with SharedPreferences
 - **Responsive Design**: Optimized for multiple screen sizes and platforms
 
 ## 📱 Platform Support
@@ -41,30 +43,38 @@ This application supports the following platforms:
 #### Firebase Services
 - `firebase_core`: ^4.2.0 - Firebase initialization
 - `firebase_auth`: ^6.1.1 - User authentication
-- `cloud_firestore`: ^6.0.3 - NoSQL cloud database
+- `cloud_firestore`: ^6.3.0 - NoSQL cloud database
+- `firebase_app_check`: ^0.4.3 - Firebase security and app verification
+- `google_sign_in`: ^6.2.2 - Google authentication
 
 #### State Management & Navigation
-- `get`: ^4. 7.2 - State management, dependency injection, and route management
+- `get`: ^4.7.2 - State management, dependency injection, and route management
 
 #### AI & Machine Learning
-- `google_generative_ai`: ^0.2.2 - AI-powered features and content generation
+- `google_generative_ai`: ^0.2.2 - AI-powered features and content generation (Gemini)
+- `tflite_flutter`: ^0.12.1 - On-device machine learning for Crop Recommendation & Disease Detection
 
-#### Image Processing
-- `image_picker`: ^1.2. 0 - Select images from gallery or camera
+#### Image Processing & Storage
+- `image_picker`: ^1.2.1 - Select images from gallery or camera
 - `cloudinary_flutter`: ^1.3.0 - Cloud-based image management
-- `cached_network_image`: ^3.3.1 - Efficient image caching
+- `cached_network_image`: ^3.4.1 - Efficient network image caching
+- `image`: ^4.8.0 - Image manipulation and processing
+
+#### Utilities & Storage
+- `sqflite`: ^2.3.3 - Local SQLite database
+- `shared_preferences`: ^2.2.2 - Local key-value storage
+- `connectivity_plus`: ^7.1.1 - Network connectivity checks
+- `geolocator`: ^14.0.2 - Location services
+- `http`: ^1.6.0 - HTTP client for API requests
+- `flutter_dotenv`: ^6.0.1 - Environment variable management
+- `uuid`: ^4.5.3 - Unique ID generation
+- `url_launcher`: ^6.3.2 - Launch external URLs
 
 #### UI Components
 - `google_fonts`: ^6.3.2 - Custom typography
 - `flutter_spinkit`: ^5.2.0 - Elegant loading animations
-- `fluttertoast`: ^8.2. 4 - User notifications
-
-#### Utilities
-- `geolocator`: ^14.0.2 - Location services
-- `intl`: ^0.20.2 - Internationalization and date formatting
-- `http`: ^1.5.0 - HTTP client for API requests
-- `flutter_dotenv`: ^5.1.0 - Environment variable management
-- `shared_preferences`: ^2.2.2 - Local data storage
+- `fluttertoast`: ^8.2.4 - User notifications
+- `cupertino_icons`: ^1.0.8 - iOS style icons
 
 ## 📋 Prerequisites
 
@@ -183,4 +193,4 @@ For questions or support regarding this project, please open an issue in the Git
 
 ---
 
-**Note**: This is Phase 1 of the Final Year Project. Additional features and improvements are planned for subsequent phases. 
+**Note**: This is Phase 1 of the Final Year Project. Additional features and improvements are planned for subsequent phases.
